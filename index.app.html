@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lunar Gateway Requirements Explorer (App)</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1 class="title">Lunar Gateway Requirements Explorer</h1>
+
+    <div class="controls">
+      <input id="searchInput" class="input" placeholder="Search requirements..." />
+      <button id="loadDemoBtn" class="btn">Load Demo</button>
+      <button id="exportBtn" class="btn">Export JSON</button>
+      <button id="importBtn" class="btn">Import JSON</button>
+      <input type="file" id="fileInput" hidden />
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside id="listPanel" class="panel"></aside>
+    <section id="detailPanel" class="panel detail">
+      <h2>Select a requirement</h2>
+      <p>Click something on the left.</p>
+    </section>
+  </main>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

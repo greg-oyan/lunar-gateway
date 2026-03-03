@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NASA Lunar Gateway — DSG-RQMT-001</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+
+    /* ═══ Loading ══════════════════════════════════════════════════ */
+    #loading {
+      position: fixed; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: radial-gradient(ellipse at center, #010c20 0%, #000810 55%, #000305 100%);
+      z-index: 1000; transition: opacity 1.4s ease;
+    }
+    #loading.out { opacity: 0; pointer-events: none; }
+    .ld-agency { font: 11px/1 'Courier New',monospace; letter-spacing:5px; color:#1e4a72; text-transform:uppercase; margin-bottom:32px; }
+    .ld-title  { font: 200 46px/1 'Courier New',monospace; letter-spacing:12px; color:#b8d8ff;
+                 text-transform:uppercase; text-shadow:0 0 40px rgba(100,180,255,0.35); }
+    .ld-sub    { font: 11px/1 'Courier New',monospace; letter-spacing:5px; color:#3a6a9a; text-transform:uppercase; margin-top:11px; }
+    .ld-doc    { font: 10px/1 'Courier New',monospace; letter-spacing:4px; color:#1e4468; text-transform:uppercase; margin-top:8px; }
+    .ld-rule   { width:1px; height:38px; background:linear-gradient(#0000,#2a5faa,#0000); margin:28px auto; }
+    .ld-track  { width:320px; height:2px; background:#0a1828; border-radius:1px; }
+    .ld-fill   { height:100%; width:0%; background:linear-gradient(90deg,#1a4090,#5aadff);
+                 transition:width 0.45s ease; border-radius:1px;
+                 box-shadow:0 0 10px rgba(90,173,255,0.6); }
+    .ld-msg    { font:11px/1 'Courier New',monospace; letter-spacing:2px; color:#4a85a8; text-transform:uppercase; margin-top:14px; min-height:12px; }
+
+    /* ═══ HUD ══════════════════════════════════════════════════════ */
+    #hud {
+      position: fixed; top: 20px; left: 20px;
+      font: 13px/1 'Courier New', monospace; letter-spacing: 1px; color: #4a7a9b;
+      background: rgba(0,4,16,0.90); border: 1px solid #0d2840; border-left: 3px solid #1e6080;
+      padding: 18px 22px 16px; min-width: 315px; z-index: 50;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 40px rgba(0,0,0,0.80), inset 0 1px 0 rgba(80,160,207,0.08);
+      pointer-events: none; opacity: 0; transition: opacity 2s ease 0.5s;
+    }
+    #hud.show { opacity: 1; }
+    .h-title   { font-size:11px; letter-spacing:3px; color:#6ab4d8; margin-bottom:12px; line-height:1; }
+    .h-div     { display:block; border:none; border-top:1px solid #0f2a40; margin:10px -2px; }
+    .h-row     { display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin: 6px 0; }
+    .h-lbl     { font-size:13px; color:#2d5878; white-space:nowrap; }
+    .h-val     { font-size:28px; color:#64c0e4; text-align:right; white-space:nowrap; letter-spacing:0; }
+    .h-alert   { font-size:28px; color:#ee4422; text-align:right; white-space:nowrap; }
+    .h-phase   { font-size:21px; color:#ddaa30; text-align:right; letter-spacing:1px; line-height:1.4; }
+    .h-sval    { font-size:17px; color:#3e7898; text-align:right; white-space:nowrap; }
+    .h-slbl    { font-size:13px; color:#264a60; white-space:nowrap; }
+    /* Speed control strip */
+    .h-speed { display:flex; gap:5px; margin-top:12px; pointer-events:all; align-items:center; }
+    .h-speed > span { font-size:10px; color:#204055; letter-spacing:1px; margin-right:2px; }
+    .h-speed button {
+      background:rgba(0,6,18,0.85); border:1px solid #0e2840; color:#2c5878;
+      font:11px 'Courier New',monospace; letter-spacing:1px; padding:5px 9px; cursor:pointer;
+      transition: color .2s, border-color .2s, background .2s;
+    }
+    .h-speed button:hover  { color:#54aac8; border-color:#1e6080; background:rgba(8,24,52,0.9); }
+    .h-speed button.active { color:#64c0e4; border-color:#2488bb; background:rgba(5,18,42,0.9); }
+    /* Camera view buttons */
+    .h-cams { display:flex; gap:5px; margin-top:8px; pointer-events:all; }
+    .h-cams button {
+      flex:1; background:rgba(0,6,18,0.85); border:1px solid #0e2840; color:#2c5878;
+      font:10px 'Courier New',monospace; letter-spacing:1px; padding:6px 4px; cursor:pointer;
+      transition: color .2s, border-color .2s, background .2s; text-align:center;
+    }
+    .h-cams button:hover { color:#54aac8; border-color:#1e6080; background:rgba(8,24,52,0.9); }
+    /* Focus button */
+    #focus-gw {
+      display: block; width: 100%; margin-top: 10px; pointer-events: all;
+      background: rgba(0,10,32,0.82); border: 1px solid #1a4868; border-left: 3px solid #246e90;
+      color: #52aacf; font: 13px 'Courier New',monospace; letter-spacing: 3px;
+      padding: 10px 10px; cursor: pointer; text-transform: uppercase;
+      text-align: center; transition: background .2s, color .2s, border-color .2s;
+    }
+    #focus-gw:hover { background: rgba(8,26,62,0.92); color: #72c0e0; border-color: #3090b8; }
+
+    /* ═══ Module info panel ════════════════════════════════════════ */
+    #info {
+      position: fixed; top: 20px; right: 20px; width: 315px;
+      font: 12px/1 'Courier New', monospace; letter-spacing: 1px; color: #4a7a9b;
+      background: rgba(0,4,16,0.92); border: 1px solid #0d2840; border-right: 3px solid #1e6080;
+      padding: 18px 22px 20px; z-index: 50; backdrop-filter: blur(12px);
+      box-shadow: 0 4px 40px rgba(0,0,0,0.80), inset 0 1px 0 rgba(80,160,207,0.08);
+      transform: translateX(calc(100% + 26px));
+      transition: transform 0.38s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    #info.show { transform: translateX(0); }
+    .i-head  { display:flex; justify-content:space-between; align-items:flex-start; }
+    .i-abbr  { font-size:12px; letter-spacing:4px; color:#3090b8; margin-bottom:5px; line-height:1; }
+    .i-name  { font-size:20px; color:#72c0e8; line-height:1.3; }
+    .i-close { color:#1e4050; cursor:pointer; font-size:18px; padding-left:10px;
+               pointer-events:all; line-height:1; }
+    .i-close:hover { color:#52a0b8; }
+    .i-div   { display:block; border:none; border-top:1px solid #0f2a40; margin:13px 0; }
+    .i-row   { display:flex; justify-content:space-between; align-items:baseline; margin:7px 0; }
+    .i-lbl   { font-size:12px; color:#2a5278; }
+    .i-val   { font-size:20px; color:#64c0e8; text-align:right; }
+    .i-desc  { font-size:12px; color:#3c7295; line-height:1.9; margin-top:12px; }
+
+    /* ═══ Corner labels ════════════════════════════════════════════ */
+    .corner {
+      position:fixed; z-index:10; pointer-events:none;
+      font:11px/1.8 'Courier New',monospace; letter-spacing:2px;
+      color:#2c4e68; text-transform:uppercase;
+      opacity:0; transition:opacity 2.5s ease 1s;
+    }
+    .corner.show { opacity:1; }
+    #cr   { bottom:18px; right:20px; text-align:right; }
+    #ht   { bottom:18px; left:20px; }
+    #oleg { bottom:52px; left:20px; }
+    .oleg-sw { display:inline-block; width:20px; height:2px; background:#aaddff;
+               vertical-align:middle; margin-right:7px; border-radius:1px; }
+
+    /* ═══ Hover tooltip ════════════════════════════════════════════ */
+    #tooltip {
+      position:fixed; display:none; pointer-events:none; z-index:200;
+      background:rgba(0,4,18,0.94); border:1px solid #1e6080; border-left:3px solid #246e90;
+      color:#64c0e4; font:11px/1 'Courier New',monospace; letter-spacing:2px;
+      padding:6px 12px; text-transform:uppercase; backdrop-filter:blur(8px);
+      box-shadow:0 2px 20px rgba(0,0,0,0.75);
+    }
+    /* ═══ Phase animations ══════════════════════════════════════════ */
+    @keyframes perilunePulse {
+      0%,100% { color:#ff6622; text-shadow:0 0 0px transparent; }
+      50%      { color:#ffaa44; text-shadow:0 0 12px rgba(255,140,40,0.7); }
+    }
+    .phase-alert { animation: perilunePulse 0.7s ease infinite; }
+    /* ═══ Progress bar ══════════════════════════════════════════════ */
+    .h-orbit-bar {
+      height:3px; background:#0a1828; border-radius:2px; margin:8px 0 4px;
+      overflow:hidden; position:relative;
+    }
+    .h-orbit-fill {
+      height:100%; background:linear-gradient(90deg,#1e6080,#64c0e4);
+      border-radius:2px; transition:width 0.3s ease;
+      box-shadow:0 0 6px rgba(100,192,228,0.4);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading -->
+  <div id="loading">
+    <div class="ld-agency">National Aeronautics and Space Administration</div>
+    <div class="ld-title">Lunar Gateway</div>
+    <div class="ld-sub">Near Rectilinear Halo Orbit</div>
+    <div class="ld-doc">Deep Space Gateway · DSG-RQMT-001 · Phase 2</div>
+    <div class="ld-rule"></div>
+    <div class="ld-track"><div class="ld-fill" id="ld-fill"></div></div>
+    <div class="ld-msg"  id="ld-msg">Initializing renderer…</div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div class="h-title">◈  LUNAR GATEWAY  ·  DSG-RQMT-001  ◈</div>
+    <hr class="h-div">
+    <div class="h-row"><span class="h-lbl">MET</span>        <span class="h-val"   id="h-met">000d 00h 00m</span></div>
+    <div class="h-row"><span class="h-lbl">ALTITUDE</span>   <span class="h-val"   id="h-alt">— km</span></div>
+    <div class="h-row"><span class="h-lbl">VELOCITY</span>   <span class="h-val"   id="h-vel">— km/s</span></div>
+    <div class="h-row"><span class="h-lbl">PERIOD</span>     <span class="h-sval">6.56 DAYS</span></div>
+    <div class="h-row"><span class="h-lbl">ORBIT</span>      <span class="h-sval">L2 NRHO 9:2 POLAR</span></div>
+    <div class="h-row"><span class="h-lbl">PERI / APO</span><span class="h-sval">1,000 / 70,000 km</span></div>
+    <div class="h-row"><span class="h-lbl">PHASE</span>      <span class="h-phase" id="h-phase">—</span></div>
+    <div class="h-orbit-bar"><div class="h-orbit-fill" id="h-orb-fill" style="width:0%"></div></div>
+    <hr class="h-div">
+    <div class="h-row"><span class="h-slbl">CREW CAPACITY</span>  <span class="h-sval">2 – 4 CREW</span></div>
+    <div class="h-row"><span class="h-slbl">HAB ENDURANCE</span>  <span class="h-sval">30+ DAYS</span></div>
+    <div class="h-row"><span class="h-slbl">UNCREWED OP</span>    <span class="h-sval">3 YEARS</span></div>
+    <div class="h-row"><span class="h-slbl">SERVICE LIFE</span>   <span class="h-sval">15 YEARS</span></div>
+    <div class="h-row"><span class="h-slbl">DATA DOWNLINK</span>  <span class="h-sval">935 GB/DAY</span></div>
+    <div class="h-row"><span class="h-slbl">PROPULSION</span>     <span class="h-sval">SEP + RCS HYD</span></div>
+    <hr class="h-div">
+    <div class="h-speed">
+      <span>SPEED</span>
+      <button id="sp-0">⏸</button>
+      <button id="sp-1">1×</button>
+      <button id="sp-100">100×</button>
+      <button id="sp-600" class="active">600×</button>
+      <button id="sp-9360">9360×</button>
+    </div>
+    <button id="focus-gw">⊕  Focus Gateway</button>
+    <div class="h-cams">
+      <button id="cam-orbit">⊹ ORBIT VIEW</button>
+      <button id="cam-gw">⊕ GATEWAY</button>
+      <button id="cam-moon">◎ MOON</button>
+    </div>
+  </div>
+
+  <!-- Module info panel -->
+  <div id="info">
+    <div class="i-head">
+      <div>
+        <div class="i-abbr" id="i-abbr">—</div>
+        <div class="i-name" id="i-name">Select a module</div>
+      </div>
+      <div class="i-close" id="i-close">✕</div>
+    </div>
+    <hr class="i-div">
+    <div class="i-row"><span class="i-lbl">LAUNCH MASS</span><span class="i-val" id="i-mass">—</span></div>
+    <div class="i-row"><span class="i-lbl">PROVIDER</span>   <span class="i-val" id="i-elem">—</span></div>
+    <hr class="i-div">
+    <div class="i-desc" id="i-desc">Click any Gateway module to view specifications from DSG-RQMT-001.</div>
+  </div>
+
+  <div class="corner" id="cr">Textures: NASA · Three.js · Wikimedia · Procedural<br>DSG-RQMT-001 Simulation</div>
+  <div class="corner" id="ht">Left drag · rotate &nbsp; Right drag · pan<br>Scroll · zoom &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Click module · specs<br>[O] Orbit &nbsp;[G] Gateway &nbsp;[M] Moon &nbsp;[Space] Pause</div>
+  <div id="tooltip"></div>
+  <div class="corner" id="oleg"><span class="oleg-sw"></span>NRHO Polar Orbit — Periapsis 1,000 km above south pole<br>Apoapsis 70,000 km · Eccentricity 0.93 · Period 6.56 days</div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three":         "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <!-- Pre-module: catches CDN failure / WebGL absence before the ES module loads -->
+  <script>
+  (function(){
+    function showErr(m){
+      var el=document.getElementById('ld-msg');
+      if(el){el.textContent='\u26a0 '+m.slice(0,200);el.style.color='#ff7755';el.style.fontSize='11px';}
+    }
+    // Surface any JS error thrown by the module (e.g. WebGL not available)
+    window.addEventListener('error',function(ev){
+      if(ev.error) showErr((ev.error.message||ev.message||'Script error')+' \u2014 open F12 console for details.');
+    });
+    // If the loading message hasn't changed after 14 s the CDN is unreachable
+    setTimeout(function(){
+      var el=document.getElementById('ld-msg');
+      if(el&&el.textContent.indexOf('\u26a0')===-1&&el.textContent.indexOf('Fetching')===-1){
+        showErr('Three.js CDN unreachable \u2014 internet access required. Try Chrome or Edge.');
+      }
+    },14000);
+  })();
+  </script>
+
+  <script type="module">
+    import * as THREE                         from 'three';
+    import { OrbitControls }                  from 'three/addons/controls/OrbitControls.js';
+    import { EffectComposer }                 from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass }                     from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass }                from 'three/addons/postprocessing/UnrealBloomPass.js';
+    import { OutputPass }                     from 'three/addons/postprocessing/OutputPass.js';
+    import { SMAAPass }                       from 'three/addons/postprocessing/SMAAPass.js';
+    import { Lensflare, LensflareElement }    from 'three/addons/objects/Lensflare.js';
+
+    // Surface any uncaught JS/promise errors in the loading screen
+    // so a frozen blank screen becomes a diagnosable message.
+    window.addEventListener('unhandledrejection', ev => {
+      const msg = (ev.reason?.message || String(ev.reason || 'Promise error')).slice(0, 180);
+      const el = document.getElementById('ld-msg');
+      if (el) { el.textContent = '⚠ ' + msg; el.style.color = '#ff7744'; }
+      console.error('[LunarGateway]', ev.reason);
+    });
+
+    // ═══════════════════════════════════════════════════════════════
+    //  SCENE & ORBITAL CONSTANTS
+    // ═══════════════════════════════════════════════════════════════
+    const MOON_R    = 5;
+    const EARTH_R   = MOON_R * 3.674;
+    const SUN_POS   = new THREE.Vector3(2200, 340, 900);
+    const EARTH_POS = new THREE.Vector3(-105, -68, -285);
+
+    // NRHO  (DSG-RQMT-001 L2 Southern 9:2)
+    const MOON_R_KM = 1737;
+    const SCALE     = MOON_R / MOON_R_KM;
+    const MU        = 4904.87;
+    const PERI_KM   = MOON_R_KM + 1000;   // 1,000 km altitude above south pole (NASA spec)
+    const APO_KM    = MOON_R_KM + 70000;  // ~70,000 km altitude above north side
+    const SMA_KM    = (PERI_KM + APO_KM) / 2;
+    const ECC       = (APO_KM - PERI_KM) / (APO_KM + PERI_KM); // ≈ 0.9265 — very elongated
+    const SMA_SC    = SMA_KM * SCALE;
+    // ORBIT_VIS: scale so perilune_vis ≈ 6 units (1 above Moon surface), orbit shows true 7:1 shape
+    const ORBIT_VIS = 0.76;
+    const SMA_VIS   = SMA_SC * ORBIT_VIS;
+    const T_REAL    = 6.56 * 24 * 3600;
+    const RAAN      = 0;            // orbit in XY plane — polar face-on view from +Z camera
+    const INC       = Math.PI / 2;  // 90° polar — orbit passes directly over lunar poles
+    const AOP       = -Math.PI / 2; // periapsis at south pole, apoapsis toward north
+
+    // Gateway visual scale — 5× real so it's actually visible
+    const GW_SCALE  = 8.0;
+
+    let simTime  = 0;
+    let simScale = 600;
+    let simPaused = false;
+
+    // ═══════════════════════════════════════════════════════════════
+    //  MODULE CATALOG
+    // ═══════════════════════════════════════════════════════════════
+    const MODS = {
+      PPE:    { abbr:'PPE',    name:'Power & Propulsion Element',    elem:'US (NASA)',    mass:'8,600 kg', color:0xcc9900,
+                desc:'Generates Gateway power via twin high-efficiency solar arrays. Hosts the Solar Electric Propulsion (SEP) system for orbital maintenance and long-range manoeuvres, plus monopropellant hydrazine RCS for attitude control. Primary communications relay and external utilization host.' },
+      MHC:    { abbr:'MHC',   name:'Minimum Habitation Capability', elem:'US (NASA)',    mass:'7,500 kg', color:0xc0c0c0,
+                desc:'Provides early habitable volume for initial crewed Gateway operations. Includes internal/external payload accommodations, robotic grapple interfaces, power/thermal control, O₂/N₂ atmosphere management, air circulation, and logistics storage.' },
+      IHAB:   { abbr:'I-HAB', name:'International Habitat',         elem:'ESA / JAXA',  mass:'8,100 kg', color:0xddd098,
+                desc:'International partner-provided habitation element (ESA/JAXA). Expands crew living volume, provides advanced life support systems, science and utilization racks, crew health monitoring equipment, and medical operations capability.' },
+      USHAB:  { abbr:'US-HAB',name:'United States Habitat',         elem:'US (NASA)',    mass:'8,100 kg', color:0xa8c4d8,
+                desc:'US-provided habitation element complementing I-HAB. Enables 4-crew operations and the 30-day independent habitation requirement. Provides redundant life support, science racks, and additional stowage volume.' },
+      AIRLOCK:{ abbr:'AL',    name:'Airlock',                       elem:'US (NASA)',    mass:'6,000 kg', color:0xeeeeee,
+                desc:'Enables crewed Extravehicular Activities (EVAs) in the cislunar environment. Provides spacesuit stowage and maintenance, EVA tool storage, pre-breathe protocol support, and mechanical/electrical interfaces for robotic arm operations during EVA.' },
+      EVR:    { abbr:'EVR',   name:'Extravehicular Robotics',       elem:'CSA (Canada)', mass:'1,600 kg', color:0x7a8c9a,
+                desc:'Robotic arm (CSA) that walks end-over-end along grapple fixtures on Gateway\'s exterior. Deploys and retrieves external payloads, supports EVA crew, performs autonomous maintenance and inspection, and supports berthing of visiting vehicles.' },
+    };
+
+    // ═══════════════════════════════════════════════════════════════
+    //  LOADING UI
+    // ═══════════════════════════════════════════════════════════════
+    const ldFill = document.getElementById('ld-fill');
+    const ldMsg  = document.getElementById('ld-msg');
+    function setLoad(pct, msg) { ldFill.style.width=Math.min(pct,100)+'%'; ldMsg.textContent=msg; }
+    function hideLoading() {
+      document.getElementById('loading').classList.add('out');
+      document.getElementById('hud').classList.add('show');
+      ['cr','ht','oleg'].forEach(id => document.getElementById(id).classList.add('show'));
+      setTimeout(() => document.getElementById('loading').remove(), 1500);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  RENDERER
+    // ═══════════════════════════════════════════════════════════════
+    const renderer = new THREE.WebGLRenderer({ antialias:false, powerPreference:'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
+    renderer.shadowMap.enabled   = true;
+    renderer.shadowMap.type      = THREE.PCFSoftShadowMap;
+    document.body.appendChild(renderer.domElement);
+
+    // ═══════════════════════════════════════════════════════════════
+    //  SCENE + CAMERA + CONTROLS
+    // ═══════════════════════════════════════════════════════════════
+    const scene  = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.001, 14000);
+    camera.position.set(0, 10, 50);   // default: Moon prominent, lower orbit arc visible
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping   = true;
+    controls.dampingFactor   = 0.04;
+    controls.autoRotate      = true;
+    controls.autoRotateSpeed = 0.06;
+    controls.minDistance     = 0.005;
+    controls.maxDistance     = 3000;
+
+    // ═══════════════════════════════════════════════════════════════
+    //  LIGHTING
+    // ═══════════════════════════════════════════════════════════════
+    scene.add(new THREE.AmbientLight(0x0c1428, 1.0));
+
+    const sunLight = new THREE.DirectionalLight(0xfff8e7, 2.5);
+    sunLight.position.copy(SUN_POS);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.set(2048, 2048);
+    const ssc = sunLight.shadow.camera;
+    ssc.near=1; ssc.far=5000; ssc.left=ssc.bottom=-10; ssc.right=ssc.top=10;
+    ssc.updateProjectionMatrix();
+    scene.add(sunLight);
+
+    const earthLight = new THREE.PointLight(0x3366bb, 0.24, 700);
+    earthLight.position.copy(EARTH_POS);
+    scene.add(earthLight);
+
+    // Moving fill light for Gateway visibility in shadow
+    const gwLight = new THREE.PointLight(0xffeedd, 0.18, 8);
+    scene.add(gwLight);
+
+    // ═══════════════════════════════════════════════════════════════
+    //  TEXTURE LOADING — multi-source with procedural fallback
+    //
+    //  tryUrls(): fires all URLs in parallel, resolves with the
+    //  first successful load. Falls back to null if all fail.
+    //  Procedural generators run only when network textures fail.
+    // ═══════════════════════════════════════════════════════════════
+    const tl = new THREE.TextureLoader();
+
+    // tryUrls: fires all URLs in parallel, resolves with first success.
+    // 9-second hard timeout so a non-responding CDN never hangs Promise.all.
+    function tryUrls(urls, ms=5000) {
+      return new Promise(res => {
+        let done=false, failed=0;
+        const bail=setTimeout(()=>{ if(!done){done=true;res(null);} }, ms);
+        const finish=(t)=>{ clearTimeout(bail); if(!done){done=true;res(t);} };
+        urls.forEach(url=>{
+          tl.load(url, tex=>finish(tex), undefined, ()=>{
+            if(!done && ++failed===urls.length) finish(null);
+          });
+        });
+      });
+    }
+
+    function solidTex(hex) {
+      const c = new THREE.Color(hex);
+      const t = new THREE.DataTexture(new Uint8Array([c.r*255,c.g*255,c.b*255,255]), 1, 1);
+      t.needsUpdate = true; return t;
+    }
+
+    function gradTex(sz, stops) {
+      const c = document.createElement('canvas'); c.width=c.height=sz;
+      const ctx=c.getContext('2d'), g=ctx.createRadialGradient(sz/2,sz/2,0,sz/2,sz/2,sz/2);
+      stops.forEach(([t,col]) => g.addColorStop(t,col));
+      ctx.fillStyle=g; ctx.fillRect(0,0,sz,sz);
+      return new THREE.CanvasTexture(c);
+    }
+
+    // ── Procedural Moon texture (crater noise + terrain variation) ─
+    function makeProceduralMoon(W=1024, H=512) {
+      const c=document.createElement('canvas'); c.width=W; c.height=H;
+      const ctx=c.getContext('2d');
+      // Base regolith — warm mid-grey
+      ctx.fillStyle='#8e8c88'; ctx.fillRect(0,0,W,H);
+      // Large-scale terrain variation via pixel noise
+      const img=ctx.getImageData(0,0,W,H); const d=img.data;
+      for (let i=0;i<d.length;i+=4) {
+        const x=(i/4)%W, y=Math.floor(i/4/W);
+        const n = Math.sin(x*0.012)*18 + Math.sin(y*0.015)*14
+                + Math.sin(x*0.035+y*0.028)*10 + Math.sin(x*0.06-y*0.05)*6;
+        const v = Math.round(138 + n);
+        d[i]=v; d[i+1]=v-2; d[i+2]=v-5; d[i+3]=255;
+      }
+      ctx.putImageData(img,0,0);
+      // Mare (dark plains) — a few large dark patches
+      const mares=[{x:0.35,y:0.45,r:0.14},{x:0.55,y:0.38,r:0.10},{x:0.22,y:0.52,r:0.08},{x:0.70,y:0.50,r:0.11}];
+      mares.forEach(m=>{
+        const g=ctx.createRadialGradient(m.x*W,m.y*H,0,m.x*W,m.y*H,m.r*W);
+        g.addColorStop(0,'rgba(70,68,65,0.55)'); g.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+      });
+      // Craters — many sizes via radial gradients
+      for (let i=0;i<380;i++) {
+        const cx=Math.random()*W, cy=Math.random()*H;
+        const sz=Math.pow(Math.random(),2.2)*W*0.055+2;
+        // Ejecta blanket (bright)
+        if (sz>12) {
+          const ej=ctx.createRadialGradient(cx,cy,sz*0.9,cx,cy,sz*2.4);
+          ej.addColorStop(0,'rgba(195,192,188,0.22)'); ej.addColorStop(1,'rgba(0,0,0,0)');
+          ctx.fillStyle=ej; ctx.beginPath(); ctx.arc(cx,cy,sz*2.4,0,Math.PI*2); ctx.fill();
+        }
+        // Rim — bright ring
+        const rim=ctx.createRadialGradient(cx,cy,sz*0.80,cx,cy,sz*1.18);
+        rim.addColorStop(0,'rgba(0,0,0,0)'); rim.addColorStop(0.5,'rgba(205,202,198,0.55)'); rim.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle=rim; ctx.beginPath(); ctx.arc(cx,cy,sz*1.3,0,Math.PI*2); ctx.fill();
+        // Floor — dark
+        const dk=0.25+Math.random()*0.35;
+        const fl=ctx.createRadialGradient(cx,cy,0,cx,cy,sz*0.9);
+        fl.addColorStop(0,`rgba(55,53,50,${dk})`); fl.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle=fl; ctx.beginPath(); ctx.arc(cx,cy,sz,0,Math.PI*2); ctx.fill();
+      }
+      // Polar frost (south pole, index=0 in our coord convention)
+      const pf=ctx.createRadialGradient(W/2,H,0,W/2,H,H*0.22);
+      pf.addColorStop(0,'rgba(230,228,224,0.55)'); pf.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=pf; ctx.fillRect(0,0,W,H);
+      const t=new THREE.CanvasTexture(c); return t;
+    }
+
+    // ── Procedural Earth day texture (3-D noise continents) ────────
+    function makeProceduralEarth(W=1024, H=512) {
+      // 3-D noise that wraps correctly around a sphere (no seams)
+      function h3(x,y,z) {
+        return ( Math.sin(x*2.1+y*1.7+z*0.9)*0.50
+               + Math.sin(x*4.2-y*3.3+z*2.1)*0.25
+               + Math.sin(x*7.5+y*6.1-z*5.8)*0.125
+               + Math.sin(x*14.1-y*11.4+z*9.6)*0.0625 );
+      }
+      const c=document.createElement('canvas'); c.width=W; c.height=H;
+      const ctx=c.getContext('2d');
+      const img=ctx.createImageData(W,H); const d=img.data;
+      for (let y=0;y<H;y++) for (let x=0;x<W;x++) {
+        const lat=(y/H-0.5)*Math.PI, lon=(x/W)*Math.PI*2-Math.PI;
+        const clat=Math.cos(lat);
+        const nx=clat*Math.cos(lon), ny=clat*Math.sin(lon), nz=Math.sin(lat);
+        const ht=h3(nx,ny,nz);                // "terrain height"
+        const aLat=Math.abs(lat*180/Math.PI); // absolute latitude deg
+        const iceF=Math.max(0,(aLat-68)/22);  // 0→1 at poles
+        let r,g,b;
+        if (ht>0.04) { // ── land ──────────────────────────────────
+          if      (iceF>0.7)  { r=225; g=228; b=232; }         // glacier
+          else if (aLat>55)   { r=120; g=115; b= 90; }         // tundra
+          else if (aLat<22)   { r= 50; g=120; b= 38; }         // tropical
+          else                { r= 72; g=108; b= 48; }         // temperate
+          const mhgt=Math.max(0,ht-0.18)/0.25;
+          r=Math.min(255,r+mhgt*130); g=Math.min(255,g+mhgt*128); b=Math.min(255,b+mhgt*120);
+        } else {       // ── ocean ─────────────────────────────────
+          const dep=-ht;
+          if (dep<0.03) { r=18; g=90;  b=165; }                // coastal
+          else          { r=10; g=42+dep*30; b=110+dep*40; }   // deep
+        }
+        // Polar ice overlay
+        if (iceF>0) { r=r+iceF*(232-r); g=g+iceF*(238-g); b=b+iceF*(248-b); }
+        const i=(y*W+x)*4;
+        d[i]=Math.min(255,Math.max(0,r|0)); d[i+1]=Math.min(255,Math.max(0,g|0));
+        d[i+2]=Math.min(255,Math.max(0,b|0)); d[i+3]=255;
+      }
+      ctx.putImageData(img,0,0);
+      // Subtle cloud wisps
+      for (let i=0;i<12;i++) {
+        const cx=Math.random()*W, cy=H*0.2+Math.random()*H*0.6;
+        const rw=W*0.08+Math.random()*W*0.12, rh=H*0.03+Math.random()*H*0.04;
+        const cg=ctx.createRadialGradient(cx,cy,0,cx,cy,rw);
+        cg.addColorStop(0,'rgba(255,255,255,0.28)'); cg.addColorStop(1,'rgba(255,255,255,0)');
+        ctx.save(); ctx.scale(1, rh/rw); ctx.fillStyle=cg;
+        ctx.beginPath(); ctx.arc(cx, cy*rw/rh, rw, 0, Math.PI*2); ctx.fill(); ctx.restore();
+      }
+      return new THREE.CanvasTexture(c);
+    }
+
+    // ── Procedural Earth night (city lights on land) ────────────
+    function makeProceduralEarthNight(W=512, H=256) {
+      function h3s(x,y,z) { // same seed as day texture
+        return ( Math.sin(x*2.1+y*1.7+z*0.9)*0.50 + Math.sin(x*4.2-y*3.3+z*2.1)*0.25
+               + Math.sin(x*7.5+y*6.1-z*5.8)*0.125 + Math.sin(x*14.1-y*11.4+z*9.6)*0.0625 );
+      }
+      const c=document.createElement('canvas'); c.width=W; c.height=H;
+      const ctx=c.getContext('2d');
+      ctx.fillStyle='#010306'; ctx.fillRect(0,0,W,H);
+      // City light dots on land pixels
+      for (let y=0;y<H;y++) for (let x=0;x<W;x++) {
+        const lat=(y/H-0.5)*Math.PI, lon=(x/W)*Math.PI*2-Math.PI;
+        const clat=Math.cos(lat);
+        const nx=clat*Math.cos(lon), ny=clat*Math.sin(lon), nz=Math.sin(lat);
+        const ht=h3s(nx,ny,nz);
+        const aLat=Math.abs(lat*180/Math.PI);
+        if (ht>0.04 && aLat<70 && Math.random()<0.018) {
+          const bright=0.5+Math.random()*0.5;
+          const sz=1+Math.random()*1.5;
+          const lg=ctx.createRadialGradient(x,y,0,x,y,sz*2);
+          lg.addColorStop(0,`rgba(255,240,200,${bright})`);
+          lg.addColorStop(0.5,`rgba(255,220,140,${bright*0.4})`);
+          lg.addColorStop(1,'rgba(0,0,0,0)');
+          ctx.fillStyle=lg; ctx.beginPath(); ctx.arc(x,y,sz*2,0,Math.PI*2); ctx.fill();
+        }
+      }
+      return new THREE.CanvasTexture(c);
+    }
+
+    // ── Procedural cloud texture ────────────────────────────────
+    function makeProceduralClouds(W=512, H=256) {
+      const c=document.createElement('canvas'); c.width=W; c.height=H;
+      const ctx=c.getContext('2d');
+      ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
+      for (let i=0;i<80;i++) {
+        const cx=Math.random()*W, cy=Math.random()*H;
+        const rw=W*0.04+Math.random()*W*0.10, rh=H*0.02+Math.random()*H*0.04;
+        const cg=ctx.createRadialGradient(cx,cy,0,cx,cy,rw);
+        cg.addColorStop(0,`rgba(255,255,255,${0.4+Math.random()*0.4})`);
+        cg.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.save(); ctx.scale(1,rh/rw); ctx.fillStyle=cg;
+        ctx.beginPath(); ctx.arc(cx, cy*rw/rh, rw, 0, Math.PI*2); ctx.fill(); ctx.restore();
+      }
+      return new THREE.CanvasTexture(c);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  ATMOSPHERE GLOW SHADER
+    // ═══════════════════════════════════════════════════════════════
+    function makeAtmo(radius, color, intensity, power=3.5) {
+      return new THREE.Mesh(
+        new THREE.SphereGeometry(radius*1.022, 64, 32),
+        new THREE.ShaderMaterial({
+          uniforms: { c:{value:new THREE.Color(color)}, i:{value:intensity}, p:{value:power} },
+          vertexShader: `varying vec3 vN,vV;
+            void main(){vN=normalize(normalMatrix*normal);
+              vV=normalize(-(modelViewMatrix*vec4(position,1.0)).xyz);
+              gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+          fragmentShader: `uniform vec3 c;uniform float i,p;varying vec3 vN,vV;
+            void main(){float r=pow(clamp(1.0-abs(dot(vN,vV)),0.0,1.0),p);
+              gl_FragColor=vec4(c*r*i,r*i);}`,
+          transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, side:THREE.FrontSide,
+        })
+      );
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  STAR FIELD  — stable, large enough to avoid sub-pixel flicker
+    // ═══════════════════════════════════════════════════════════════
+    function buildStars() {
+      const N=22000, pos=new Float32Array(N*3), col=new Float32Array(N*3), sz=new Float32Array(N);
+      for (let i=0;i<N;i++) {
+        const u=Math.random(), v=Math.random();
+        const th=2*Math.PI*u, ph=Math.acos(2*v-1), r=3400+Math.random()*700;
+        pos[i*3]=r*Math.sin(ph)*Math.cos(th); pos[i*3+1]=r*Math.sin(ph)*Math.sin(th); pos[i*3+2]=r*Math.cos(ph);
+        const t=Math.random();
+        if      (t<0.04){col[i*3]=0.43;col[i*3+1]=0.51;col[i*3+2]=0.78;}
+        else if (t<0.12){col[i*3]=0.63;col[i*3+1]=0.68;col[i*3+2]=0.78;}
+        else if (t<0.50){col[i*3]=0.76;col[i*3+1]=0.76;col[i*3+2]=0.74;}
+        else if (t<0.84){col[i*3]=0.78;col[i*3+1]=0.67;col[i*3+2]=0.46;}
+        else            {col[i*3]=0.78;col[i*3+1]=0.46;col[i*3+2]=0.29;}
+        // Fixed 1.5 px — no random variation prevents alias/bloom flicker
+        sz[i] = 1.5;
+      }
+      const geo=new THREE.BufferGeometry();
+      geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+      geo.setAttribute('color',   new THREE.BufferAttribute(col,3));
+      // Use a simple custom shader so we can vary size per vertex
+      const mat = new THREE.ShaderMaterial({
+        uniforms: {},
+        // Explicitly declare all attributes so the shader is self-contained
+        // and not reliant on Three.js prefix injection via vertexColors flag.
+        vertexShader: `
+          attribute float size; attribute vec3 color; varying vec3 vCol;
+          void main(){vCol=color;
+            gl_PointSize=size;
+            gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+        fragmentShader: `
+          varying vec3 vCol;
+          void main(){
+            float d=length(gl_PointCoord-0.5)*2.0;
+            if(d>1.0) discard;
+            gl_FragColor=vec4(vCol, 0.88*(1.0-d*0.3));}`,
+        transparent:true, blending:THREE.AdditiveBlending, depthWrite:false,
+      });
+      // Attach size attribute
+      geo.setAttribute('size', new THREE.BufferAttribute(sz,1));
+      return new THREE.Points(geo, mat);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  EARTH GLSL
+    // ═══════════════════════════════════════════════════════════════
+    const EARTH_VERT = `
+      varying vec2 vUv; varying vec3 vWorldN;
+      void main(){vUv=uv; vWorldN=normalize((modelMatrix*vec4(normal,0.0)).xyz);
+        gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`;
+    const EARTH_FRAG = `
+      uniform sampler2D dayTex,nightTex,cloudTex; uniform vec3 sunDir; uniform float cloudOff;
+      varying vec2 vUv; varying vec3 vWorldN;
+      void main(){
+        float day=smoothstep(-0.08,0.20,dot(vWorldN,sunDir));
+        vec4 d=texture2D(dayTex,vUv), n=texture2D(nightTex,vUv)*2.6;
+        float cld=texture2D(cloudTex,vec2(mod(vUv.x+cloudOff,1.0),vUv.y)).r;
+        gl_FragColor=mix(mix(n,vec4(0.02,0.02,0.02,1.0),cld*0.30*(1.0-day)),
+                         mix(d,vec4(1.0,1.0,1.0,1.0),    cld*0.55*day), day);}`;
+
+    // ═══════════════════════════════════════════════════════════════
+    //  KEPLER + NRHO
+    // ═══════════════════════════════════════════════════════════════
+    function keplerE(M,e) {
+      let E=M+0.85*e*Math.sign(Math.sin(M)||1);
+      for(let i=0;i<20;i++){const dE=(M-E+e*Math.sin(E))/(1-e*Math.cos(E));E+=dE;if(Math.abs(dE)<1e-12)break;}
+      return E;
+    }
+    function nrhoPos(t) {
+      const M=((2*Math.PI/T_REAL*t)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);
+      const E=keplerE(M,ECC), r=SMA_VIS*(1-ECC*Math.cos(E));
+      const nu=2*Math.atan2(Math.sqrt(1+ECC)*Math.sin(E/2),Math.sqrt(1-ECC)*Math.cos(E/2));
+      const u=AOP+nu;
+      const cR=Math.cos(RAAN),sR=Math.sin(RAAN),cI=Math.cos(INC),sI=Math.sin(INC);
+      const cU=Math.cos(u),sU=Math.sin(u);
+      // Perifocal → selenocentric ECI; map to Three.js (Y=north/up, Z=toward viewer)
+      const rx=r*(cR*cU-sR*sU*cI), ry=r*(sR*cU+cR*sU*cI), rz=r*(sU*sI);
+      return new THREE.Vector3(rx, rz, -ry);
+    }
+    function buildOrbitLine() {
+      const pts=[];
+      const p=SMA_VIS*(1-ECC*ECC);  // semi-latus rectum for polar equation
+      const cR=Math.cos(RAAN),sR=Math.sin(RAAN),cI=Math.cos(INC),sI=Math.sin(INC);
+      for(let i=0;i<=360;i++){
+        const nu=(i/360)*2*Math.PI;           // uniform true-anomaly sampling
+        const r=p/(1+ECC*Math.cos(nu));
+        const u=AOP+nu;
+        const cU=Math.cos(u),sU=Math.sin(u);
+        const rx=r*(cR*cU-sR*sU*cI), ry=r*(sR*cU+cR*sU*cI), rz=r*(sU*sI);
+        pts.push(new THREE.Vector3(rx,rz,-ry));
+      }
+      return new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(pts),
+        new THREE.LineBasicMaterial({ color:0x88bbee, transparent:true, opacity:0.72 })
+      );
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  GATEWAY BUILDERS
+    //  All dimensions at 1× scale; group.scale = GW_SCALE (5×)
+    // ═══════════════════════════════════════════════════════════════
+    function makeSolarTex() {
+      const c=document.createElement('canvas'); c.width=128; c.height=64;
+      const ctx=c.getContext('2d');
+      ctx.fillStyle='#050c1a'; ctx.fillRect(0,0,128,64);
+      ctx.strokeStyle='#0c1c34'; ctx.lineWidth=0.9;
+      for(let x=0;x<=128;x+=16){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,64);ctx.stroke();}
+      for(let y=0;y<=64; y+=16){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(128,y);ctx.stroke();}
+      for(let xi=0;xi<8;xi++) for(let yi=0;yi<4;yi++){
+        const g=ctx.createLinearGradient(xi*16,yi*16,xi*16+16,yi*16+16);
+        g.addColorStop(0,'rgba(18,52,125,0.42)'); g.addColorStop(1,'rgba(6,22,68,0.18)');
+        ctx.fillStyle=g; ctx.fillRect(xi*16+1,yi*16+1,14,14);
+      }
+      const t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; return t;
+    }
+    function makeMLI(css) {
+      const c=document.createElement('canvas'); c.width=64; c.height=128;
+      const ctx=c.getContext('2d');
+      ctx.fillStyle=css; ctx.fillRect(0,0,64,128);
+      for(let y=0;y<128;y+=5){
+        ctx.fillStyle='rgba(0,0,0,0.22)'; ctx.fillRect(0,y,64,2);
+        ctx.fillStyle='rgba(255,255,255,0.05)'; ctx.fillRect(0,y+2,64,1);
+      }
+      const t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(2,1); return t;
+    }
+
+    const solarTex = makeSolarTex();
+    const clickables = [];
+
+    function modMat(color, r=0.55, m=0.22) { return new THREE.MeshStandardMaterial({color,roughness:r,metalness:m}); }
+    function reg(mesh, key) {
+      mesh.userData.moduleKey=key; mesh.castShadow=mesh.receiveShadow=true;
+      clickables.push(mesh); return mesh;
+    }
+
+    function buildPPE(gw) {
+      const g=new THREE.Group();
+      const mli=makeMLI('#c89820');
+      const body=new THREE.Mesh(new THREE.CylinderGeometry(0.058,0.058,0.170,20),
+        new THREE.MeshStandardMaterial({color:0xcc9900,map:mli,roughness:0.55,metalness:0.35,emissive:0x221100,emissiveIntensity:0.06}));
+      body.rotation.z=Math.PI/2; g.add(reg(body,'PPE'));
+      const cone=new THREE.Mesh(new THREE.CylinderGeometry(0.040,0.058,0.035,16),modMat(0xb08a10));
+      cone.rotation.z=Math.PI/2; cone.position.x=-0.102; g.add(reg(cone,'PPE'));
+      for(let i=0;i<4;i++){
+        const a=(i/4)*Math.PI*2;
+        const th=new THREE.Mesh(new THREE.ConeGeometry(0.008,0.024,6),modMat(0x444444,0.5,0.9));
+        th.position.set(0.097,Math.cos(a)*0.034,Math.sin(a)*0.034); th.rotation.z=-Math.PI/2; g.add(reg(th,'PPE'));
+      }
+      const panMat=new THREE.MeshStandardMaterial({color:0x182848,map:solarTex,roughness:0.62,metalness:0.10,emissive:0x001020,emissiveIntensity:0.10});
+      for(const s of[-1,1]){
+        const yoke=new THREE.Mesh(new THREE.BoxGeometry(0.012,0.058,0.012),modMat(0x888888));
+        yoke.position.set(0.008,s*0.088,0); g.add(reg(yoke,'PPE'));
+        const p1=new THREE.Mesh(new THREE.BoxGeometry(0.185,0.062,0.004),panMat);
+        p1.position.set(0.008,s*0.180,0); g.add(reg(p1,'PPE'));
+        const p2=new THREE.Mesh(new THREE.BoxGeometry(0.185,0.062,0.004),panMat);
+        p2.position.set(0.008,s*0.262,0); g.add(reg(p2,'PPE'));
+      }
+      for(const s of[-1,1]){
+        const rad=new THREE.Mesh(new THREE.BoxGeometry(0.115,0.004,0.052),modMat(0xdde0ee,0.6,0.3));
+        rad.position.set(-0.018,0,s*0.078); g.add(reg(rad,'PPE'));
+      }
+      g.position.x=0.315; gw.add(g); return g;
+    }
+
+    function buildHab(gw,key,xPos,len,rad,hexColor) {
+      const g=new THREE.Group();
+      const css='#'+hexColor.toString(16).padStart(6,'0');
+      const mat=new THREE.MeshStandardMaterial({color:hexColor,map:makeMLI(css),roughness:0.55,metalness:0.22,emissive:hexColor,emissiveIntensity:0.05});
+      const body=new THREE.Mesh(new THREE.CylinderGeometry(rad,rad,len,20),mat);
+      body.rotation.z=Math.PI/2; g.add(reg(body,key));
+      for(const s of[-1,1]){
+        const cap=new THREE.Mesh(new THREE.CylinderGeometry(rad*0.60,rad,0.014,16),modMat(0x888888,0.3,0.85));
+        cap.rotation.z=Math.PI/2; cap.position.x=s*(len/2+0.007); g.add(reg(cap,key));
+        const ring=new THREE.Mesh(new THREE.TorusGeometry(rad*0.55,0.006,8,24),modMat(0xaaaaaa,0.2,0.9));
+        ring.rotation.y=Math.PI/2; ring.position.x=s*(len/2+0.014); g.add(reg(ring,key));
+      }
+      const equip=new THREE.Mesh(new THREE.BoxGeometry(0.024,0.016,0.016),modMat(hexColor,0.4,0.5));
+      equip.position.set(0,rad+0.010,0); g.add(reg(equip,key));
+      g.position.x=xPos; gw.add(g); return g;
+    }
+
+    function buildAirlock(gw) {
+      const g=new THREE.Group();
+      const mat=new THREE.MeshStandardMaterial({color:0xeeeeee,roughness:0.55,metalness:0.18,emissive:0x111111,emissiveIntensity:0.06});
+      const body=new THREE.Mesh(new THREE.CylinderGeometry(0.055,0.055,0.110,16),mat);
+      body.rotation.z=Math.PI/2; g.add(reg(body,'AIRLOCK'));
+      const hatch=new THREE.Mesh(new THREE.CircleGeometry(0.040,16),modMat(0xdddddd,0.2,0.8));
+      hatch.rotation.y=-Math.PI/2; hatch.position.x=-0.056; g.add(reg(hatch,'AIRLOCK'));
+      for(const rot of[0,Math.PI/2]){
+        const bar=new THREE.Mesh(new THREE.BoxGeometry(0.001,0.048,0.005),modMat(0x999999,0.2,0.9));
+        bar.rotation.x=rot; bar.position.x=-0.057; g.add(reg(bar,'AIRLOCK'));
+      }
+      const collar=new THREE.Mesh(new THREE.CylinderGeometry(0.040,0.055,0.014,16),modMat(0x888888,0.3,0.85));
+      collar.rotation.z=Math.PI/2; collar.position.x=0.062; g.add(reg(collar,'AIRLOCK'));
+      g.position.x=-0.318; gw.add(g); return g;
+    }
+
+    function buildEVR(gw) {
+      const g=new THREE.Group(), mat=modMat(0x7a8c9a,0.45,0.75);
+      const base=new THREE.Mesh(new THREE.BoxGeometry(0.020,0.018,0.020),mat);
+      base.position.set(0,0.072,0); g.add(reg(base,'EVR'));
+      const s1=new THREE.Mesh(new THREE.CylinderGeometry(0.007,0.007,0.082,8),mat);
+      s1.position.set(0,0.125,0); g.add(reg(s1,'EVR'));
+      const j1=new THREE.Mesh(new THREE.SphereGeometry(0.010,8,8),modMat(0xbbbbbb));
+      j1.position.set(0,0.168,0); g.add(reg(j1,'EVR'));
+      const s2=new THREE.Mesh(new THREE.CylinderGeometry(0.006,0.006,0.072,8),mat);
+      s2.position.set(0.012,0.214,0); s2.rotation.z=0.24; g.add(reg(s2,'EVR'));
+      const j2=new THREE.Mesh(new THREE.SphereGeometry(0.009,8,8),modMat(0xbbbbbb));
+      j2.position.set(0.024,0.252,0); g.add(reg(j2,'EVR'));
+      const eff=new THREE.Mesh(new THREE.BoxGeometry(0.022,0.012,0.012),modMat(0xcccccc));
+      eff.position.set(0.024,0.264,0); g.add(reg(eff,'EVR'));
+      for(let xi=0;xi<3;xi++){
+        const fix=new THREE.Mesh(new THREE.BoxGeometry(0.008,0.006,0.055),modMat(0xcccccc,0.2,0.9));
+        fix.position.set(-0.040+xi*0.040,0.068,0); g.add(fix);
+      }
+      g.position.x=0.095; gw.add(g); return g;
+    }
+
+    function buildGateway() {
+      const gw=new THREE.Group(); gw.name='gateway';
+      buildPPE(gw);
+      buildHab(gw,'MHC',   +0.132,0.145,0.064,MODS.MHC.color);
+      buildHab(gw,'IHAB',  -0.020,0.120,0.064,MODS.IHAB.color);
+      buildHab(gw,'USHAB', -0.168,0.120,0.064,MODS.USHAB.color);
+      buildAirlock(gw); buildEVR(gw);
+      gw.scale.setScalar(GW_SCALE);  // ← 5× visual scale
+      return gw;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  LOAD TEXTURES + BUILD SCENE  (wrapped so any error is visible)
+    // ═══════════════════════════════════════════════════════════════
+    try { // ← catches renderer creation failure, shader errors, etc.
+    setLoad(5, 'Fetching texture assets…');
+
+    const SSS  = 'https://www.solarsystemscope.com/textures/download/';
+    const GH   = 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/';
+    const WIKI = 'https://upload.wikimedia.org/wikipedia/commons/';
+
+    const [moonTex, dayTex, nightTex, cloudTex, milkyTex, sunTex] = await Promise.all([
+      tryUrls([GH+'moon_1024.jpg', SSS+'2k_moon.jpg',
+               WIKI+'a/a8/Lunar_surface_%28Clementine%2C_750nm%29.jpg']).then(t => t || makeProceduralMoon()),
+      tryUrls([GH+'earth_atmos_2048.jpg', SSS+'2k_earth_daymap.jpg',
+               WIKI+'thumb/2/23/Blue_Marble_2002.png/1280px-Blue_Marble_2002.png']).then(t => t || makeProceduralEarth()),
+      tryUrls([GH+'earth_lights_2048.png', SSS+'2k_earth_nightmap.jpg']).then(t => t || makeProceduralEarthNight()),
+      tryUrls([SSS+'2k_earth_clouds.jpg']).then(t => t || makeProceduralClouds()),
+      tryUrls([SSS+'2k_stars_milky_way.jpg']),   // null = OK, procedural stars cover it
+      tryUrls([SSS+'2k_sun.jpg']),                // null = OK, solid colour works
+    ]);
+
+    setLoad(70, 'Building celestial scene…');
+
+    const maxA = renderer.capabilities.getMaxAnisotropy();
+    [moonTex,dayTex,nightTex,cloudTex].forEach(t=>{ if(t&&t.isTexture) t.anisotropy=maxA; });
+
+    // ── Milky Way skybox ───────────────────────────────────────────
+    scene.add(new THREE.Mesh(
+      new THREE.SphereGeometry(4300,32,16),
+      new THREE.MeshBasicMaterial({map:milkyTex||null, color:milkyTex?0xffffff:0x030508, side:THREE.BackSide})
+    ));
+
+    // ── Stars ─────────────────────────────────────────────────────
+    scene.add(buildStars());
+
+    // ── Sun — 3× larger, flooding the scene ───────────────────────
+    const SUN_R = 105;  // was 34 — 3× bigger for visual impact
+    const sunMesh = new THREE.Mesh(
+      new THREE.SphereGeometry(SUN_R,32,32),
+      new THREE.MeshBasicMaterial({map:sunTex||null, color:0xffee77})
+    );
+    sunMesh.position.copy(SUN_POS); scene.add(sunMesh);
+    sunMesh.add(makeAtmo(SUN_R,'#ff9922',4.5,1.8));
+
+    // Inner super-bright core sprite for bloom target
+    const sunCore = new THREE.Mesh(
+      new THREE.SphereGeometry(SUN_R*0.4,16,16),
+      new THREE.MeshBasicMaterial({color:0xfffff0, transparent:true, opacity:0.95})
+    );
+    sunMesh.add(sunCore);
+
+    // Lensflare — larger, more dramatic
+    const fA=gradTex(256,[[0,'rgba(255,240,180,1)'],[0.22,'rgba(255,165,50,0.65)'],[1,'transparent']]);
+    const fB=gradTex(128,[[0,'rgba(175,215,255,0.90)'],[1,'transparent']]);
+    const fC=gradTex(64, [[0,'rgba(255,210,100,0.75)'],[1,'transparent']]);
+    const fD=gradTex(64, [[0,'rgba(255,255,255,0.50)'],[1,'transparent']]);
+    const lf=new Lensflare();
+    lf.addElement(new LensflareElement(fA, 900, 0.00, new THREE.Color(0xffeeaa)));
+    lf.addElement(new LensflareElement(fB, 120, 0.42));
+    lf.addElement(new LensflareElement(fD,  60, 0.56));
+    lf.addElement(new LensflareElement(fC,  80, 0.68));
+    lf.addElement(new LensflareElement(fB,  45, 0.82));
+    lf.addElement(new LensflareElement(fD, 110, 1.00));
+    sunMesh.add(lf);
+
+    // ── Moon ──────────────────────────────────────────────────────
+    const moonMesh = new THREE.Mesh(
+      new THREE.SphereGeometry(MOON_R,128,64),
+      new THREE.MeshStandardMaterial({
+        map: moonTex&&moonTex.isTexture ? moonTex : solidTex(0xb2b2b2),
+        roughness:0.93, metalness:0.00,
+        bumpMap: moonTex&&moonTex.isTexture ? moonTex : null, bumpScale:0.18,
+      })
+    );
+    moonMesh.receiveShadow=moonMesh.castShadow=true; scene.add(moonMesh);
+    moonMesh.add(makeAtmo(MOON_R,'#ffe8cc',0.12,5.5));
+    // South pole marker — periapsis grazes here
+    const sPole=new THREE.Mesh(new THREE.SphereGeometry(0.12,8,8),
+      new THREE.MeshBasicMaterial({color:0xffcc44}));
+    sPole.position.set(0,-MOON_R,0); moonMesh.add(sPole);
+    // Faint pole ring to show orbital plane intersection
+    const poleRing=new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(
+        Array.from({length:33},(_,i)=>{const a=(i/32)*Math.PI*2;return new THREE.Vector3(Math.cos(a)*0.4,0,Math.sin(a)*0.4);})),
+      new THREE.LineBasicMaterial({color:0xffcc44,transparent:true,opacity:0.45}));
+    poleRing.position.set(0,-MOON_R,0); moonMesh.add(poleRing);
+
+    // ── Earth (day/night shader) ───────────────────────────────────
+    const sunDirE=new THREE.Vector3().subVectors(SUN_POS,EARTH_POS).normalize();
+    const earthU={
+      dayTex:  {value: dayTex&&dayTex.isTexture     ? dayTex   : solidTex(0x1a4888)},
+      nightTex:{value: nightTex&&nightTex.isTexture ? nightTex : solidTex(0x04080f)},
+      cloudTex:{value: cloudTex&&cloudTex.isTexture ? cloudTex : solidTex(0x000000)},
+      sunDir:  {value:sunDirE}, cloudOff:{value:0.0},
+    };
+    const earthMesh=new THREE.Mesh(
+      new THREE.SphereGeometry(EARTH_R,128,64),
+      new THREE.ShaderMaterial({uniforms:earthU, vertexShader:EARTH_VERT, fragmentShader:EARTH_FRAG})
+    );
+    earthMesh.position.copy(EARTH_POS); earthMesh.rotation.y=2.1; scene.add(earthMesh);
+    earthMesh.add(makeAtmo(EARTH_R,'#1e88ff',0.85,2.8));
+    earthMesh.add(makeAtmo(EARTH_R*1.008,'#aaddff',0.30,7.0));
+
+    // ── NRHO orbit path ────────────────────────────────────────────
+    setLoad(82, 'Computing NRHO trajectory…');
+    scene.add(buildOrbitLine());
+
+    // Faint orbit-plane ghost — helps viewer understand 3D geometry
+    const _slr = SMA_VIS*(1-ECC*ECC); // semi-latus rectum = half-width of orbit
+    const _apo = SMA_VIS*(1+ECC);
+    const _peri= SMA_VIS*(1-ECC);
+    const _ePlaneGeo = new THREE.BufferGeometry().setFromPoints(
+      Array.from({length:3},(_, i) => [
+        new THREE.Vector3(-_slr, 0, 0),    // equatorial crossing west
+        new THREE.Vector3(0, -_peri, 0),   // periapsis (south pole)
+        new THREE.Vector3(_slr, 0, 0),     // equatorial crossing east
+      ][i])
+    );
+    // Thin dashed-look triangle showing lower half of orbit plane
+    scene.add(new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(-_slr, 0, 0), new THREE.Vector3(0,-_peri,0), new THREE.Vector3(_slr,0,0)]),
+      new THREE.LineBasicMaterial({color:0x335566,transparent:true,opacity:0.25})));
+
+    // ── Gateway ───────────────────────────────────────────────────
+    setLoad(88, 'Assembling Gateway modules…');
+    const gatewayGroup=buildGateway();
+    scene.add(gatewayGroup);
+
+    // ── Orbital trail — fading shader line behind Gateway ─────────
+    const TRAIL_N = 280;
+    const _trailBuf  = new Float32Array(TRAIL_N * 3);
+    const _trailAges = new Float32Array(TRAIL_N); for(let i=0;i<TRAIL_N;i++) _trailAges[i]=i;
+    const _trailGeo  = new THREE.BufferGeometry();
+    const _trailAttr = new THREE.BufferAttribute(_trailBuf, 3);
+    _trailAttr.setUsage(THREE.DynamicDrawUsage);
+    _trailGeo.setAttribute('position', _trailAttr);
+    _trailGeo.setAttribute('tAge', new THREE.BufferAttribute(_trailAges, 1));
+    _trailGeo.setDrawRange(0, 0);
+    const _trailLine = new THREE.Line(_trailGeo, new THREE.ShaderMaterial({
+      uniforms: { tCount: {value: 1.0} },
+      vertexShader: `attribute float tAge; uniform float tCount; varying float vF;
+        void main(){ vF=max(0.0,1.0-tAge/max(tCount-1.0,1.0));
+          gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+      fragmentShader: `varying float vF;
+        void main(){ float a=vF*vF; gl_FragColor=vec4(0.48,0.78,1.0,a*0.52); }`,
+      transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
+    }));
+    scene.add(_trailLine);
+    const _trailRing = new Float32Array(TRAIL_N * 3);
+    let _trailHead=0, _trailCount=0;
+
+    // ── Engine thruster glow (tracks Gateway, brightens at perilune) ─
+    const _thrustGlow = new THREE.PointLight(0x88bbff, 0.0, 22);
+    scene.add(_thrustGlow);
+
+    // ═══════════════════════════════════════════════════════════════
+    //  POST-PROCESSING — stronger bloom for sun impact
+    // ═══════════════════════════════════════════════════════════════
+    setLoad(93, 'Initializing post-processing…');
+    const composer=new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene,camera));
+    // Bloom: stronger strength + larger radius for dramatic sun glow
+    const bloom=new UnrealBloomPass(new THREE.Vector2(window.innerWidth,window.innerHeight), 1.2, 0.70, 0.82);
+    composer.addPass(bloom);
+    const smaa=new SMAAPass(window.innerWidth*renderer.getPixelRatio(), window.innerHeight*renderer.getPixelRatio());
+    composer.addPass(smaa);
+    composer.addPass(new OutputPass());
+
+    // ═══════════════════════════════════════════════════════════════
+    //  RAYCASTER + SELECTION
+    // ═══════════════════════════════════════════════════════════════
+    const ray=new THREE.Raycaster(); const ptr=new THREE.Vector2();
+    let selKey=null, mDown={x:0,y:0}, dragged=false;
+
+    function clearHL() {
+      gatewayGroup.traverse(c=>{
+        if(c.isMesh&&c.material&&c.userData.moduleKey===selKey){
+          c.material.emissive.set(0x000000); c.material.emissiveIntensity=0.05;
+        }
+      });
+    }
+    function selectModule(key) {
+      clearHL();
+      if(key===selKey){ selKey=null; document.getElementById('info').classList.remove('show'); return; }
+      selKey=key;
+      gatewayGroup.traverse(c=>{
+        if(c.isMesh&&c.material&&c.userData.moduleKey===key){
+          c.material.emissive.set(0x003366); c.material.emissiveIntensity=0.65;
+        }
+      });
+      const d=MODS[key];
+      ['i-abbr','i-name','i-mass','i-elem','i-desc'].forEach(id=>{
+        document.getElementById(id).textContent={
+          'i-abbr':d.abbr,'i-name':d.name,'i-mass':d.mass,'i-elem':d.elem,'i-desc':d.desc
+        }[id];
+      });
+      document.getElementById('info').classList.add('show');
+      let found=false; const wp=new THREE.Vector3();
+      gatewayGroup.traverse(c=>{ if(!found&&c.isMesh&&c.userData.moduleKey===key){ c.getWorldPosition(wp); found=true; } });
+      if(found) startLerp(wp, 3.0);
+    }
+
+    renderer.domElement.addEventListener('mousedown', e=>{mDown={x:e.clientX,y:e.clientY};dragged=false;});
+    const _ttEl = document.getElementById('tooltip');
+    renderer.domElement.addEventListener('mousemove', e=>{
+      const dx=e.clientX-mDown.x,dy=e.clientY-mDown.y;
+      if(dx*dx+dy*dy>25) dragged=true;
+      // Hover tooltip
+      ptr.x=(e.clientX/window.innerWidth)*2-1; ptr.y=-(e.clientY/window.innerHeight)*2+1;
+      ray.setFromCamera(ptr,camera);
+      const hits=ray.intersectObjects(clickables,false);
+      if(hits.length>0 && hits[0].object.userData.moduleKey){
+        const d=MODS[hits[0].object.userData.moduleKey];
+        _ttEl.textContent=d.abbr+' — '+d.name;
+        _ttEl.style.display='block';
+        _ttEl.style.left=(e.clientX+14)+'px';
+        _ttEl.style.top=(e.clientY-8)+'px';
+        renderer.domElement.style.cursor='pointer';
+      } else {
+        _ttEl.style.display='none';
+        renderer.domElement.style.cursor='';
+      }
+    });
+    renderer.domElement.addEventListener('click', e=>{
+      if(dragged) return;
+      ptr.x=(e.clientX/window.innerWidth)*2-1; ptr.y=-(e.clientY/window.innerHeight)*2+1;
+      ray.setFromCamera(ptr,camera);
+      const hits=ray.intersectObjects(clickables,false);
+      if(hits.length>0&&hits[0].object.userData.moduleKey) selectModule(hits[0].object.userData.moduleKey);
+      else if(selKey) selectModule(selKey);
+    });
+    document.getElementById('i-close').addEventListener('click',()=>{ if(selKey) selectModule(selKey); });
+
+    // ═══════════════════════════════════════════════════════════════
+    //  CAMERA LERP
+    // ═══════════════════════════════════════════════════════════════
+    let lerp=null;
+    function startLerp(target, minDist=null) {
+      const dist=camera.position.distanceTo(target);
+      const zoom=minDist ? minDist : Math.max(dist*0.14, 0.30);
+      const dir=new THREE.Vector3().subVectors(camera.position,target).normalize();
+      lerp={fc:camera.position.clone(),ft:controls.target.clone(),
+             tc:target.clone().addScaledVector(dir,zoom),tt:target.clone(),t:0,dur:1.6};
+      controls.autoRotate=false;
+    }
+    function easeIO(t){return t<0.5?2*t*t:-1+(4-2*t)*t;}
+
+    // ═══════════════════════════════════════════════════════════════
+    //  SPEED CONTROLS + FOCUS BUTTON
+    // ═══════════════════════════════════════════════════════════════
+    const speedMap={'sp-0':0,'sp-1':1,'sp-100':100,'sp-600':600,'sp-9360':9360};
+    Object.entries(speedMap).forEach(([id,s])=>{
+      document.getElementById(id).addEventListener('click',()=>{
+        simScale=s; simPaused=s===0;
+        document.querySelectorAll('.h-speed button').forEach(b=>b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+      });
+    });
+    document.getElementById('focus-gw').addEventListener('click',()=>{
+      startLerp(gatewayGroup.position.clone(), 3.5);
+    });
+
+    // Camera preset helpers
+    function lerpTo(camTo, targetTo, dur, onDone) {
+      lerp={fc:camera.position.clone(),ft:controls.target.clone(),
+             tc:camTo,tt:targetTo,t:0,dur:dur||1.8,onDone:onDone||null};
+      controls.autoRotate=false;
+    }
+    document.getElementById('cam-orbit').addEventListener('click',()=>{
+      lerpTo(new THREE.Vector3(0,75,195),new THREE.Vector3(0,70,0),2.2,()=>{controls.autoRotate=true;});
+    });
+    document.getElementById('cam-gw').addEventListener('click',()=>{
+      startLerp(gatewayGroup.position.clone(), 3.5);
+    });
+    document.getElementById('cam-moon').addEventListener('click',()=>{
+      lerpTo(new THREE.Vector3(4,3,16),new THREE.Vector3(0,0,0));
+    });
+
+    // ── Keyboard shortcuts ─────────────────────────────────────────
+    document.addEventListener('keydown', e=>{
+      if(e.target.tagName==='INPUT') return;
+      switch(e.code){
+        case 'Space': e.preventDefault();
+          document.getElementById(simPaused?'sp-600':'sp-0').click(); break;
+        case 'KeyO': document.getElementById('cam-orbit').click(); break;
+        case 'KeyG': document.getElementById('cam-gw').click(); break;
+        case 'KeyM': document.getElementById('cam-moon').click(); break;
+        case 'KeyF': document.getElementById('focus-gw').click(); break;
+        case 'Escape': if(selKey) selectModule(selKey); break;
+        case 'Digit0': document.getElementById('sp-0').click(); break;
+        case 'Digit1': document.getElementById('sp-1').click(); break;
+        case 'Digit2': document.getElementById('sp-100').click(); break;
+        case 'Digit3': document.getElementById('sp-600').click(); break;
+        case 'Digit4': document.getElementById('sp-9360').click(); break;
+      }
+    });
+
+    // ═══════════════════════════════════════════════════════════════
+    //  HUD UPDATE
+    // ═══════════════════════════════════════════════════════════════
+    function fmtMET(s){
+      const d=Math.floor(s/86400),h=Math.floor((s%86400)/3600),m=Math.floor((s%3600)/60);
+      return `${String(d).padStart(3,'0')}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m`;
+    }
+    function updateHUD(pos) {
+      const r_sc=pos.length()/ORBIT_VIS, r_km=(r_sc/MOON_R)*MOON_R_KM, alt=Math.max(r_km-MOON_R_KM,0);
+      const v=Math.sqrt(Math.abs(MU*(2/r_km-1/SMA_KM)));
+      const M=((2*Math.PI/T_REAL*simTime)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);
+      const isPeri=alt<5000;
+      let phase;
+      if     (isPeri)     phase='⚡ PERILUNE PASSAGE';
+      else if(M<Math.PI)  phase='OUTBOUND → APOLUNE';
+      else if(alt>55000)  phase='◉  APOLUNE REGION';
+      else                phase='INBOUND → PERILUNE';
+      // Orbit progress (0→100 from perilune→apolune→perilune)
+      const orbPct = Math.round((M / (2*Math.PI)) * 100);
+      document.getElementById('h-met').textContent=fmtMET(simTime);
+      const altEl=document.getElementById('h-alt');
+      altEl.textContent=alt<10000?`⚠ ${Math.round(alt).toLocaleString()} km`:`${Math.round(alt).toLocaleString()} km`;
+      altEl.className=isPeri?'h-alert':'h-val';
+      document.getElementById('h-vel').textContent=v.toFixed(3)+' km/s';
+      const phEl=document.getElementById('h-phase');
+      phEl.textContent=phase;
+      phEl.className=isPeri?'h-phase phase-alert':'h-phase';
+      document.getElementById('h-orb-fill').style.width=orbPct+'%';
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  RESIZE
+    // ═══════════════════════════════════════════════════════════════
+    window.addEventListener('resize',()=>{
+      const w=window.innerWidth,h=window.innerHeight;
+      camera.aspect=w/h; camera.updateProjectionMatrix();
+      renderer.setSize(w,h); composer.setSize(w,h); bloom.setSize(w,h);
+    });
+
+    // ═══════════════════════════════════════════════════════════════
+    //  READY
+    // ═══════════════════════════════════════════════════════════════
+    setLoad(100,'Launching simulation…');
+    setTimeout(hideLoading, 380);
+
+    // ═══════════════════════════════════════════════════════════════
+    //  RENDER LOOP
+    // ═══════════════════════════════════════════════════════════════
+    const clock=new THREE.Clock();
+    const _v0=new THREE.Vector3(),_v1=new THREE.Vector3(),_mx=new THREE.Matrix4();
+
+    (function tick(){
+      requestAnimationFrame(tick);
+      const dt=clock.getDelta();
+
+      if(!simPaused) simTime+=dt*simScale;
+
+      // Gateway orbital position
+      const gwPos=nrhoPos(simTime);
+      gatewayGroup.position.copy(gwPos);
+      gwLight.position.copy(gwPos);  // fill light tracks gateway
+
+      // Gateway attitude: X along velocity, Y toward Sun
+      const gwNext=nrhoPos(simTime+10);
+      const velDir=_v0.subVectors(gwNext,gwPos).normalize();
+      const toSun =_v1.subVectors(SUN_POS,gwPos).normalize();
+      const zAxis =new THREE.Vector3().crossVectors(velDir,toSun).normalize();
+      const yAxis =new THREE.Vector3().crossVectors(zAxis,velDir).normalize();
+      _mx.makeBasis(velDir,yAxis,zAxis);
+      gatewayGroup.setRotationFromMatrix(_mx);
+
+      // Camera lerp
+      if(lerp){
+        lerp.t=Math.min(lerp.t+dt/lerp.dur,1);
+        const e=easeIO(lerp.t);
+        camera.position.lerpVectors(lerp.fc,lerp.tc,e);
+        controls.target.lerpVectors(lerp.ft,lerp.tt,e);
+        if(lerp.t>=1) { if(lerp.onDone) lerp.onDone(); lerp=null; }
+      }
+
+      // Celestial rotations
+      // Real astronomical rotation periods (seconds): Moon 2,361,888 | Earth sidereal 86,164 | Sun 2,192,832
+      moonMesh.rotation.y  = (simTime / 2361888) * 2 * Math.PI;
+      earthMesh.rotation.y = (simTime /   86164) * 2 * Math.PI;
+      sunMesh.rotation.y   = (simTime / 2192832) * 2 * Math.PI;
+      earthU.cloudOff.value= (simTime /  288000) % 1.0;
+
+      // Orbital trail update
+      _trailRing[_trailHead*3]  =gwPos.x;
+      _trailRing[_trailHead*3+1]=gwPos.y;
+      _trailRing[_trailHead*3+2]=gwPos.z;
+      _trailHead=(_trailHead+1)%TRAIL_N;
+      if(_trailCount<TRAIL_N) _trailCount++;
+      for(let i=0;i<_trailCount;i++){
+        const s=(_trailHead-1-i+TRAIL_N)%TRAIL_N;
+        _trailBuf[i*3]=_trailRing[s*3]; _trailBuf[i*3+1]=_trailRing[s*3+1]; _trailBuf[i*3+2]=_trailRing[s*3+2];
+      }
+      _trailAttr.needsUpdate=true;
+      _trailLine.material.uniforms.tCount.value=_trailCount;
+      _trailGeo.setDrawRange(0,_trailCount);
+
+      // Thruster glow — brighter near periapsis
+      _thrustGlow.position.copy(gwPos);
+      const _tAlt=(gwPos.length()/ORBIT_VIS/MOON_R)*MOON_R_KM-MOON_R_KM;
+      _thrustGlow.intensity=_tAlt<12000?1.1*Math.pow(Math.max(0,1-_tAlt/12000),2):0;
+
+      updateHUD(gwPos);
+      controls.update();
+      try { composer.render(); } catch(re) { console.error('[render]', re); }
+    })();
+
+    } catch(initErr) { // ← surface any init error on the loading screen
+      ldMsg.textContent = '\u26a0 ' + (initErr.message || String(initErr)).slice(0, 200);
+      ldMsg.style.color = '#ff7755';
+      ldMsg.style.fontSize = '11px';
+      console.error('[LunarGateway init]', initErr);
+    }
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+:root {
+  --bg: #0f1115;
+  --panel: #151a23;
+  --text: #eaeaea;
+  --muted: #a8b0c0;
+  --border: #2a3140;
+  --hover: #1e2533;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.topbar {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.title {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+}
+
+.controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.input {
+  flex: 1;
+  min-width: 240px;
+  padding: 10px 12px;
+  background: #0c0f14;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+}
+
+.btn {
+  padding: 10px 12px;
+  background: #0c0f14;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: var(--hover);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  height: calc(100vh - 110px);
+}
+
+.panel {
+  padding: 12px;
+  overflow: auto;
+}
+
+.panel.detail {
+  border-left: 1px solid var(--border);
+}
+
+.req-item {
+  padding: 10px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  background: #0c0f14;
+}
+
+.req-item:hover {
+  background: var(--hover);
+}
+
+.req-id {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.req-title {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
