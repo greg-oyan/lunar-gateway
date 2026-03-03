@@ -447,15 +447,15 @@
     const ECC       = (APO_KM - PERI_KM) / (APO_KM + PERI_KM); // ≈ 0.9265 — very elongated
     const SMA_SC    = SMA_KM * SCALE;
     // ORBIT_VIS: scale so perilune_vis ≈ 6 units (1 above Moon surface), orbit shows true 7:1 shape
-    const ORBIT_VIS = 0.76;
+    const ORBIT_VIS = 0.70;
     const SMA_VIS   = SMA_SC * ORBIT_VIS;
     const T_REAL    = 6.56 * 24 * 3600;
     const RAAN      = 0;            // orbit in XY plane — polar face-on view from +Z camera
     const INC       = Math.PI / 2;  // 90° polar — orbit passes directly over lunar poles
     const AOP       = -Math.PI / 2; // periapsis at south pole, apoapsis toward north
 
-    // Gateway visual scale — 5× real so it's actually visible
-    const GW_SCALE  = 8.0;
+    // Gateway visual scale — intentionally enlarged for readability, but no longer oversized
+    const GW_SCALE  = 2.2;
 
     let simTime  = 0;
     let simScale = 600;
@@ -495,11 +495,20 @@
     // ═══════════════════════════════════════════════════════════════
     //  RENDERER
     // ═══════════════════════════════════════════════════════════════
+    const LOOK = Object.freeze({
+      exposure: 0.84,
+      bloomStrength: 0.32,
+      bloomRadius: 0.28,
+      bloomThreshold: 0.95,
+    });
+
     const renderer = new THREE.WebGLRenderer({ antialias:false, powerPreference:'high-performance' });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputColorSpace    = THREE.SRGBColorSpace;
+    if ('useLegacyLights' in renderer) renderer.useLegacyLights = false;
     renderer.toneMapping         = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.0;
+    renderer.toneMappingExposure = LOOK.exposure;
     renderer.shadowMap.enabled   = true;
     renderer.shadowMap.type      = THREE.PCFSoftShadowMap;
     document.body.appendChild(renderer.domElement);
@@ -522,23 +531,26 @@
     // ═══════════════════════════════════════════════════════════════
     //  LIGHTING
     // ═══════════════════════════════════════════════════════════════
-    scene.add(new THREE.AmbientLight(0x0c1428, 1.0));
+    scene.add(new THREE.AmbientLight(0x090f1a, 0.18));
+    scene.add(new THREE.HemisphereLight(0x24364a, 0x05070c, 0.16));
 
-    const sunLight = new THREE.DirectionalLight(0xfff8e7, 2.5);
+    const sunLight = new THREE.DirectionalLight(0xfff4de, 3.3);
     sunLight.position.copy(SUN_POS);
     sunLight.castShadow = true;
-    sunLight.shadow.mapSize.set(2048, 2048);
+    sunLight.shadow.mapSize.set(3072, 3072);
     const ssc = sunLight.shadow.camera;
-    ssc.near=1; ssc.far=5000; ssc.left=ssc.bottom=-10; ssc.right=ssc.top=10;
+    ssc.near=1; ssc.far=5000; ssc.left=ssc.bottom=-9; ssc.right=ssc.top=9;
+    sunLight.shadow.bias = -0.00012;
+    sunLight.shadow.normalBias = 0.02;
     ssc.updateProjectionMatrix();
     scene.add(sunLight);
 
-    const earthLight = new THREE.PointLight(0x3366bb, 0.24, 700);
+    const earthLight = new THREE.PointLight(0x5f86b0, 0.08, 620);
     earthLight.position.copy(EARTH_POS);
     scene.add(earthLight);
 
     // Moving fill light for Gateway visibility in shadow
-    const gwLight = new THREE.PointLight(0xffeedd, 0.18, 8);
+    const gwLight = new THREE.PointLight(0xfff0dc, 0.07, 6);
     scene.add(gwLight);
 
     // ═══════════════════════════════════════════════════════════════
@@ -750,42 +762,45 @@
     //  STAR FIELD  — stable, large enough to avoid sub-pixel flicker
     // ═══════════════════════════════════════════════════════════════
     function buildStars() {
-      const N=22000, pos=new Float32Array(N*3), col=new Float32Array(N*3), sz=new Float32Array(N);
+      const N=46000, pos=new Float32Array(N*3), col=new Float32Array(N*3), sz=new Float32Array(N);
       for (let i=0;i<N;i++) {
         const u=Math.random(), v=Math.random();
-        const th=2*Math.PI*u, ph=Math.acos(2*v-1), r=3400+Math.random()*700;
+        const th=2*Math.PI*u, ph=Math.acos(2*v-1), r=5200+Math.random()*1000;
         pos[i*3]=r*Math.sin(ph)*Math.cos(th); pos[i*3+1]=r*Math.sin(ph)*Math.sin(th); pos[i*3+2]=r*Math.cos(ph);
+        // Magnitude-like distribution: many dim stars, very few bright.
+        const m = Math.pow(Math.random(), 2.8);
+        const lum = 0.10 + m * 0.85;
         const t=Math.random();
-        if      (t<0.04){col[i*3]=0.43;col[i*3+1]=0.51;col[i*3+2]=0.78;}
-        else if (t<0.12){col[i*3]=0.63;col[i*3+1]=0.68;col[i*3+2]=0.78;}
-        else if (t<0.50){col[i*3]=0.76;col[i*3+1]=0.76;col[i*3+2]=0.74;}
-        else if (t<0.84){col[i*3]=0.78;col[i*3+1]=0.67;col[i*3+2]=0.46;}
-        else            {col[i*3]=0.78;col[i*3+1]=0.46;col[i*3+2]=0.29;}
-        // Fixed 1.5 px — no random variation prevents alias/bloom flicker
-        sz[i] = 1.5;
+        let cr=0.93, cg=0.93, cb=0.93; // neutral
+        if (t < 0.14)      { cr=0.84; cg=0.88; cb=0.96; } // cool
+        else if (t > 0.86) { cr=0.98; cg=0.92; cb=0.84; } // warm
+        col[i*3]   = cr * lum;
+        col[i*3+1] = cg * lum;
+        col[i*3+2] = cb * lum;
+        sz[i] = 0.85 + m * 0.55;
       }
       const geo=new THREE.BufferGeometry();
       geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
       geo.setAttribute('color',   new THREE.BufferAttribute(col,3));
-      // Use a simple custom shader so we can vary size per vertex
       const mat = new THREE.ShaderMaterial({
         uniforms: {},
-        // Explicitly declare all attributes so the shader is self-contained
-        // and not reliant on Three.js prefix injection via vertexColors flag.
         vertexShader: `
-          attribute float size; attribute vec3 color; varying vec3 vCol;
+          attribute float size; attribute vec3 color; varying vec3 vCol; varying float vA;
           void main(){vCol=color;
+            vA=clamp((color.r+color.g+color.b)/3.0, 0.08, 0.92);
             gl_PointSize=size;
-            gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+            gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);
+          }`,
         fragmentShader: `
-          varying vec3 vCol;
+          varying vec3 vCol; varying float vA;
           void main(){
             float d=length(gl_PointCoord-0.5)*2.0;
             if(d>1.0) discard;
-            gl_FragColor=vec4(vCol, 0.88*(1.0-d*0.3));}`,
-        transparent:true, blending:THREE.AdditiveBlending, depthWrite:false,
+            float soft = smoothstep(1.0, 0.0, d);
+            gl_FragColor=vec4(vCol, vA*soft*0.64);
+          }`,
+        transparent:true, blending:THREE.NormalBlending, depthWrite:false,
       });
-      // Attach size attribute
       geo.setAttribute('size', new THREE.BufferAttribute(sz,1));
       return new THREE.Points(geo, mat);
     }
@@ -801,11 +816,18 @@
       uniform sampler2D dayTex,nightTex,cloudTex; uniform vec3 sunDir; uniform float cloudOff;
       varying vec2 vUv; varying vec3 vWorldN;
       void main(){
-        float day=smoothstep(-0.08,0.20,dot(vWorldN,sunDir));
-        vec4 d=texture2D(dayTex,vUv), n=texture2D(nightTex,vUv)*2.6;
+        float ndl=dot(vWorldN,sunDir);
+        float day=smoothstep(-0.10,0.24,ndl);
+        vec3 d=texture2D(dayTex,vUv).rgb;
+        vec3 n=texture2D(nightTex,vUv).rgb * 1.35;
         float cld=texture2D(cloudTex,vec2(mod(vUv.x+cloudOff,1.0),vUv.y)).r;
-        gl_FragColor=mix(mix(n,vec4(0.02,0.02,0.02,1.0),cld*0.30*(1.0-day)),
-                         mix(d,vec4(1.0,1.0,1.0,1.0),    cld*0.55*day), day);}`;
+        float lum=dot(d,vec3(0.2126,0.7152,0.0722));
+        d=mix(vec3(lum), d, 0.74) * 0.82;
+        vec3 cloudDay=vec3(0.84,0.87,0.92) * cld * day * 0.30;
+        vec3 cloudNight=vec3(0.09,0.11,0.14) * cld * (1.0-day) * 0.22;
+        vec3 col=mix(n,d,day) + cloudDay + cloudNight;
+        gl_FragColor=vec4(col,1.0);
+      }`;
 
     // ═══════════════════════════════════════════════════════════════
     //  KEPLER + NRHO
@@ -840,13 +862,13 @@
       }
       return new THREE.Line(
         new THREE.BufferGeometry().setFromPoints(pts),
-        new THREE.LineBasicMaterial({ color:0x88bbee, transparent:true, opacity:0.72 })
+        new THREE.LineBasicMaterial({ color:0x5f7590, transparent:true, opacity:0.40 })
       );
     }
 
     // ═══════════════════════════════════════════════════════════════
     //  GATEWAY BUILDERS
-    //  All dimensions at 1× scale; group.scale = GW_SCALE (5×)
+    //  All dimensions at 1× scale; group.scale uses GW_SCALE for visibility
     // ═══════════════════════════════════════════════════════════════
     function makeSolarTex() {
       const c=document.createElement('canvas'); c.width=128; c.height=64;
@@ -972,7 +994,7 @@
       buildHab(gw,'IHAB',  -0.020,0.120,0.064,MODS.IHAB.color);
       buildHab(gw,'USHAB', -0.168,0.120,0.064,MODS.USHAB.color);
       buildAirlock(gw); buildEVR(gw);
-      gw.scale.setScalar(GW_SCALE);  // ← 5× visual scale
+      gw.scale.setScalar(GW_SCALE);
       return gw;
     }
 
@@ -987,7 +1009,7 @@
     const WIKI = 'https://upload.wikimedia.org/wikipedia/commons/';
 
     const [moonTex, dayTex, nightTex, cloudTex, milkyTex, sunTex] = await Promise.all([
-      tryUrls([GH+'moon_1024.jpg', SSS+'2k_moon.jpg',
+      tryUrls([SSS+'2k_moon.jpg', GH+'moon_1024.jpg',
                WIKI+'a/a8/Lunar_surface_%28Clementine%2C_750nm%29.jpg']).then(t => t || makeProceduralMoon()),
       tryUrls([GH+'earth_atmos_2048.jpg', SSS+'2k_earth_daymap.jpg',
                WIKI+'thumb/2/23/Blue_Marble_2002.png/1280px-Blue_Marble_2002.png']).then(t => t || makeProceduralEarth()),
@@ -1009,36 +1031,35 @@
     ));
 
     // ── Stars ─────────────────────────────────────────────────────
-    scene.add(buildStars());
+    const starField = buildStars();
+    scene.add(starField);
 
-    // ── Sun — 3× larger, flooding the scene ───────────────────────
-    const SUN_R = 105;  // was 34 — 3× bigger for visual impact
+    // ── Sun — restrained presentation ─────────────────────────────
+    const SUN_R = 58;
     const sunMesh = new THREE.Mesh(
       new THREE.SphereGeometry(SUN_R,32,32),
       new THREE.MeshBasicMaterial({map:sunTex||null, color:0xffee77})
     );
     sunMesh.position.copy(SUN_POS); scene.add(sunMesh);
-    sunMesh.add(makeAtmo(SUN_R,'#ff9922',4.5,1.8));
+    sunMesh.add(makeAtmo(SUN_R,'#ff9e4d',1.6,2.2));
 
     // Inner super-bright core sprite for bloom target
     const sunCore = new THREE.Mesh(
       new THREE.SphereGeometry(SUN_R*0.4,16,16),
-      new THREE.MeshBasicMaterial({color:0xfffff0, transparent:true, opacity:0.95})
+      new THREE.MeshBasicMaterial({color:0xfffff0, transparent:true, opacity:0.62})
     );
     sunMesh.add(sunCore);
 
-    // Lensflare — larger, more dramatic
-    const fA=gradTex(256,[[0,'rgba(255,240,180,1)'],[0.22,'rgba(255,165,50,0.65)'],[1,'transparent']]);
-    const fB=gradTex(128,[[0,'rgba(175,215,255,0.90)'],[1,'transparent']]);
-    const fC=gradTex(64, [[0,'rgba(255,210,100,0.75)'],[1,'transparent']]);
-    const fD=gradTex(64, [[0,'rgba(255,255,255,0.50)'],[1,'transparent']]);
+    // Lensflare — subtle filmic accent
+    const fA=gradTex(256,[[0,'rgba(255,240,180,0.76)'],[0.24,'rgba(255,170,80,0.36)'],[1,'transparent']]);
+    const fB=gradTex(128,[[0,'rgba(170,205,245,0.38)'],[1,'transparent']]);
+    const fC=gradTex(64, [[0,'rgba(255,210,120,0.30)'],[1,'transparent']]);
+    const fD=gradTex(64, [[0,'rgba(255,255,255,0.20)'],[1,'transparent']]);
     const lf=new Lensflare();
-    lf.addElement(new LensflareElement(fA, 900, 0.00, new THREE.Color(0xffeeaa)));
-    lf.addElement(new LensflareElement(fB, 120, 0.42));
-    lf.addElement(new LensflareElement(fD,  60, 0.56));
-    lf.addElement(new LensflareElement(fC,  80, 0.68));
-    lf.addElement(new LensflareElement(fB,  45, 0.82));
-    lf.addElement(new LensflareElement(fD, 110, 1.00));
+    lf.addElement(new LensflareElement(fA, 380, 0.00, new THREE.Color(0xffeecc)));
+    lf.addElement(new LensflareElement(fB,  70, 0.44));
+    lf.addElement(new LensflareElement(fD,  34, 0.60));
+    lf.addElement(new LensflareElement(fC,  44, 0.74));
     sunMesh.add(lf);
 
     // ── Moon ──────────────────────────────────────────────────────
@@ -1046,22 +1067,12 @@
       new THREE.SphereGeometry(MOON_R,128,64),
       new THREE.MeshStandardMaterial({
         map: moonTex&&moonTex.isTexture ? moonTex : solidTex(0xb2b2b2),
-        roughness:0.93, metalness:0.00,
-        bumpMap: moonTex&&moonTex.isTexture ? moonTex : null, bumpScale:0.18,
+        roughness:0.96, metalness:0.00,
+        bumpMap: moonTex&&moonTex.isTexture ? moonTex : null, bumpScale:0.24,
       })
     );
     moonMesh.receiveShadow=moonMesh.castShadow=true; scene.add(moonMesh);
-    moonMesh.add(makeAtmo(MOON_R,'#ffe8cc',0.12,5.5));
-    // South pole marker — periapsis grazes here
-    const sPole=new THREE.Mesh(new THREE.SphereGeometry(0.12,8,8),
-      new THREE.MeshBasicMaterial({color:0xffcc44}));
-    sPole.position.set(0,-MOON_R,0); moonMesh.add(sPole);
-    // Faint pole ring to show orbital plane intersection
-    const poleRing=new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints(
-        Array.from({length:33},(_,i)=>{const a=(i/32)*Math.PI*2;return new THREE.Vector3(Math.cos(a)*0.4,0,Math.sin(a)*0.4);})),
-      new THREE.LineBasicMaterial({color:0xffcc44,transparent:true,opacity:0.45}));
-    poleRing.position.set(0,-MOON_R,0); moonMesh.add(poleRing);
+    moonMesh.add(makeAtmo(MOON_R,'#efe0cf',0.07,6.2));
 
     // ── Earth (day/night shader) ───────────────────────────────────
     const sunDirE=new THREE.Vector3().subVectors(SUN_POS,EARTH_POS).normalize();
@@ -1076,29 +1087,13 @@
       new THREE.ShaderMaterial({uniforms:earthU, vertexShader:EARTH_VERT, fragmentShader:EARTH_FRAG})
     );
     earthMesh.position.copy(EARTH_POS); earthMesh.rotation.y=2.1; scene.add(earthMesh);
-    earthMesh.add(makeAtmo(EARTH_R,'#1e88ff',0.85,2.8));
-    earthMesh.add(makeAtmo(EARTH_R*1.008,'#aaddff',0.30,7.0));
+    earthMesh.add(makeAtmo(EARTH_R,'#5d97c8',0.24,3.3));
+    earthMesh.add(makeAtmo(EARTH_R*1.008,'#b6d3ec',0.08,8.0));
 
     // ── NRHO orbit path ────────────────────────────────────────────
     setLoad(82, 'Computing NRHO trajectory…');
     scene.add(buildOrbitLine());
-
-    // Faint orbit-plane ghost — helps viewer understand 3D geometry
-    const _slr = SMA_VIS*(1-ECC*ECC); // semi-latus rectum = half-width of orbit
-    const _apo = SMA_VIS*(1+ECC);
-    const _peri= SMA_VIS*(1-ECC);
-    const _ePlaneGeo = new THREE.BufferGeometry().setFromPoints(
-      Array.from({length:3},(_, i) => [
-        new THREE.Vector3(-_slr, 0, 0),    // equatorial crossing west
-        new THREE.Vector3(0, -_peri, 0),   // periapsis (south pole)
-        new THREE.Vector3(_slr, 0, 0),     // equatorial crossing east
-      ][i])
-    );
-    // Thin dashed-look triangle showing lower half of orbit plane
-    scene.add(new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(-_slr, 0, 0), new THREE.Vector3(0,-_peri,0), new THREE.Vector3(_slr,0,0)]),
-      new THREE.LineBasicMaterial({color:0x335566,transparent:true,opacity:0.25})));
+    // Orbit-plane helper removed for cleaner cinematic presentation.
 
     // ── Gateway ───────────────────────────────────────────────────
     setLoad(88, 'Assembling Gateway modules…');
@@ -1133,13 +1128,17 @@
     scene.add(_thrustGlow);
 
     // ═══════════════════════════════════════════════════════════════
-    //  POST-PROCESSING — stronger bloom for sun impact
+    //  POST-PROCESSING — restrained cinematic bloom
     // ═══════════════════════════════════════════════════════════════
     setLoad(93, 'Initializing post-processing…');
     const composer=new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene,camera));
-    // Bloom: stronger strength + larger radius for dramatic sun glow
-    const bloom=new UnrealBloomPass(new THREE.Vector2(window.innerWidth,window.innerHeight), 1.2, 0.70, 0.82);
+    const bloom=new UnrealBloomPass(
+      new THREE.Vector2(window.innerWidth,window.innerHeight),
+      LOOK.bloomStrength,
+      LOOK.bloomRadius,
+      LOOK.bloomThreshold
+    );
     composer.addPass(bloom);
     const smaa=new SMAAPass(window.innerWidth*renderer.getPixelRatio(), window.innerHeight*renderer.getPixelRatio());
     composer.addPass(smaa);
@@ -1381,6 +1380,8 @@
       _thrustGlow.intensity=_tAlt<12000?1.1*Math.pow(Math.max(0,1-_tAlt/12000),2):0;
 
       updateHUD(gwPos);
+      // Keep starfield effectively at infinity: no translation parallax.
+      starField.position.copy(camera.position);
       controls.update();
       try { composer.render(); } catch(re) { console.error('[render]', re); }
     })();
@@ -1414,3 +1415,4 @@
   </script>
 </body>
 </html>
+
