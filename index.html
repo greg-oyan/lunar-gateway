@@ -28,6 +28,119 @@
                  box-shadow:0 0 10px rgba(90,173,255,0.6); }
     .ld-msg    { font:11px/1 'Courier New',monospace; letter-spacing:2px; color:#4a85a8; text-transform:uppercase; margin-top:14px; min-height:12px; }
 
+    /* Launch screen */
+    #launch {
+      position: fixed;
+      inset: 0;
+      z-index: 1200;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(1000px 620px at 50% -10%, rgba(72, 128, 182, 0.16), transparent 62%),
+        linear-gradient(180deg, rgba(2, 8, 18, 0.96), rgba(1, 4, 10, 0.99));
+      backdrop-filter: blur(6px);
+      transition: opacity 0.45s ease, visibility 0.45s ease;
+    }
+    #launch.out {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    #launch .launch-card {
+      width: min(760px, 100%);
+      background: rgba(0, 8, 22, 0.90);
+      border: 1px solid #17324e;
+      border-left: 3px solid #2d6d95;
+      box-shadow: 0 20px 70px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(96, 166, 216, 0.10);
+      backdrop-filter: blur(14px);
+      color: #76a9cc;
+      font: 12px/1.55 'Courier New', monospace;
+      letter-spacing: 1px;
+      padding: 24px;
+    }
+    #launch .launch-title {
+      color: #beddff;
+      font-size: 22px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+    #launch .launch-sub {
+      margin-top: 6px;
+      color: #4c7ea5;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    #launch .launch-actions {
+      margin-top: 18px;
+      display: flex;
+      gap: 10px;
+    }
+    #launch button {
+      appearance: none;
+      border: 1px solid #2b5e84;
+      background: rgba(8, 24, 44, 0.92);
+      color: #8cc6e8;
+      font: 11px/1 'Courier New', monospace;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+    #launch button:hover {
+      background: rgba(12, 34, 66, 0.95);
+      border-color: #4a8dbb;
+      color: #bee6ff;
+    }
+    #launch .launch-grid {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    #launch .launch-block {
+      border: 1px solid #102740;
+      background: rgba(0, 6, 16, 0.55);
+      padding: 10px 12px;
+    }
+    #launch .launch-label {
+      color: #3d6889;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    #launch .launch-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    #launch .launch-list li {
+      margin: 3px 0;
+    }
+    #launch select {
+      width: 100%;
+      background: #061327;
+      border: 1px solid #1e4363;
+      color: #84bddd;
+      padding: 8px 10px;
+      font: 11px/1 'Courier New', monospace;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    #launch .launch-status {
+      margin-top: 12px;
+      color: #5d8caf;
+      font-size: 11px;
+    }
+    @media (max-width: 760px) {
+      #launch .launch-grid { grid-template-columns: 1fr; }
+      #launch .launch-actions { flex-direction: column; }
+      #launch button { width: 100%; }
+    }
+
     /* ═══ HUD ══════════════════════════════════════════════════════ */
     #hud {
       position: fixed; top: 20px; left: 20px;
@@ -141,6 +254,42 @@
 </head>
 <body>
 
+  <div id="launch">
+    <div class="launch-card" role="dialog" aria-modal="true" aria-labelledby="launch-title">
+      <div class="launch-title" id="launch-title">Lunar Gateway — Mission Demo</div>
+      <div class="launch-sub">DSG-RQMT-001 · Preflight Console</div>
+
+      <div class="launch-actions">
+        <button id="launch-start" type="button">Start Demo</button>
+        <button id="launch-tour" type="button">Tour Mode (90s)</button>
+      </div>
+
+      <div class="launch-grid">
+        <section class="launch-block" aria-labelledby="launch-controls">
+          <div class="launch-label" id="launch-controls">Controls</div>
+          <ul class="launch-list">
+            <li><strong>Space</strong> Pause/Resume</li>
+            <li><strong>O / G / M / F</strong> Camera presets</li>
+            <li><strong>0–4</strong> Time scale</li>
+            <li><strong>Esc</strong> Close module info</li>
+          </ul>
+        </section>
+
+        <section class="launch-block" aria-labelledby="launch-perf">
+          <div class="launch-label" id="launch-perf">Performance</div>
+          <select id="launch-performance" aria-label="Performance profile">
+            <option value="auto" selected>Auto</option>
+            <option value="high">High</option>
+            <option value="balanced">Balanced</option>
+            <option value="safe">Safe</option>
+          </select>
+        </section>
+      </div>
+
+      <div class="launch-status" id="launch-webgl-status">WebGL: checking...</div>
+    </div>
+  </div>
+
   <!-- Loading -->
   <div id="loading">
     <div class="ld-agency">National Aeronautics and Space Administration</div>
@@ -229,13 +378,19 @@
     window.addEventListener('error',function(ev){
       if(ev.error) showErr((ev.error.message||ev.message||'Script error')+' \u2014 open F12 console for details.');
     });
-    // If the loading message hasn't changed after 14 s the CDN is unreachable
-    setTimeout(function(){
-      var el=document.getElementById('ld-msg');
-      if(el&&el.textContent.indexOf('\u26a0')===-1&&el.textContent.indexOf('Fetching')===-1){
-        showErr('Three.js CDN unreachable \u2014 internet access required. Try Chrome or Edge.');
-      }
-    },14000);
+    // Deferred CDN watchdog: start only after user launches demo
+    var _cdnWatchdogStarted=false;
+    window.__startCdnWatchdog=function(){
+      if(_cdnWatchdogStarted) return;
+      _cdnWatchdogStarted=true;
+      setTimeout(function(){
+        var el=document.getElementById('ld-msg');
+        if(!el) return;
+        if(el.textContent.indexOf('\u26a0')===-1&&el.textContent.indexOf('Fetching')===-1){
+          showErr('Three.js CDN unreachable \u2014 internet access required. Try Chrome or Edge.');
+        }
+      },14000);
+    };
   })();
   </script>
 
@@ -261,6 +416,22 @@
     // ═══════════════════════════════════════════════════════════════
     //  SCENE & ORBITAL CONSTANTS
     // ═══════════════════════════════════════════════════════════════
+    window.__TOUR_MODE__ = false;
+    let _simStarted = false;
+
+    const launchEl = document.getElementById('launch');
+    const launchStartBtn = document.getElementById('launch-start');
+    const launchTourBtn = document.getElementById('launch-tour');
+    const launchWebglStatus = document.getElementById('launch-webgl-status');
+
+    (function checkWebGL() {
+      const c = document.createElement('canvas');
+      const ok = !!(c.getContext('webgl2') || c.getContext('webgl') || c.getContext('experimental-webgl'));
+      if (launchWebglStatus) launchWebglStatus.textContent = ok ? 'WebGL: OK' : 'WebGL: unavailable';
+    })();
+
+    async function initSimulation() {
+
     const MOON_R    = 5;
     const EARTH_R   = MOON_R * 3.674;
     const SUN_POS   = new THREE.Vector3(2200, 340, 900);
@@ -1220,6 +1391,25 @@
       ldMsg.style.fontSize = '11px';
       console.error('[LunarGateway init]', initErr);
     }
+
+    }
+
+    function startFromLaunch(isTour) {
+      if (_simStarted) return;
+      _simStarted = true;
+
+      window.__TOUR_MODE__ = !!isTour;
+      if (window.__startCdnWatchdog) window.__startCdnWatchdog();
+
+      if (launchEl) launchEl.classList.add('out');
+      setTimeout(() => {
+        if (launchEl) launchEl.remove();
+        initSimulation();
+      }, 420);
+    }
+
+    if (launchStartBtn) launchStartBtn.addEventListener('click', () => startFromLaunch(false));
+    if (launchTourBtn) launchTourBtn.addEventListener('click', () => startFromLaunch(true));
 
   </script>
 </body>

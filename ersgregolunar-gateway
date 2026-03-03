@@ -1,0 +1,173 @@
+warning: in the working copy of 'index.html', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/index.html b/index.html[m
+[1mindex 40ece16..11cb4c1 100644[m
+[1m--- a/index.html[m
+[1m+++ b/index.html[m
+[36m@@ -28,6 +28,119 @@[m
+                  box-shadow:0 0 10px rgba(90,173,255,0.6); }[m
+     .ld-msg    { font:11px/1 'Courier New',monospace; letter-spacing:2px; color:#4a85a8; text-transform:uppercase; margin-top:14px; min-height:12px; }[m
+ [m
+[32m+[m[32m    /* Launch screen */[m
+[32m+[m[32m    #launch {[m
+[32m+[m[32m      position: fixed;[m
+[32m+[m[32m      inset: 0;[m
+[32m+[m[32m      z-index: 1200;[m
+[32m+[m[32m      display: grid;[m
+[32m+[m[32m      place-items: center;[m
+[32m+[m[32m      padding: 24px;[m
+[32m+[m[32m      background:[m
+[32m+[m[32m        radial-gradient(1000px 620px at 50% -10%, rgba(72, 128, 182, 0.16), transparent 62%),[m
+[32m+[m[32m        linear-gradient(180deg, rgba(2, 8, 18, 0.96), rgba(1, 4, 10, 0.99));[m
+[32m+[m[32m      backdrop-filter: blur(6px);[m
+[32m+[m[32m      transition: opacity 0.45s ease, visibility 0.45s ease;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    #launch.out {[m
+[32m+[m[32m      opacity: 0;[m
+[32m+[m[32m      visibility: hidden;[m
+[32m+[m[32m      pointer-events: none;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    #launch .launch-card {[m
+[32m+[m[32m      width: min(760px, 100%);[m
+[32m+[m[32m      background: rgba(0, 8, 22, 0.90);[m
+[32m+[m[32m      border: 1px solid #17324e;[m
+[32m+[m[32m      border-left: 3px solid #2d6d95;[m
+[32m+[m[32m      box-shadow: 0 20px 70px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(96, 166, 216, 0.10);[m
+[32m+[m[32m      backdrop-filter: blur(14px);[m
+[32m+[m[32m      color: #76a9cc;[m
+[32m+[m[32m      font: 12px/1.55 'Courier New', monospace;[m
+[32m+[m[32m      letter-spacing: 1px;[m
+[32m+[m[32m      padding: 24px;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    #launch .launch-title {[m
+[32m+[m[32m      color: #beddff;[m
+[32m+[m[32m      font-size: 22px;[m
+[32m+[m[32m      letter-spacing: 3px;[m
+[32m+[m[32m      text-transform: uppercase;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    #launch .launch-sub {[m
+[32m+[m[32m      margin-top: 6px;[m
+[32m+[m[32m      color: #4c7ea5;[m
+[32m+[m[32m      font-size: 11px;[m
+[32m+[m[32m      letter-spacing: 2px;[m
+[32m+[m[32m      text-transform: uppercase;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    #launch .launch-actions {[m
+[32m+[m[32m      margin-top: 18px;[m
+[32m+[m[32m      display: flex;[m
+[32m+[m[32m      gap: 10px;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    #launch button {[m
+[32m+[m[32m      appearance: none;[m
+[32m+[m[32m      border: 1px solid #2b5e84;[m
+[32m+[m[32m      background: rgba(8, 24, 44, 0.92);[m
+[32m+[m[32m      color: #8cc6e8;[m
+[32m+[m[32m      font: 11px/1 'Courier New', monospace;[m
+[32m+[m[32m      letter-spacing: 1.5px;[m
+[32m+[m[32m      text-transform: uppercase;[m
+[32m+[m[32m      padding: 10px 14px;[m
+[32m+[m[32m      cursor: pointer;[m
+[32m+[m[32m      transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    #launch button:hover {[m
+[32m+[m[32m      background: rgba(12, 34, 66, 0.95);[m
+[32m+[m[32m      border-color: #4a8dbb;[m
+[32m+[m[32m      color: #bee6ff;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    #launch .launch-grid {[m
+[32m+[m[32m      margin-top: 16px;[m
+[32m+[m[32m      display: grid;[m
+[32m+[m[32m      grid-template-columns: 1fr 1fr;[m
+[32m+[m[32m      gap: 12px;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    #launch .launch-block {[m
+[32m+[m[32m      border: 1px solid #102740;[m
+[32m+[m[32m      background: rgba(0, 6, 16, 0.55);[m
+[32m+[m[32m      padding: 10px 12px;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    #launch .launch-label {[m
+[32m+[m[32m      color: #3d6889;[m
+[32m+[m[32m      font-size: 10px;[m
+[32m+[m[32m      letter-spacing: 2px;[m
+[32m+[m[32m      text-transform: uppercase;[m
+[32m+[m[32m      margin-bottom: 8px;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    #launch .launch-list {[m
+[32m+[m[32m      list-style: none;[m
+[32m+[m[32m      margin: 0;[m
+[32m+[m[32m      padding: 0;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    #launch .launch-list li {[m
+[32m+[m[32m      margin: 3px 0;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    #launch select {[m
+[32m+[m[32m      width: 100%;[m
+[32m+[m[32m      background: #061327;[m
+[32m+[m[32m      border: 1px solid #1e4363;[m
+[32m+[m[32m      color: #84bddd;[m
+[32m+[m[32m      padding: 8px 10px;[m
+[32m+[m[32m      font: 11px/1 'Courier New', monospace;[m
+[32m+[m[32m      letter-spacing: 1px;[m
+[32m+[m[32m      text-transform: uppercase;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    #launch .launch-status {[m
+[32m+[m[32m      margin-top: 12px;[m
+[32m+[m[32m      color: #5d8caf;[m
+[32m+[m[32m      font-size: 11px;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    @media (max-width: 760px) {[m
+[32m+[m[32m      #launch .launch-grid { grid-template-columns: 1fr; }[m
+[32m+[m[32m      #launch .launch-actions { flex-direction: column; }[m
+[32m+[m[32m      #launch button { width: 100%; }[m
+[32m+[m[32m    }[m
+[32m+[m
+     /* ═══ HUD ══════════════════════════════════════════════════════ */[m
+     #hud {[m
+       position: fixed; top: 20px; left: 20px;[m
+[36m@@ -141,6 +254,42 @@[m
+ </head>[m
+ <body>[m
+ [m
+[32m+[m[32m  <div id="launch">[m
+[32m+[m[32m    <div class="launch-card" role="dialog" aria-modal="true" aria-labelledby="launch-title">[m
+[32m+[m[32m      <div class="launch-title" id="launch-title">Lunar Gateway — Mission Demo</div>[m
+[32m+[m[32m      <div class="launch-sub">DSG-RQMT-001 · Preflight Console</div>[m
+[32m+[m
+[32m+[m[32m      <div class="launch-actions">[m
+[32m+[m[32m        <button id="launch-start" type="button">Start Demo</button>[m
+[32m+[m[32m        <button id="launch-tour" type="button">Tour Mode (90s)</button>[m
+[32m+[m[32m      </div>[m
+[32m+[m
+[32m+[m[32m      <div class="launch-grid">[m
+[32m+[m[32m        <section class="launch-block" aria-labelledby="launch-controls">[m
+[32m+[m[32m          <div class="launch-label" id="launch-controls">Controls</div>[m
+[32m+[m[32m          <ul class="launch-list">[m
+[32m+[m[32m            <li><strong>Space</strong> Pause/Resume</li>[m
+[32m+[m[32m            <li><strong>O / G / M / F</strong> Camera presets</li>[m
+[32m+[m[32m            <li><strong>0–4</strong> Time scale</li>[m
+[32m+[m[32m            <li><strong>Esc</strong> Close module info</li>[m
+[32m+[m[32m          </ul>[m
+[32m+[m[32m        </section>[m
+[32m+[m
+[32m+[m[32m        <section class="launch-block" aria-labelledby="launch-perf">[m
+[32m+[m[32m          <div class="launch-label" id="launch-perf">Performance</div>[m
+[32m+[m[32m          <select id="launch-performance" aria-label="Performance profile">[m
+[32m+[m[32m            <option value="auto" selected>Auto</option>[m
+[32m+[m[32m            <option value="high">High</option>[m
+[32m+[m[32m            <option value="balanced">Balanced</option>[m
+[32m+[m[32m            <option value="safe">Safe</option>[m
+[32m+[m[32m          </select>[m
+[32m+[m[32m        </section>[m
+[32m+[m[32m      </div>[m
+[32m+[m
+[32m+[m[32m      <div class="launch-status" id="launch-webgl-status">WebGL: checking...</div>[m
+[32m+[m[32m    </div>[m
+[32m+[m[32m  </div>[m
+[32m+[m
+   <!-- Loading -->[m
+   <div id="loading">[m
+     <div class="ld-agency">National Aeronautics and Space Administration</div>[m
+[36m@@ -229,13 +378,19 @@[m
+     window.addEventListener('error',function(ev){[m
+       if(ev.error) showErr((ev.error.message||ev.message||'Script error')+' \u2014 open F12 console for details.');[m
+     });[m
+[31m-    // If the lo
