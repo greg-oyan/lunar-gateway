@@ -595,6 +595,29 @@
       });
     }
 
+    async function loadTexture(url) {
+      return new Promise((resolve, reject) => {
+        new THREE.TextureLoader().load(url, resolve, undefined, reject);
+      });
+    }
+
+    async function loadTextureLocalhostReload(url) {
+      const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+      if (!isLocal) return await loadTexture(url);
+
+      const res = await fetch(url, { cache: 'reload' });
+      if (!res.ok) throw new Error('fetch failed ' + res.status + ' for ' + url);
+      const blob = await res.blob();
+      const objUrl = URL.createObjectURL(blob);
+
+      try {
+        const tex = await loadTexture(objUrl);
+        return tex;
+      } finally {
+        URL.revokeObjectURL(objUrl);
+      }
+    }
+
     function solidTex(hex) {
       const c = new THREE.Color(hex);
       const t = new THREE.DataTexture(new Uint8Array([c.r*255,c.g*255,c.b*255,255]), 1, 1);
@@ -1063,12 +1086,12 @@
     const SSS  = 'https://www.solarsystemscope.com/textures/download/';
     const GH   = 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/';
     const WIKI = 'https://upload.wikimedia.org/wikipedia/commons/';
+    const earthUrl = GH+'earth_atmos_2048.jpg';
 
     const [moonTex, dayTex, nightTex, cloudTex, milkyTex, sunTex] = await Promise.all([
       tryUrls([SSS+'2k_moon.jpg', GH+'moon_1024.jpg',
                WIKI+'a/a8/Lunar_surface_%28Clementine%2C_750nm%29.jpg']).then(t => t || makeProceduralMoon()),
-      tryUrls([GH+'earth_atmos_2048.jpg', SSS+'2k_earth_daymap.jpg',
-               WIKI+'thumb/2/23/Blue_Marble_2002.png/1280px-Blue_Marble_2002.png']).then(t => t || makeProceduralEarth()),
+      loadTextureLocalhostReload(earthUrl).catch(() => makeProceduralEarth()),
       tryUrls([GH+'earth_lights_2048.png', SSS+'2k_earth_nightmap.jpg']).then(t => t || makeProceduralEarthNight()),
       tryUrls([SSS+'2k_earth_clouds.jpg']).then(t => t || makeProceduralClouds()),
       tryUrls([SSS+'2k_stars_milky_way.jpg']),   // null = OK, procedural stars cover it
