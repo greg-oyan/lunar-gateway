@@ -764,47 +764,85 @@
     //  STAR FIELD  — stable, large enough to avoid sub-pixel flicker
     // ═══════════════════════════════════════════════════════════════
     function buildStars() {
-      const N=46000, pos=new Float32Array(N*3), col=new Float32Array(N*3), sz=new Float32Array(N);
-      for (let i=0;i<N;i++) {
-        const u=Math.random(), v=Math.random();
-        const th=2*Math.PI*u, ph=Math.acos(2*v-1), r=5200+Math.random()*1000;
-        pos[i*3]=r*Math.sin(ph)*Math.cos(th); pos[i*3+1]=r*Math.sin(ph)*Math.sin(th); pos[i*3+2]=r*Math.cos(ph);
-        // Magnitude-like distribution: many dim stars, very few bright.
-        const m = Math.pow(Math.random(), 2.8);
-        const lum = 0.22 + m * 1.00;
-        const t=Math.random();
-        let cr=0.93, cg=0.93, cb=0.93; // neutral
-        if (t < 0.14)      { cr=0.84; cg=0.88; cb=0.96; } // cool
-        else if (t > 0.86) { cr=0.98; cg=0.92; cb=0.84; } // warm
-        col[i*3]   = cr * lum;
-        col[i*3+1] = cg * lum;
-        col[i*3+2] = cb * lum;
-        sz[i] = 0.95 + m * 0.46;
+      const RADIUS = 5000;
+      const group = new THREE.Group();
+
+      function makePositions(count, radius) {
+        const pos = new Float32Array(count * 3);
+        for (let i = 0; i < count; i++) {
+          const u = Math.random() * 2 - 1;
+          const a = Math.random() * Math.PI * 2;
+          const s = Math.sqrt(1 - u * u);
+          const r = radius * Math.cbrt(Math.random());
+          pos[i * 3] = r * s * Math.cos(a);
+          pos[i * 3 + 1] = r * s * Math.sin(a);
+          pos[i * 3 + 2] = r * u;
+        }
+        return pos;
       }
-      const geo=new THREE.BufferGeometry();
-      geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
-      geo.setAttribute('color',   new THREE.BufferAttribute(col,3));
-      const mat = new THREE.ShaderMaterial({
-        uniforms: {},
-        vertexShader: `
-          attribute float size; attribute vec3 color; varying vec3 vCol; varying float vA;
-          void main(){vCol=color;
-            vA=clamp((color.r+color.g+color.b)/3.0, 0.18, 1.0);
-            gl_PointSize=size;
-            gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);
-          }`,
-        fragmentShader: `
-          varying vec3 vCol; varying float vA;
-          void main(){
-            float d=length(gl_PointCoord-0.5)*2.0;
-            if(d>1.0) discard;
-            float soft = smoothstep(1.0, 0.0, d);
-            gl_FragColor=vec4(vCol, vA*soft*0.62);
-          }`,
-        transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false,
+
+      function makeTintColors(count, subtle) {
+        const col = new Float32Array(count * 3);
+        for (let i = 0; i < count; i++) {
+          const warm = Math.random() > 0.5;
+          const t = subtle ? 0.06 : 0.10;
+          let r = 1.0, g = 1.0, b = 1.0;
+          if (warm) {
+            r = 1.0;
+            g = 0.96 + Math.random() * t;
+            b = 0.90 + Math.random() * t;
+          } else {
+            r = 0.90 + Math.random() * t;
+            g = 0.95 + Math.random() * t;
+            b = 1.0;
+          }
+          col[i * 3] = Math.min(1.0, r);
+          col[i * 3 + 1] = Math.min(1.0, g);
+          col[i * 3 + 2] = Math.min(1.0, b);
+        }
+        return col;
+      }
+
+      const g1 = new THREE.BufferGeometry();
+      g1.setAttribute('position', new THREE.BufferAttribute(makePositions(70000, RADIUS), 3));
+      const m1 = new THREE.PointsMaterial({
+        color: 0xffffff,
+        size: 0.6,
+        transparent: true,
+        opacity: 0.18,
+        toneMapped: false,
+        depthWrite: false
       });
-      geo.setAttribute('size', new THREE.BufferAttribute(sz,1));
-      return new THREE.Points(geo, mat);
+      group.add(new THREE.Points(g1, m1));
+
+      const g2 = new THREE.BufferGeometry();
+      g2.setAttribute('position', new THREE.BufferAttribute(makePositions(8000, RADIUS), 3));
+      g2.setAttribute('color', new THREE.BufferAttribute(makeTintColors(8000, true), 3));
+      const m2 = new THREE.PointsMaterial({
+        size: 1.2,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.36,
+        toneMapped: false,
+        depthWrite: false
+      });
+      group.add(new THREE.Points(g2, m2));
+
+      const g3 = new THREE.BufferGeometry();
+      g3.setAttribute('position', new THREE.BufferAttribute(makePositions(400, RADIUS), 3));
+      g3.setAttribute('color', new THREE.BufferAttribute(makeTintColors(400, false), 3));
+      const m3 = new THREE.PointsMaterial({
+        size: 2.5,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.72,
+        blending: THREE.AdditiveBlending,
+        toneMapped: false,
+        depthWrite: false
+      });
+      group.add(new THREE.Points(g3, m3));
+
+      return group;
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -1111,6 +1149,30 @@
     earthMesh.position.copy(EARTH_POS); earthMesh.rotation.y=2.1; scene.add(earthMesh);
     earthMesh.add(makeAtmo(EARTH_R,'#5d97c8',0.24,3.3));
     earthMesh.add(makeAtmo(EARTH_R*1.008,'#b6d3ec',0.08,8.0));
+
+    let skySphere = null;
+    const skyLoader = new THREE.TextureLoader();
+    skyLoader.load(
+      'https://www.spacespheremaps.com/wp-content/uploads/plain_starfield_1.png',
+      (skyTex) => {
+        skyTex.colorSpace = THREE.SRGBColorSpace;
+
+        skySphere = new THREE.Mesh(
+          new THREE.SphereGeometry(20000, 64, 32),
+          new THREE.MeshBasicMaterial({
+            map: skyTex,
+            side: THREE.BackSide,
+            toneMapped: false,
+            depthWrite: false
+          })
+        );
+
+        skySphere.frustumCulled = false;
+        scene.add(skySphere);
+      },
+      undefined,
+      () => {}
+    );
 
     // ── NRHO orbit path ────────────────────────────────────────────
     setLoad(82, 'Computing NRHO trajectory…');
@@ -1485,6 +1547,7 @@
       updateHUD(gwPos);
       // Keep starfield effectively at infinity: no translation parallax.
       starField.position.copy(camera.position);
+      if (skySphere) skySphere.position.copy(camera.position);
       controls.update();
       try { composer.render(); } catch(re) { console.error('[render]', re); }
     })();
