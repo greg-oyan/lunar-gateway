@@ -270,7 +270,7 @@
           <div class="launch-label" id="launch-controls">Controls</div>
           <ul class="launch-list">
             <li><strong>Space</strong> Pause/Resume</li>
-            <li><strong>O / G / M / F</strong> Camera presets</li>
+            <li><strong>O / G / M / E / F</strong> Camera presets</li>
             <li><strong>0–4</strong> Time scale</li>
             <li><strong>Esc</strong> Close module info</li>
           </ul>
@@ -330,6 +330,7 @@
       <button id="cam-orbit">⊹ ORBIT VIEW</button>
       <button id="cam-gw">⊕ GATEWAY</button>
       <button id="cam-moon">◎ MOON</button>
+      <button id="cam-earth">◉ EARTH</button>
     </div>
   </div>
 
@@ -350,7 +351,7 @@
   </div>
 
   <div class="corner" id="cr">Textures: NASA · Three.js · Wikimedia · Procedural<br>DSG-RQMT-001 Simulation</div>
-  <div class="corner" id="ht">Left drag · rotate &nbsp; Right drag · pan<br>Scroll · zoom &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Click module · specs<br>[O] Orbit &nbsp;[G] Gateway &nbsp;[M] Moon &nbsp;[Space] Pause</div>
+  <div class="corner" id="ht">Left drag · rotate &nbsp; Right drag · pan<br>Scroll · zoom &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Click module · specs<br>[O] Orbit &nbsp;[G] Gateway &nbsp;[M] Moon &nbsp;[E] Earth &nbsp;[Space] Pause</div>
   <div id="tooltip"></div>
   <div class="corner" id="oleg"><span class="oleg-sw"></span>NRHO Polar Orbit — Periapsis 1,000 km above south pole<br>Apoapsis 70,000 km · Eccentricity 0.93 · Period 6.56 days</div>
 
@@ -493,9 +494,9 @@
     // ═══════════════════════════════════════════════════════════════
     const LOOK = Object.freeze({
       exposure: 0.84,
-      bloomStrength: 0.32,
-      bloomRadius: 0.28,
-      bloomThreshold: 0.95,
+      bloomStrength: 0.38,
+      bloomRadius: 0.30,
+      bloomThreshold: 0.94,
     });
 
     const renderer = new THREE.WebGLRenderer({ antialias:false, powerPreference:'high-performance' });
@@ -527,10 +528,10 @@
     // ═══════════════════════════════════════════════════════════════
     //  LIGHTING
     // ═══════════════════════════════════════════════════════════════
-    scene.add(new THREE.AmbientLight(0x090f1a, 0.18));
-    scene.add(new THREE.HemisphereLight(0x24364a, 0x05070c, 0.16));
+    scene.add(new THREE.AmbientLight(0x090f1a, 0.08));
+    scene.add(new THREE.HemisphereLight(0x24364a, 0x05070c, 0.10));
 
-    const sunLight = new THREE.DirectionalLight(0xfff4de, 3.3);
+    const sunLight = new THREE.DirectionalLight(0xfff4de, 3.6);
     sunLight.position.copy(SUN_POS);
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.set(3072, 3072);
@@ -541,9 +542,14 @@
     ssc.updateProjectionMatrix();
     scene.add(sunLight);
 
-    const earthLight = new THREE.PointLight(0x5f86b0, 0.08, 620);
+    const earthLight = new THREE.PointLight(0x6b90b8, 0.13, 720);
     earthLight.position.copy(EARTH_POS);
     scene.add(earthLight);
+
+    // Subtle earthshine-style rim contribution for Moon nightside readability.
+    const moonRimLight = new THREE.DirectionalLight(0x7ea2c8, 0.18);
+    moonRimLight.position.copy(EARTH_POS.clone().normalize().multiplyScalar(1800));
+    scene.add(moonRimLight);
 
     // Moving fill light for Gateway visibility in shadow
     const gwLight = new THREE.PointLight(0xfff0dc, 0.07, 6);
@@ -765,7 +771,7 @@
         pos[i*3]=r*Math.sin(ph)*Math.cos(th); pos[i*3+1]=r*Math.sin(ph)*Math.sin(th); pos[i*3+2]=r*Math.cos(ph);
         // Magnitude-like distribution: many dim stars, very few bright.
         const m = Math.pow(Math.random(), 2.8);
-        const lum = 0.16 + m * 0.98;
+        const lum = 0.22 + m * 1.00;
         const t=Math.random();
         let cr=0.93, cg=0.93, cb=0.93; // neutral
         if (t < 0.14)      { cr=0.84; cg=0.88; cb=0.96; } // cool
@@ -773,7 +779,7 @@
         col[i*3]   = cr * lum;
         col[i*3+1] = cg * lum;
         col[i*3+2] = cb * lum;
-        sz[i] = 1.00 + m * 0.72;
+        sz[i] = 0.95 + m * 0.46;
       }
       const geo=new THREE.BufferGeometry();
       geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
@@ -783,7 +789,7 @@
         vertexShader: `
           attribute float size; attribute vec3 color; varying vec3 vCol; varying float vA;
           void main(){vCol=color;
-            vA=clamp((color.r+color.g+color.b)/3.0, 0.12, 1.0);
+            vA=clamp((color.r+color.g+color.b)/3.0, 0.18, 1.0);
             gl_PointSize=size;
             gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);
           }`,
@@ -793,9 +799,9 @@
             float d=length(gl_PointCoord-0.5)*2.0;
             if(d>1.0) discard;
             float soft = smoothstep(1.0, 0.0, d);
-            gl_FragColor=vec4(vCol, vA*soft*0.82);
+            gl_FragColor=vec4(vCol, vA*soft*0.62);
           }`,
-        transparent:true, blending:THREE.NormalBlending, depthWrite:false, toneMapped:false,
+        transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false,
       });
       geo.setAttribute('size', new THREE.BufferAttribute(sz,1));
       return new THREE.Points(geo, mat);
@@ -1031,32 +1037,52 @@
     scene.add(starField);
 
     // ── Sun — restrained presentation ─────────────────────────────
-    const SUN_R = 58;
+    const SUN_R = 66;
     const sunMesh = new THREE.Mesh(
       new THREE.SphereGeometry(SUN_R,32,32),
       new THREE.MeshBasicMaterial({map:sunTex||null, color:0xffee77})
     );
     sunMesh.position.copy(SUN_POS); scene.add(sunMesh);
-    sunMesh.add(makeAtmo(SUN_R,'#ff9e4d',1.6,2.2));
+    sunMesh.add(makeAtmo(SUN_R,'#ff9e4d',2.2,2.1));
 
     // Inner super-bright core sprite for bloom target
     const sunCore = new THREE.Mesh(
       new THREE.SphereGeometry(SUN_R*0.4,16,16),
-      new THREE.MeshBasicMaterial({color:0xfffff0, transparent:true, opacity:0.62})
+      new THREE.MeshBasicMaterial({color:0xfffff0, transparent:true, opacity:0.80})
     );
     sunMesh.add(sunCore);
 
     // Lensflare — subtle filmic accent
-    const fA=gradTex(256,[[0,'rgba(255,240,180,0.76)'],[0.24,'rgba(255,170,80,0.36)'],[1,'transparent']]);
-    const fB=gradTex(128,[[0,'rgba(170,205,245,0.38)'],[1,'transparent']]);
-    const fC=gradTex(64, [[0,'rgba(255,210,120,0.30)'],[1,'transparent']]);
-    const fD=gradTex(64, [[0,'rgba(255,255,255,0.20)'],[1,'transparent']]);
+    const fA=gradTex(256,[[0,'rgba(255,240,180,0.84)'],[0.24,'rgba(255,170,80,0.42)'],[1,'transparent']]);
+    const fB=gradTex(128,[[0,'rgba(170,205,245,0.44)'],[1,'transparent']]);
+    const fC=gradTex(64, [[0,'rgba(255,210,120,0.34)'],[1,'transparent']]);
+    const fD=gradTex(64, [[0,'rgba(255,255,255,0.24)'],[1,'transparent']]);
     const lf=new Lensflare();
-    lf.addElement(new LensflareElement(fA, 380, 0.00, new THREE.Color(0xffeecc)));
-    lf.addElement(new LensflareElement(fB,  70, 0.44));
-    lf.addElement(new LensflareElement(fD,  34, 0.60));
-    lf.addElement(new LensflareElement(fC,  44, 0.74));
+    lf.addElement(new LensflareElement(fA, 440, 0.00, new THREE.Color(0xffeecc)));
+    lf.addElement(new LensflareElement(fB,  86, 0.44));
+    lf.addElement(new LensflareElement(fD,  40, 0.60));
+    lf.addElement(new LensflareElement(fC,  52, 0.74));
     sunMesh.add(lf);
+
+    // Subtle anamorphic-like streak near sun core (cheap procedural sprite).
+    const flareCanvas=document.createElement('canvas');
+    flareCanvas.width=512; flareCanvas.height=48;
+    const flareCtx=flareCanvas.getContext('2d');
+    const flareGrad=flareCtx.createLinearGradient(0,24,512,24);
+    flareGrad.addColorStop(0.0,'rgba(0,0,0,0)');
+    flareGrad.addColorStop(0.40,'rgba(255,210,150,0.0)');
+    flareGrad.addColorStop(0.50,'rgba(255,238,205,0.72)');
+    flareGrad.addColorStop(0.60,'rgba(255,210,150,0.0)');
+    flareGrad.addColorStop(1.0,'rgba(0,0,0,0)');
+    flareCtx.fillStyle=flareGrad;
+    flareCtx.fillRect(0,0,512,48);
+    const flareTex=new THREE.CanvasTexture(flareCanvas);
+    const sunStreak=new THREE.Sprite(new THREE.SpriteMaterial({
+      map:flareTex, color:0xffedcf, transparent:true, opacity:0.34,
+      blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false
+    }));
+    sunStreak.scale.set(320,22,1);
+    sunMesh.add(sunStreak);
 
     // ── Moon ──────────────────────────────────────────────────────
     const moonMesh = new THREE.Mesh(
@@ -1068,7 +1094,7 @@
       })
     );
     moonMesh.receiveShadow=moonMesh.castShadow=true; scene.add(moonMesh);
-    moonMesh.add(makeAtmo(MOON_R,'#efe0cf',0.07,6.2));
+    moonMesh.add(makeAtmo(MOON_R,'#efe0cf',0.10,6.0));
 
     // ── Earth (day/night shader) ───────────────────────────────────
     const sunDirE=new THREE.Vector3().subVectors(SUN_POS,EARTH_POS).normalize();
@@ -1171,7 +1197,7 @@
       document.getElementById('info').classList.add('show');
       let found=false; const wp=new THREE.Vector3();
       gatewayGroup.traverse(c=>{ if(!found&&c.isMesh&&c.userData.moduleKey===key){ c.getWorldPosition(wp); found=true; } });
-      if(found) { followGateway=false; startLerp(wp, 3.0); }
+      if(found) { followGateway=false; followEarth=false; startLerp(wp, 3.0); }
     }
 
     renderer.domElement.addEventListener('mousedown', e=>{mDown={x:e.clientX,y:e.clientY};dragged=false;});
@@ -1210,6 +1236,7 @@
     // ═══════════════════════════════════════════════════════════════
     let lerp=null;
     let followGateway=false;
+    let followEarth=false;
     let tourActive=false;
     let tourTimer=null;
     function startLerp(target, minDist=null) {
@@ -1235,6 +1262,7 @@
     });
     document.getElementById('focus-gw').addEventListener('click',()=>{
       if(tourActive) return;
+      followEarth=false;
       startLerp(gatewayGroup.position.clone(), 3.5);
       followGateway=true;
     });
@@ -1258,6 +1286,7 @@
     function startTourMode() {
       stopTourMode();
       followGateway=false;
+      followEarth=false;
       tourActive=true;
       controls.autoRotate=false;
       controls.enabled=false;
@@ -1287,21 +1316,33 @@
       };
       playShot(0);
     }
-    controls.addEventListener('start',()=>{ followGateway=false; });
+    controls.addEventListener('start',()=>{ followGateway=false; followEarth=false; });
     document.getElementById('cam-orbit').addEventListener('click',()=>{
       if(tourActive) return;
       followGateway=false;
+      followEarth=false;
       lerpTo(new THREE.Vector3(0,75,195),new THREE.Vector3(0,70,0),2.2,()=>{controls.autoRotate=true;});
     });
     document.getElementById('cam-gw').addEventListener('click',()=>{
       if(tourActive) return;
       followGateway=false;
+      followEarth=false;
       startLerp(gatewayGroup.position.clone(), 3.5);
     });
     document.getElementById('cam-moon').addEventListener('click',()=>{
       if(tourActive) return;
       followGateway=false;
+      followEarth=false;
       lerpTo(new THREE.Vector3(4,3,16),new THREE.Vector3(0,0,0));
+    });
+    document.getElementById('cam-earth').addEventListener('click',()=>{
+      if(tourActive) return;
+      followGateway=false;
+      followEarth=true;
+      const earthToMoon=new THREE.Vector3().subVectors(moonMesh.position,earthMesh.position).normalize();
+      const camTo=earthMesh.position.clone().addScaledVector(earthToMoon, EARTH_R*5.0).add(new THREE.Vector3(EARTH_R*0.35, EARTH_R*0.20, 0));
+      const tgtTo=earthMesh.position.clone().add(new THREE.Vector3(0, EARTH_R*0.05, 0));
+      lerpTo(camTo,tgtTo,2.4);
     });
 
     // ── Keyboard shortcuts ─────────────────────────────────────────
@@ -1313,6 +1354,7 @@
         case 'KeyO': document.getElementById('cam-orbit').click(); break;
         case 'KeyG': document.getElementById('cam-gw').click(); break;
         case 'KeyM': document.getElementById('cam-moon').click(); break;
+        case 'KeyE': document.getElementById('cam-earth').click(); break;
         case 'KeyF': document.getElementById('focus-gw').click(); break;
         case 'Escape': if(selKey) selectModule(selKey); break;
         case 'Digit0': document.getElementById('sp-0').click(); break;
@@ -1408,6 +1450,10 @@
       if(followGateway && !tourActive && !lerp){
         const a=1-Math.exp(-dt*3.0);
         controls.target.lerp(gwPos,a);
+      }
+      if(followEarth && !tourActive && !lerp){
+        const a=1-Math.exp(-dt*2.4);
+        controls.target.lerp(earthMesh.position,a);
       }
 
       // Celestial rotations
