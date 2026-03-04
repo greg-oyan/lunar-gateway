@@ -120,7 +120,8 @@
     #launch .launch-list li {
       margin: 3px 0;
     }
-    #launch select {
+    #launch select,
+    #launch .launch-quality {
       width: 100%;
       background: #061327;
       border: 1px solid #1e4363;
@@ -276,13 +277,8 @@
         </section>
 
         <section class="launch-block" aria-labelledby="launch-perf">
-          <div class="launch-label" id="launch-perf">Performance</div>
-          <select id="launch-performance" aria-label="Performance profile">
-            <option value="auto" selected>Auto</option>
-            <option value="high">High</option>
-            <option value="balanced">Balanced</option>
-            <option value="safe">Safe</option>
-          </select>
+          <div class="launch-label" id="launch-perf">Quality</div>
+          <div class="launch-quality" aria-label="Quality profile">High (Cinematic)</div>
         </section>
       </div>
 
@@ -769,7 +765,7 @@
         pos[i*3]=r*Math.sin(ph)*Math.cos(th); pos[i*3+1]=r*Math.sin(ph)*Math.sin(th); pos[i*3+2]=r*Math.cos(ph);
         // Magnitude-like distribution: many dim stars, very few bright.
         const m = Math.pow(Math.random(), 2.8);
-        const lum = 0.10 + m * 0.85;
+        const lum = 0.16 + m * 0.98;
         const t=Math.random();
         let cr=0.93, cg=0.93, cb=0.93; // neutral
         if (t < 0.14)      { cr=0.84; cg=0.88; cb=0.96; } // cool
@@ -777,7 +773,7 @@
         col[i*3]   = cr * lum;
         col[i*3+1] = cg * lum;
         col[i*3+2] = cb * lum;
-        sz[i] = 0.85 + m * 0.55;
+        sz[i] = 1.00 + m * 0.72;
       }
       const geo=new THREE.BufferGeometry();
       geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
@@ -787,7 +783,7 @@
         vertexShader: `
           attribute float size; attribute vec3 color; varying vec3 vCol; varying float vA;
           void main(){vCol=color;
-            vA=clamp((color.r+color.g+color.b)/3.0, 0.08, 0.92);
+            vA=clamp((color.r+color.g+color.b)/3.0, 0.12, 1.0);
             gl_PointSize=size;
             gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);
           }`,
@@ -797,9 +793,9 @@
             float d=length(gl_PointCoord-0.5)*2.0;
             if(d>1.0) discard;
             float soft = smoothstep(1.0, 0.0, d);
-            gl_FragColor=vec4(vCol, vA*soft*0.64);
+            gl_FragColor=vec4(vCol, vA*soft*0.82);
           }`,
-        transparent:true, blending:THREE.NormalBlending, depthWrite:false,
+        transparent:true, blending:THREE.NormalBlending, depthWrite:false, toneMapped:false,
       });
       geo.setAttribute('size', new THREE.BufferAttribute(sz,1));
       return new THREE.Points(geo, mat);
@@ -1175,7 +1171,7 @@
       document.getElementById('info').classList.add('show');
       let found=false; const wp=new THREE.Vector3();
       gatewayGroup.traverse(c=>{ if(!found&&c.isMesh&&c.userData.moduleKey===key){ c.getWorldPosition(wp); found=true; } });
-      if(found) startLerp(wp, 3.0);
+      if(found) { followGateway=false; startLerp(wp, 3.0); }
     }
 
     renderer.domElement.addEventListener('mousedown', e=>{mDown={x:e.clientX,y:e.clientY};dragged=false;});
@@ -1213,6 +1209,9 @@
     //  CAMERA LERP
     // ═══════════════════════════════════════════════════════════════
     let lerp=null;
+    let followGateway=false;
+    let tourActive=false;
+    let tourTimer=null;
     function startLerp(target, minDist=null) {
       const dist=camera.position.distanceTo(target);
       const zoom=minDist ? minDist : Math.max(dist*0.14, 0.30);
@@ -1235,7 +1234,9 @@
       });
     });
     document.getElementById('focus-gw').addEventListener('click',()=>{
+      if(tourActive) return;
       startLerp(gatewayGroup.position.clone(), 3.5);
+      followGateway=true;
     });
 
     // Camera preset helpers
@@ -1244,13 +1245,62 @@
              tc:camTo,tt:targetTo,t:0,dur:dur||1.8,onDone:onDone||null};
       controls.autoRotate=false;
     }
+    function stopTourMode() {
+      tourActive=false;
+      if(tourTimer){ clearTimeout(tourTimer); tourTimer=null; }
+      controls.enabled=true;
+    }
+    function anchorPoint(name, gwPos) {
+      if(name==='moon') return moonMesh.position;
+      if(name==='earth') return earthMesh.position;
+      return gwPos || gatewayGroup.position;
+    }
+    function startTourMode() {
+      stopTourMode();
+      followGateway=false;
+      tourActive=true;
+      controls.autoRotate=false;
+      controls.enabled=false;
+
+      const shots=[
+        {camAnchor:'moon',    camOff:new THREE.Vector3( 34, 12, 74), tgtAnchor:'moon',    tgtOff:new THREE.Vector3(0,0,0), dur: 8.5, hold:2.0},
+        {camAnchor:'gateway', camOff:new THREE.Vector3( 14,  5, 24), tgtAnchor:'gateway', tgtOff:new THREE.Vector3(0,0,0), dur:10.0, hold:2.0},
+        {camAnchor:'gateway', camOff:new THREE.Vector3(-26, 11, 16), tgtAnchor:'moon',    tgtOff:new THREE.Vector3(0,0,0), dur:10.0, hold:2.0},
+        {camAnchor:'moon',    camOff:new THREE.Vector3(  0, 40, 20), tgtAnchor:'gateway', tgtOff:new THREE.Vector3(0,0,0), dur:10.0, hold:2.0},
+        {camAnchor:'earth',   camOff:new THREE.Vector3( 38, 10, 44), tgtAnchor:'gateway', tgtOff:new THREE.Vector3(0,0,0), dur:10.0, hold:2.0},
+        {camAnchor:'gateway', camOff:new THREE.Vector3(-20, -3,-18), tgtAnchor:'gateway', tgtOff:new THREE.Vector3(0,0,0), dur: 9.0, hold:2.0},
+        {camAnchor:'moon',    camOff:new THREE.Vector3(-30,  4, 52), tgtAnchor:'gateway', tgtOff:new THREE.Vector3(0,0,0), dur: 9.0, hold:2.0},
+        {camAnchor:'gateway', camOff:new THREE.Vector3( 10,  3, 16), tgtAnchor:'gateway', tgtOff:new THREE.Vector3(0,0,0), dur: 7.0, hold:0.0},
+      ];
+
+      const playShot=(idx)=>{
+        if(!tourActive) return;
+        if(idx>=shots.length){ stopTourMode(); return; }
+        const s=shots[idx];
+        const gwNow=gatewayGroup.position.clone();
+        const camTo=anchorPoint(s.camAnchor,gwNow).clone().add(s.camOff);
+        const tgtTo=anchorPoint(s.tgtAnchor,gwNow).clone().add(s.tgtOff);
+        lerpTo(camTo,tgtTo,s.dur,()=>{
+          if(!tourActive) return;
+          tourTimer=setTimeout(()=>playShot(idx+1), Math.max(0,s.hold||0)*1000);
+        });
+      };
+      playShot(0);
+    }
+    controls.addEventListener('start',()=>{ followGateway=false; });
     document.getElementById('cam-orbit').addEventListener('click',()=>{
+      if(tourActive) return;
+      followGateway=false;
       lerpTo(new THREE.Vector3(0,75,195),new THREE.Vector3(0,70,0),2.2,()=>{controls.autoRotate=true;});
     });
     document.getElementById('cam-gw').addEventListener('click',()=>{
+      if(tourActive) return;
+      followGateway=false;
       startLerp(gatewayGroup.position.clone(), 3.5);
     });
     document.getElementById('cam-moon').addEventListener('click',()=>{
+      if(tourActive) return;
+      followGateway=false;
       lerpTo(new THREE.Vector3(4,3,16),new THREE.Vector3(0,0,0));
     });
 
@@ -1317,6 +1367,9 @@
     // ═══════════════════════════════════════════════════════════════
     setLoad(100,'Launching simulation…');
     setTimeout(hideLoading, 380);
+    if(window.__TOUR_MODE__){
+      setTimeout(()=>startTourMode(), 1700);
+    }
 
     // ═══════════════════════════════════════════════════════════════
     //  RENDER LOOP
@@ -1351,6 +1404,10 @@
         camera.position.lerpVectors(lerp.fc,lerp.tc,e);
         controls.target.lerpVectors(lerp.ft,lerp.tt,e);
         if(lerp.t>=1) { if(lerp.onDone) lerp.onDone(); lerp=null; }
+      }
+      if(followGateway && !tourActive && !lerp){
+        const a=1-Math.exp(-dt*3.0);
+        controls.target.lerp(gwPos,a);
       }
 
       // Celestial rotations
