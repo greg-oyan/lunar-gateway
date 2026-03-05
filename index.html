@@ -1067,11 +1067,16 @@
     }
 
     function addGatewayVisuals(gw) {
-      const panelMat = new THREE.MeshStandardMaterial({
+      const panelMat = new THREE.MeshPhysicalMaterial({
         color: 0x1b2a44,
-        metalness: 0.6,
-        roughness: 0.4,
-        side: THREE.DoubleSide
+        metalness: 0.15,
+        roughness: 0.12,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.06,
+        reflectivity: 0.6,
+        side: THREE.DoubleSide,
+        emissive: 0x0a1a33,
+        emissiveIntensity: 0.55
       });
       const mastMat = new THREE.MeshStandardMaterial({
         color: 0xb3b8c2,
@@ -1079,14 +1084,55 @@
         roughness: 0.5
       });
 
+      const cellCanvas = document.createElement('canvas');
+      cellCanvas.width = 64; cellCanvas.height = 64;
+      const cellCtx = cellCanvas.getContext('2d');
+      cellCtx.clearRect(0, 0, 64, 64);
+      cellCtx.strokeStyle = 'rgba(190,220,255,0.28)';
+      cellCtx.lineWidth = 1;
+      for (let i = 8; i < 64; i += 8) {
+        cellCtx.beginPath(); cellCtx.moveTo(i, 0); cellCtx.lineTo(i, 64); cellCtx.stroke();
+        cellCtx.beginPath(); cellCtx.moveTo(0, i); cellCtx.lineTo(64, i); cellCtx.stroke();
+      }
+      const cellTex = new THREE.CanvasTexture(cellCanvas);
+      const cellMat = new THREE.MeshBasicMaterial({
+        map: cellTex,
+        color: 0xcfe0ff,
+        transparent: true,
+        opacity: 0.20,
+        depthWrite: false,
+        depthTest: true,
+        side: THREE.DoubleSide
+      });
+
       for (const side of [-1, 1]) {
         const wing = new THREE.Group();
         wing.position.set(side * 0.235, 0.122, 0.0);
+        wing.scale.x = side;
+        wing.rotation.y += THREE.MathUtils.degToRad(28);
+        wing.rotation.y += side * THREE.MathUtils.degToRad(6);
+        wing.rotation.y = THREE.MathUtils.clamp(wing.rotation.y, -Math.PI/2 + 0.25, Math.PI/2 - 0.25);
         const mast = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.01, 0.01), mastMat);
-        const panel = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.18), panelMat);
-        panel.position.set(side * 0.13, 0.0, 0.0);
-        panel.rotation.z = side * THREE.MathUtils.degToRad(12);
-        wing.add(mast, panel);
+        wing.add(mast);
+
+        const SEG_W = 0.16, SEG_H = 0.18, GAP = 0.015;
+        for (let i = 0; i < 3; i++) {
+          const seg = new THREE.Mesh(new THREE.PlaneGeometry(SEG_W, SEG_H), panelMat);
+          seg.position.set(0.11 + i * (SEG_W + GAP), 0.0, 0.0);
+
+          const cellOverlayFront = new THREE.Mesh(new THREE.PlaneGeometry(SEG_W, SEG_H), cellMat);
+          cellOverlayFront.position.set(0, 0, 0.0015);
+          seg.add(cellOverlayFront);
+
+          const cellOverlayBack = new THREE.Mesh(new THREE.PlaneGeometry(SEG_W, SEG_H), cellMat);
+          cellOverlayBack.rotation.y = Math.PI;
+          cellOverlayBack.position.set(0, 0, -0.0015);
+          seg.add(cellOverlayBack);
+
+          wing.add(seg);
+        }
+
+        wing.rotation.z = side * THREE.MathUtils.degToRad(12);
         gw.add(wing);
       }
 
