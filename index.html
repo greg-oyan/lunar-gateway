@@ -1117,23 +1117,10 @@
     const SUN_R = 66;
     const sunMesh = new THREE.Mesh(
       new THREE.SphereGeometry(SUN_R,32,32),
-      new THREE.MeshBasicMaterial({map:sunTex||null, color:0xfff3c8})
+      new THREE.MeshBasicMaterial({map:sunTex||null, color:0xffffff})
     );
     sunMesh.position.copy(SUN_POS); scene.add(sunMesh);
-    sunMesh.add(makeAtmo(SUN_R,'#ff9e4d',2.2,2.1));
-
-    // Inner super-bright core sprite for bloom target
-    const sunCore = new THREE.Mesh(
-      new THREE.SphereGeometry(SUN_R*0.4,16,16),
-      new THREE.MeshBasicMaterial({
-        color:0xffffff,
-        transparent:true,
-        opacity:0.95,
-        blending:THREE.AdditiveBlending,
-        depthWrite:false
-      })
-    );
-    sunMesh.add(sunCore);
+    sunMesh.add(makeAtmo(SUN_R,'#ff9e4d',3.8,2.4));
 
     // Lensflare — subtle filmic accent
     const fA=gradTex(256,[[0,'rgba(255,240,180,0.84)'],[0.24,'rgba(255,170,80,0.42)'],[1,'transparent']]);
@@ -1141,10 +1128,10 @@
     const fC=gradTex(64, [[0,'rgba(255,210,120,0.34)'],[1,'transparent']]);
     const fD=gradTex(64, [[0,'rgba(255,255,255,0.24)'],[1,'transparent']]);
     const lf=new Lensflare();
-    lf.addElement(new LensflareElement(fA, 440, 0.00, new THREE.Color(0xffeecc)));
-    lf.addElement(new LensflareElement(fB,  86, 0.44));
-    lf.addElement(new LensflareElement(fD,  40, 0.60));
-    lf.addElement(new LensflareElement(fC,  52, 0.74));
+    lf.addElement(new LensflareElement(fA, 300, 0.00, new THREE.Color(0xffeecc)));
+    lf.addElement(new LensflareElement(fB,  68, 0.44));
+    lf.addElement(new LensflareElement(fD,  28, 0.60));
+    lf.addElement(new LensflareElement(fC,  40, 0.74));
     sunMesh.add(lf);
 
     // Subtle anamorphic-like streak near sun core (cheap procedural sprite).
@@ -1161,7 +1148,7 @@
     flareCtx.fillRect(0,0,512,48);
     const flareTex=new THREE.CanvasTexture(flareCanvas);
     const sunStreak=new THREE.Sprite(new THREE.SpriteMaterial({
-      map:flareTex, color:0xffedcf, transparent:true, opacity:0.55,
+      map:flareTex, color:0xffedcf, transparent:true, opacity:0.48,
       blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false
     }));
     sunStreak.scale.set(320,22,1);
@@ -1575,7 +1562,6 @@
       // Real astronomical rotation periods (seconds): Moon 2,361,888 | Earth sidereal 86,164 | Sun 2,192,832
       moonMesh.rotation.y  = (simTime / 2361888) * 2 * Math.PI;
       earthMesh.rotation.y = (simTime /   86164) * 2 * Math.PI;
-      sunMesh.rotation.y   = (simTime / 2192832) * 2 * Math.PI;
       earthU.cloudOff.value= (simTime /  288000) % 1.0;
 
       // Orbital trail update
