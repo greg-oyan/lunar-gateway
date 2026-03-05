@@ -1066,6 +1066,40 @@
       g.position.x=0.095; gw.add(g); return g;
     }
 
+    function addGatewayVisuals(gw) {
+      const panelMat = new THREE.MeshStandardMaterial({
+        color: 0x1b2a44,
+        metalness: 0.6,
+        roughness: 0.4,
+        side: THREE.DoubleSide
+      });
+      const mastMat = new THREE.MeshStandardMaterial({
+        color: 0xb3b8c2,
+        metalness: 0.7,
+        roughness: 0.5
+      });
+
+      for (const side of [-1, 1]) {
+        const wing = new THREE.Group();
+        wing.position.set(side * 0.235, 0.122, 0.0);
+        const mast = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.01, 0.01), mastMat);
+        const panel = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.18), panelMat);
+        panel.position.set(side * 0.13, 0.0, 0.0);
+        panel.rotation.z = side * THREE.MathUtils.degToRad(12);
+        wing.add(mast, panel);
+        gw.add(wing);
+      }
+
+      const truss = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.012, 0.012), mastMat);
+      truss.position.set(0.0, 0.168, 0.0);
+      gw.add(truss);
+
+      const dockRing = new THREE.Mesh(new THREE.TorusGeometry(0.050, 0.004, 8, 24), mastMat);
+      dockRing.position.set(-0.248, 0.150, 0.0);
+      dockRing.rotation.y = Math.PI / 2;
+      gw.add(dockRing);
+    }
+
     function buildGateway() {
       const gw=new THREE.Group(); gw.name='gateway';
       buildPPE(gw);
@@ -1073,6 +1107,7 @@
       buildHab(gw,'IHAB',  -0.020,0.120,0.064,MODS.IHAB.color);
       buildHab(gw,'USHAB', -0.168,0.120,0.064,MODS.USHAB.color);
       buildAirlock(gw); buildEVR(gw);
+      addGatewayVisuals(gw);
       gw.scale.setScalar(GW_SCALE);
       return gw;
     }
