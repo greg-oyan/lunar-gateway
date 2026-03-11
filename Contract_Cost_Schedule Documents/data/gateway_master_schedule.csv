@@ -1,0 +1,166 @@
+task_id,task_name,wbs_id,start_date,end_date,duration_days,predecessor,organization,milestone_flag,critical_flag
+T-001,Gateway Program Formulation and Congressional Authorization,1.0,2017-10-01,2018-12-31,457,,NASA HQ,TRUE,TRUE
+T-002,Gateway Architecture Studies and Concept Development,1.2.4,2018-01-01,2019-03-31,454,T-001,NASA JSC,FALSE,TRUE
+T-003,Independent Cost Estimate Execution and PCA Development,1.1.1,2021-10-01,2022-05-31,242,T-001,NASA JSC / Aerospace Corp,FALSE,TRUE
+T-004,Program Commitment Agreement Baseline Approval,1.1.1,2022-06-01,2022-06-01,1,T-003,NASA JSC,TRUE,TRUE
+T-005,Integrated Baseline Review - PPE Contract (Maxar),1.1.2,2019-08-01,2019-10-31,91,T-026,NASA JSC,FALSE,FALSE
+T-006,Integrated Baseline Review - HALO Contract (Northrop),1.1.2,2021-10-01,2021-12-31,91,T-047,NASA JSC,FALSE,FALSE
+T-007,Gateway Environmental Impact Statement (NEPA EIS),1.1.3,2020-01-01,2021-12-31,729,T-001,NASA / NEPA Team,FALSE,FALSE
+T-008,Non-Advocate Review (NAR) Pre-PCA,1.1.1,2022-03-01,2022-05-31,91,T-002,Aerospace Corporation,TRUE,TRUE
+T-009,Mass Reduction Tiger Team - GAO-24-106878 Response,1.2.3,2024-07-31,2025-09-30,426,T-002,NASA JSC / Maxar / Northrop,FALSE,TRUE
+T-010,Annual Program Performance Review FY2025,1.1.1,2025-10-01,2025-12-31,91,T-004,NASA JSC,FALSE,FALSE
+T-011,Gateway System Requirements Review (SRR),1.2.1,2019-03-01,2019-06-30,121,T-002,NASA JSC,TRUE,TRUE
+T-012,Gateway System Definition Review (SDR),1.2.1,2019-07-01,2019-12-31,183,T-011,NASA JSC,TRUE,TRUE
+T-013,Interface Control Document Set Phase 1 - PPE and HALO,1.2.2,2020-01-01,2021-06-30,545,T-012,NASA JSC,FALSE,TRUE
+T-014,Interface Control Document Set Phase 2 - Partner Modules,1.2.2,2021-07-01,2023-12-31,913,T-013,NASA JSC,FALSE,FALSE
+T-015,Gateway-HLS Interface Control Document Revision,1.2.2,2024-01-01,2025-06-30,545,T-014,NASA JSC / SpaceX,FALSE,TRUE
+T-016,Mass Properties Baseline Report Establishment,1.2.3,2022-01-01,2022-06-30,180,T-012,NASA JSC,FALSE,TRUE
+T-017,Mass Properties Quarterly Status Reports FY2023,1.2.3,2023-01-01,2023-12-31,364,T-016,NASA JSC,FALSE,TRUE
+T-018,Mass Properties Quarterly Status Reports FY2024,1.2.3,2024-01-01,2024-12-31,365,T-017,NASA JSC,FALSE,TRUE
+T-019,PPE Controllability Analysis for Starship HLS Docking,1.2.4,2024-01-01,2025-06-30,545,T-015,Maxar Technologies / NASA JSC,FALSE,TRUE
+T-020,Human Factors and Habitability Assessment,1.2.6,2020-06-01,2022-12-31,942,T-012,NASA JSC HRP,FALSE,FALSE
+T-021,Verification and Validation Plan Baseline,1.2.8,2022-01-01,2022-12-31,364,T-011,NASA JSC,FALSE,FALSE
+T-022,System Safety Review Panel Phase 1 - Through CDR,1.1.3,2020-01-01,2023-06-30,1276,T-012,NASA JSC Safety,FALSE,FALSE
+T-023,System Safety Review Panel Phase 2 - Post CDR to Launch,1.1.3,2023-07-01,2027-04-30,1399,T-022,NASA JSC Safety,FALSE,FALSE
+T-024,Technology Maturation Plan and TRL Advancement,1.2.7,2019-01-01,2024-12-31,2191,T-002,NASA JSC / AES,FALSE,FALSE
+T-025,Systems Engineering Support to Integration Assembly and Test,1.2.1,2025-01-01,2027-04-30,849,T-021,NASA JSC,FALSE,TRUE
+T-026,PPE Contract Award - Maxar Technologies FFP $375M,1.3,2019-05-23,2019-05-23,1,T-002,NASA JSC,TRUE,TRUE
+T-027,PPE System Requirements Review,1.3.1,2019-06-01,2019-09-30,121,T-026,Maxar Technologies,TRUE,TRUE
+T-028,PPE Preliminary Design Review,1.3.1,2020-03-01,2020-06-30,121,T-027,Maxar Technologies,TRUE,TRUE
+T-029,PPE Critical Design Review,1.3.1,2022-06-01,2022-09-15,106,T-028,Maxar Technologies,TRUE,TRUE
+T-030,PPE Primary Structure Fabrication,1.3.1,2022-10-01,2023-09-30,364,T-029,Maxar Technologies,FALSE,TRUE
+T-031,PPE Solar Power Array (ROSA) Manufacturing,1.3.2,2022-10-01,2024-03-31,547,T-029,Maxar / MMA Design,FALSE,TRUE
+T-032,AEPS Hall-Effect Thruster Procurement and Acceptance Test,1.3.3,2021-06-01,2023-12-31,943,T-026,Aerojet Rocketdyne,FALSE,TRUE
+T-033,PPE Xenon Tank and Propellant Feed System Fabrication,1.3.3,2022-10-01,2023-12-31,456,T-029,Maxar Technologies,FALSE,TRUE
+T-034,PPE GNC and ADCS Software Development,1.3.4,2021-01-01,2024-06-30,1276,T-028,Maxar Technologies,FALSE,TRUE
+T-035,PPE Command and Data Handling Software Development,1.3.7,2021-01-01,2024-09-30,1368,T-028,Maxar Technologies,FALSE,FALSE
+T-036,PPE Autonomous Fault Management Software Development,1.3.8,2022-01-01,2025-06-30,1276,T-034 T-035,Maxar Technologies,FALSE,TRUE
+T-037,PPE Thermal Control System Fabrication and Integration,1.3.6,2022-10-01,2023-09-30,364,T-029,Maxar Technologies,FALSE,FALSE
+T-038,PPE Communications and Tracking System Integration,1.3.5,2022-10-01,2023-12-31,456,T-029,Maxar Technologies,FALSE,FALSE
+T-039,PPE Bus Assembly and Subsystem Integration,1.3.1,2024-01-01,2024-06-30,181,T-030 T-031 T-033 T-037 T-038,Maxar Technologies,FALSE,TRUE
+T-040,PPE Solar Electric Propulsion Subsystem Integration,1.3.3,2024-04-01,2024-07-31,121,T-032 T-033,Maxar Technologies,FALSE,TRUE
+T-041,PPE Avionics and Software Integration,1.3.7,2024-06-01,2024-10-31,152,T-039 T-034 T-035 T-036,Maxar Technologies,FALSE,TRUE
+T-042,PPE Spacecraft Functional Test,1.3.8,2024-09-01,2024-11-30,90,T-041,Maxar Technologies,FALSE,TRUE
+T-043,PPE Electromagnetic Compatibility and RF Testing,1.3.5,2024-10-01,2024-12-15,75,T-042,Maxar Technologies,FALSE,FALSE
+T-044,PPE Pre-Shipment Review,1.3,2024-12-01,2024-12-31,30,T-043,Maxar Technologies / NASA JSC,TRUE,TRUE
+T-045,PPE Transport and Delivery to NGIS Gilbert AZ,1.3,2025-01-15,2025-02-28,44,T-044,Maxar Technologies,TRUE,TRUE
+T-046,PPE Post-Delivery Acceptance Test at NGIS,1.3.8,2025-03-01,2025-04-30,60,T-045,Northrop Grumman / Maxar,FALSE,TRUE
+T-047,HALO Phase A-B Contract Award - Northrop Grumman $187M,1.4,2020-06-05,2020-06-05,1,T-002,NASA JSC,TRUE,TRUE
+T-048,HALO Preliminary Design Review,1.4.1,2021-03-01,2021-06-30,121,T-047,Northrop Grumman,TRUE,TRUE
+T-049,HALO Fabrication and Integration Contract Award $935M,1.4,2021-07-09,2021-07-09,1,T-048,NASA JSC,TRUE,TRUE
+T-050,HALO Critical Design Review,1.4.1,2022-08-01,2022-11-10,101,T-049,Northrop Grumman,TRUE,TRUE
+T-051,HALO Pressure Vessel Fabrication at TAS Turin Italy,1.4.1,2020-10-01,2024-06-30,1368,T-047,Thales Alenia Space,FALSE,TRUE
+T-052,HALO ECLSS Subsystem Development and Breadboard Test,1.4.2,2021-01-01,2024-09-30,1368,T-047,Northrop Grumman,FALSE,TRUE
+T-053,HALO ECLSS Qualification Testing,1.4.2,2024-06-01,2025-09-30,486,T-052,Northrop Grumman,FALSE,TRUE
+T-054,HALO Avionics Hardware Development and Qualification,1.4.6,2021-07-01,2024-03-31,1004,T-049,Northrop Grumman,FALSE,TRUE
+T-055,HALO Flight Software Development,1.4.6,2022-01-01,2025-06-30,1276,T-050,Northrop Grumman,FALSE,TRUE
+T-056,HALO Docking Port Manufacturing and Acceptance Test,1.4.7,2021-07-01,2024-09-30,1186,T-049,Northrop Grumman,FALSE,FALSE
+T-057,HALO Interior Outfitting and Crew Systems Fabrication,1.4.8,2022-01-01,2025-09-30,1368,T-050,Northrop Grumman,FALSE,FALSE
+T-058,HALO Radiation Shielding Integration,1.4.9,2023-01-01,2025-06-30,911,T-050,Northrop Grumman,FALSE,FALSE
+T-059,HALO Electrical Power System Integration at TAS,1.4.3,2022-06-01,2024-03-31,669,T-050,Northrop Grumman / TAS,FALSE,TRUE
+T-060,HALO Thermal Control System Manufacturing,1.4.5,2022-06-01,2024-03-31,669,T-050,Northrop Grumman,FALSE,FALSE
+T-061,HALO Communications System Development and Integration,1.4.4,2021-07-01,2024-03-31,1004,T-049,Northrop Grumman,FALSE,FALSE
+T-062,HALO Pressure Vessel Delivery from TAS Turin to NGIS,1.4.1,2024-07-01,2024-09-30,91,T-051,Thales Alenia Space,TRUE,TRUE
+T-063,HALO Module System Integration at NGIS Gilbert AZ,1.4.1,2024-10-01,2025-06-30,272,T-062 T-059 T-060 T-061,Northrop Grumman,FALSE,TRUE
+T-064,HALO Software Integration and Test (SWIT),1.4.6,2025-07-01,2025-11-30,152,T-063 T-055,Northrop Grumman,FALSE,TRUE
+T-065,HALO System-Level Functional Test,1.4.6,2025-10-01,2026-01-31,122,T-064,Northrop Grumman,FALSE,TRUE
+T-066,HALO Docking Port Integration at NGIS,1.4.7,2024-12-01,2025-06-30,211,T-056 T-063,Northrop Grumman,FALSE,FALSE
+T-067,HALO Interior Outfitting Installation at NGIS,1.4.8,2025-01-01,2025-09-30,272,T-057 T-063,Northrop Grumman,FALSE,FALSE
+T-068,HALO ECLSS Installation and Checkout at NGIS,1.4.2,2025-04-01,2025-12-31,274,T-053 T-063,Northrop Grumman,FALSE,TRUE
+T-069,HALO Radiation Shielding Installation at NGIS,1.4.9,2025-07-01,2025-12-31,183,T-058 T-063,Northrop Grumman,FALSE,FALSE
+T-070,HALO Pre-Shipment Review,1.4,2025-12-01,2025-12-31,30,T-065 T-066 T-067 T-068 T-069,Northrop Grumman / NASA JSC,TRUE,TRUE
+T-071,HALO Independent Technical Authority Review,1.1.3,2025-10-01,2025-11-30,60,T-065,NASA JSC Safety,FALSE,TRUE
+T-072,ESPRIT Lunar Link Integration onto HALO at NGIS,1.6.1,2025-11-01,2026-01-31,91,T-063 T-093,Thales Alenia Space / Northrop,FALSE,TRUE
+T-073,HALO Mission-Specific Software Load and Configuration,1.4.6,2025-09-01,2026-02-28,180,T-064,Northrop Grumman,FALSE,TRUE
+T-074,HALO Final Closeout and Hazardous Material Review,1.4.8,2026-01-01,2026-03-31,89,T-070,Northrop Grumman,FALSE,TRUE
+T-075,HALO Declared Ready for Environmental Test,1.4,2026-03-31,2026-03-31,1,T-074,NASA JSC,TRUE,TRUE
+T-076,I-HAB Phase A-B Design Studies at ESA and TAS,1.5,2020-10-14,2021-12-31,443,T-002,ESA / Thales Alenia Space,FALSE,FALSE
+T-077,I-HAB Preliminary Design Review,1.5.1,2022-09-01,2022-12-31,121,T-076,Thales Alenia Space / ESA,TRUE,FALSE
+T-078,I-HAB Critical Design Review,1.5.1,2025-01-01,2025-09-30,272,T-077,Thales Alenia Space / ESA,TRUE,FALSE
+T-079,I-HAB Primary Structure Fabrication at TAS Turin,1.5.1,2025-10-01,2027-09-30,729,T-078,Thales Alenia Space,FALSE,FALSE
+T-080,I-HAB JAXA ECLSS Manufacturing and Qualification,1.5.2,2023-01-01,2027-06-30,1642,T-076,JAXA / Thales Alenia Space,FALSE,FALSE
+T-081,I-HAB Thermal Control System Manufacturing,1.5.3,2025-10-01,2027-06-30,638,T-078,Thales Alenia Space,FALSE,FALSE
+T-082,I-HAB Interior Outfitting and Crew Systems,1.5.6,2026-01-01,2027-09-30,607,T-078,Thales Alenia Space,FALSE,FALSE
+T-083,I-HAB Radiation Shielding Integration at TAS,1.5.8,2026-06-01,2027-09-30,486,T-078,Thales Alenia Space,FALSE,FALSE
+T-084,I-HAB Environmental Testing (ESA-Managed),1.5,2027-10-01,2028-03-31,182,T-079 T-080 T-081 T-082 T-083,ESA / TAS,FALSE,FALSE
+T-085,I-HAB Delivery to Kennedy Space Center,1.5.7,2028-04-01,2028-05-31,60,T-084,ESA / NASA KSC,TRUE,FALSE
+T-086,I-HAB SLS Co-Manifest Integration at KSC,1.5.7,2028-06-01,2028-08-15,75,T-085,ESA / NASA KSC / Boeing,FALSE,TRUE
+T-087,ESPRIT Lunar Link Design and Fabrication at TAS,1.6.1,2020-01-01,2025-06-30,1977,T-002,Thales Alenia Space,FALSE,FALSE
+T-088,ESPRIT Lunar View Module Preliminary Design Phase,1.6.2,2020-01-01,2023-12-31,1460,T-002,Thales Alenia Space / OHB,FALSE,FALSE
+T-089,ESPRIT Lunar View Detailed Design - Post Oct 2024 Amendment,1.6.2,2024-01-01,2026-06-30,911,T-088,Thales Alenia Space / OHB,FALSE,FALSE
+T-090,ESPRIT Xenon Tank and Propellant Transfer System Design and Build,1.6.3,2022-01-01,2027-09-30,2100,T-088,Thales Alenia Space,FALSE,FALSE
+T-091,ESPRIT Deep Space Optical Communications Terminal Development,1.6.4,2022-01-01,2027-09-30,2100,T-087,ESA / OHB,FALSE,FALSE
+T-092,ESPRIT Lunar View Module Fabrication at TAS,1.6.2,2026-07-01,2028-06-30,729,T-089,Thales Alenia Space,FALSE,FALSE
+T-093,ESPRIT Lunar Link Delivery for HALO Integration at NGIS,1.6.1,2025-09-01,2025-10-31,60,T-087,Thales Alenia Space,TRUE,FALSE
+T-094,ESPRIT Lunar View Environmental Test,1.6.2,2028-07-01,2028-12-31,183,T-092 T-090 T-091,Thales Alenia Space,FALSE,FALSE
+T-095,ESPRIT Lunar View Launch Campaign Preparation,1.10.3,2029-01-01,2029-06-30,180,T-094,ESA / Commercial Launch Provider,FALSE,FALSE
+T-096,ESPRIT Lunar View Launch,1.10.3,2029-07-01,2029-07-01,1,T-095,ESA / SpaceX (TBC),TRUE,FALSE
+T-097,UAE Airlock Program Initiation and Requirements Definition,1.7,2024-01-15,2024-09-30,258,T-002,MBRSC / Thales Alenia Space,FALSE,FALSE
+T-098,UAE Airlock Preliminary Design Review,1.7.1,2025-01-01,2025-06-30,180,T-097,Thales Alenia Space / MBRSC,TRUE,FALSE
+T-099,UAE Airlock Critical Design Review,1.7.1,2026-01-01,2026-09-30,272,T-098,Thales Alenia Space / MBRSC,TRUE,FALSE
+T-100,UAE Airlock Pressure Vessel Fabrication at TAS,1.7.1,2026-10-01,2028-09-30,729,T-099,Thales Alenia Space,FALSE,FALSE
+T-101,UAE Airlock EVA Support Systems Development,1.7.2,2026-10-01,2028-12-31,822,T-099,Thales Alenia Space,FALSE,FALSE
+T-102,UAE Airlock Thermal Control System Development,1.7.7,2027-01-01,2028-12-31,729,T-099,Thales Alenia Space,FALSE,FALSE
+T-103,UAE Airlock Integration and Assembly at TAS,1.7,2029-01-01,2030-03-31,454,T-100 T-101 T-102,Thales Alenia Space / MBRSC,FALSE,FALSE
+T-104,UAE Airlock Environmental Testing,1.7,2030-01-01,2030-06-30,180,T-103,Thales Alenia Space,FALSE,FALSE
+T-105,UAE Airlock Launch Campaign Preparation,1.10.4,2030-07-01,2030-09-30,91,T-104,MBRSC / NASA KSC,FALSE,FALSE
+T-106,UAE Airlock Launch,1.10.4,2030-10-01,2030-10-01,1,T-105,NASA / Commercial TBD,TRUE,FALSE
+T-107,UAE Airlock On-Orbit Installation and Activation,1.7,2030-10-15,2030-11-30,46,T-106,NASA JSC MOD / MBRSC,TRUE,FALSE
+T-108,Canadarm3 Large Arm Design Fabrication and Test (MDA),1.8.1,2021-01-01,2028-12-31,2920,T-002,MDA Space,FALSE,FALSE
+T-109,Canadarm3 Small Dexterous Arm Design Fabrication and Test,1.8.2,2021-01-01,2029-03-31,3012,T-002,MDA Space,FALSE,FALSE
+T-110,Canadarm3 AI and Autonomous Operations Software Development,1.8.5,2022-01-01,2029-09-30,2737,T-002,MDA Space,FALSE,FALSE
+T-111,Canadarm3 External Robotic Interface Hardware for All Modules,1.8.3,2023-01-01,2029-06-30,2372,T-002,MDA Space,FALSE,FALSE
+T-112,Canadarm3 Ground Control System Development at CSA,1.8.4,2022-01-01,2030-06-30,3103,T-002,CSA,FALSE,FALSE
+T-113,Canadarm3 End-to-End Integration and Verification,1.8.6,2029-01-01,2029-10-31,303,T-108 T-109 T-110 T-111,MDA Space,FALSE,FALSE
+T-114,Canadarm3 Environmental Testing,1.8.6,2029-07-01,2029-11-30,152,T-113,MDA Space / CSA,FALSE,FALSE
+T-115,Canadarm3 Flight Acceptance Test,1.8.6,2029-10-01,2029-12-31,91,T-114,MDA Space / NASA,FALSE,FALSE
+T-116,Canadarm3 Delivery and Launch on SLS Artemis V,1.8.6,2030-03-01,2030-03-01,1,T-115,CSA / NASA,TRUE,FALSE
+T-117,Canadarm3 On-Orbit Commissioning and First Light,1.8,2030-03-15,2030-05-31,77,T-116,MDA Space / NASA JSC MOD,TRUE,FALSE
+T-118,PPE-HALO Mechanical Integration at NGIS Gilbert AZ,1.9.1,2025-05-01,2025-09-30,152,T-046 T-075,Northrop Grumman,TRUE,TRUE
+T-119,PPE-HALO Integrated System Test,1.9.4,2025-10-01,2026-01-31,122,T-118,Northrop Grumman / NASA JSC,TRUE,TRUE
+T-120,Contamination Control Plan Implementation Throughout IA-T,1.9.7,2024-01-01,2027-04-30,1215,T-050,NASA JSC,FALSE,FALSE
+T-121,PPE-HALO Acoustic and Vibration Environmental Test,1.9.2,2026-02-01,2026-05-31,119,T-119,Northrop Grumman,TRUE,TRUE
+T-122,PPE-HALO Thermal Vacuum Environmental Test,1.9.2,2026-06-01,2026-09-30,121,T-121,Northrop Grumman / NASA,TRUE,TRUE
+T-123,PPE-HALO Electromagnetic Compatibility RF Testing,1.9.4,2026-10-01,2026-11-30,60,T-122,Northrop Grumman,FALSE,TRUE
+T-124,ESPRIT Lunar Link Final Integration onto HALO Assembly,1.9.1,2026-10-01,2026-11-30,60,T-072 T-122,Thales Alenia Space / Northrop,FALSE,TRUE
+T-125,PPE-HALO Pre-Shipment Review,1.9,2026-12-01,2026-12-31,30,T-123 T-124,NASA JSC / Northrop,TRUE,TRUE
+T-126,PPE-HALO Transport to Kennedy Space Center,1.9.5,2027-01-01,2027-01-31,30,T-125,Northrop Grumman / NASA KSC,FALSE,TRUE
+T-127,KSC Payload Processing at Payload Hazardous Servicing Facility,1.9.5,2027-02-01,2027-03-31,58,T-126,SpaceX / NASA KSC,FALSE,TRUE
+T-128,PPE-HALO Xenon and RCS Propellant Loading,1.9.3,2027-04-01,2027-04-20,19,T-127,SpaceX / NASA KSC,FALSE,TRUE
+T-129,Launch Site Hazardous Servicing Final Operations,1.9.8,2027-04-01,2027-04-25,24,T-127,SpaceX / NASA KSC,FALSE,TRUE
+T-130,Falcon Heavy Vehicle Mate and Launch Pad Operations,1.10.1,2027-04-20,2027-04-29,9,T-128 T-129,SpaceX,FALSE,TRUE
+T-131,Launch Readiness Review - PPE-HALO Falcon Heavy,1.10.1,2026-11-01,2026-11-30,29,T-125,NASA JSC,TRUE,TRUE
+T-132,PPE-HALO Launch on Falcon Heavy - L-Day,1.10.1,2027-04-30,2027-04-30,1,T-130 T-131,SpaceX,TRUE,TRUE
+T-133,PPE Solo Operations and AEPS 12-Month Demonstration,1.3.8,2027-05-01,2027-06-30,60,T-132,Maxar / NASA JSC MOD,FALSE,TRUE
+T-134,PPE-HALO Low-Thrust NRHO Lunar Transit,1.3.3,2027-07-01,2028-01-31,214,T-133,Maxar / GSFC FDF,FALSE,TRUE
+T-135,NRHO Insertion and Orbit Verification,1.2.4,2028-01-31,2028-02-28,28,T-134,GSFC FDF / Maxar,TRUE,TRUE
+T-136,PPE-HALO Initial On-Orbit Test,1.9.4,2028-02-01,2028-04-30,89,T-135,NASA JSC MOD,TRUE,TRUE
+T-137,HALO Declared Ready for First Crewed Visit,1.4,2028-04-30,2028-04-30,1,T-136,NASA JSC,TRUE,TRUE
+T-138,Artemis IV Launch Readiness Review,1.10.2,2028-08-15,2028-09-15,31,T-086,NASA JSC,TRUE,TRUE
+T-139,Artemis IV Launch - SLS Block 1B with Orion and I-HAB,1.10.2,2028-10-01,2028-10-01,1,T-138,NASA / Boeing,TRUE,TRUE
+T-140,Orion First Docking at HALO - First Crewed Gateway Visit,1.12.1,2028-10-06,2028-10-06,1,T-139,NASA JSC MOD,TRUE,TRUE
+T-141,MCC-H Gateway Flight Control Room Development,1.11.1,2022-01-01,2027-12-31,2190,T-004,NASA JSC,FALSE,TRUE
+T-142,DSN Contact Time Allocation and Link Budget Certification,1.11.2,2025-01-01,2027-03-31,819,T-004,NASA JPL,FALSE,TRUE
+T-143,FDF NRHO Trajectory Operations Software Development,1.11.3,2023-01-01,2027-03-31,1550,T-004,NASA GSFC,FALSE,FALSE
+T-144,Mission Data Management System Development,1.11.4,2022-01-01,2026-12-31,1826,T-004,NASA JSC,FALSE,FALSE
+T-145,Cybersecurity and Information Assurance Accreditation,1.11.6,2024-01-01,2027-06-30,1276,T-141,NASA JSC,FALSE,FALSE
+T-146,International Partner Ground System Interface Implementation,1.11.5,2024-01-01,2027-09-30,1368,T-014,NASA JSC,FALSE,FALSE
+T-147,Launch Site Range Safety Documentation and Certification,1.10.6,2025-01-01,2026-12-31,729,T-004,NASA KSC / USAF,FALSE,FALSE
+T-148,Ground Systems End-to-End Integration Test,1.11,2027-01-01,2027-03-31,89,T-141 T-142 T-143 T-144,NASA JSC,FALSE,TRUE
+T-149,Gateway Flight Rules Development,1.12.3,2025-01-01,2027-09-30,972,T-022,NASA JSC MOD,FALSE,TRUE
+T-150,Flight Operations Team Recruitment and Certification,1.12.1,2025-06-01,2027-12-31,943,T-141,NASA JSC,FALSE,TRUE
+T-151,Gateway Crew Training Curriculum Development,1.12.2,2025-01-01,2027-09-30,972,T-020,NASA JSC Crew Office,FALSE,FALSE
+T-152,Artemis IV Crew Gateway Training Campaign,1.12.2,2027-01-01,2028-09-30,638,T-151,NASA JSC Crew Office,FALSE,TRUE
+T-153,Gateway Emergency Procedures Development and Verification,1.12.2,2025-06-01,2027-06-30,759,T-151,NASA JSC MOD,FALSE,FALSE
+T-154,International Operations Coordination Framework Development,1.12.5,2025-01-01,2027-12-31,1094,T-146,NASA JSC,FALSE,FALSE
+T-155,Science and Payload Operations Plan Development,1.12.4,2025-01-01,2028-03-31,1186,T-004,NASA JSC / Science Office,FALSE,FALSE
+T-156,Crew Health and Medical Protocols for NRHO Environment,1.12.6,2024-01-01,2027-09-30,1368,T-020,NASA JSC HRP,FALSE,FALSE
+T-157,Visiting Vehicle Operations Support Planning,1.12.7,2025-01-01,2027-12-31,1094,T-013,NASA JSC MOD,FALSE,FALSE
+T-158,Mission Simulation Campaign for Artemis IV Readiness,1.12.3,2027-10-01,2028-09-30,364,T-150 T-152,NASA JSC MOD,FALSE,TRUE
+T-159,I-HAB Separation and Crew-Assisted Berthing at Gateway,1.5.7,2028-10-07,2028-10-10,3,T-140,NASA JSC MOD / Artemis IV Crew,FALSE,TRUE
+T-160,First Crewed Activation of Gateway Systems Artemis IV,1.12.1,2028-10-10,2028-11-10,31,T-159,Artemis IV Crew / NASA JSC MOD,FALSE,FALSE
+T-161,ESPRIT Lunar View NRHO Transit and Autonomous Docking,1.6.2,2029-07-02,2029-08-15,44,T-096,NASA JSC MOD / ESA,FALSE,FALSE
+T-162,ESPRIT Xenon Propellant Transfer Demonstration to PPE,1.6.3,2029-08-16,2029-10-31,76,T-161,NASA JSC / ESA,TRUE,FALSE
+T-163,Canadarm3 First Operational Tasking and Commissioning Complete,1.8.6,2030-03-15,2030-05-31,77,T-117,MDA Space / NASA JSC MOD,TRUE,FALSE
+T-164,UAE Airlock Crew-Assisted Docking and Commissioning,1.7,2030-10-15,2030-11-30,46,T-107,NASA JSC MOD / MBRSC,TRUE,FALSE
+T-165,Gateway Full Initial Operational Capability Declaration,1.0,2031-06-01,2031-06-01,1,T-163 T-164,NASA JSC,TRUE,TRUE
