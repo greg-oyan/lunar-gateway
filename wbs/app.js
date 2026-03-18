@@ -14,8 +14,15 @@ const workspace = document.getElementById('workspace');
 const searchInput = document.getElementById('searchInput');
 const expandTopBtn = document.getElementById('expandTopBtn');
 const collapseBtn = document.getElementById('collapseBtn');
+const explorerViewBtn = document.getElementById('explorerViewBtn');
+const structureViewBtn = document.getElementById('structureViewBtn');
+const navActions = document.querySelector('.nav-zone__actions');
 const treeStatus = document.getElementById('treeStatus');
 const treeElement = document.getElementById('tree');
+const structureView = document.getElementById('structureView');
+const structureLevelSummary = document.getElementById('structureLevelSummary');
+const structureViewport = document.getElementById('structureViewport');
+const structureSvg = document.getElementById('structureSvg');
 const overviewContent = document.getElementById('overviewContent');
 const focusZone = document.getElementById('focusZone');
 const focusContent = document.getElementById('focusContent');
@@ -33,12 +40,14 @@ const state = {
   visibleIds: null,
   autoExpandedIds: new Set(),
   activeDetail: null,
+  viewMode: 'explorer',
   expandedPreviewByDetail: {
     cost: false,
     schedule: false,
     risks: false,
     documents: false,
   },
+  structureLayout: null,
 };
 
 function escapeHtml(value) {
@@ -243,6 +252,28 @@ function buildLensCards(node) {
   ];
 }
 
+function truncateLabel(text, maxLength) {
+  const clean = String(text ?? '').replace(/\s+/g, ' ').trim();
+  if (clean.length <= maxLength) return clean;
+  return `${clean.slice(0, maxLength - 1).trim()}...`;
+}
+
+function getSelectedPathIds(node) {
+  if (!node) return new Set();
+  return new Set([node.id, ...node.ancestorIds]);
+}
+
+function setViewMode(mode) {
+  state.viewMode = mode;
+  render();
+
+  if (mode === 'structure') {
+    requestAnimationFrame(() => {
+      scrollStructureToSelection();
+    });
+  }
+}
+
 function updateSearchState() {
   const query = state.searchQuery.trim().toLowerCase();
   state.searchMatches = new Set();
@@ -300,6 +331,11 @@ function selectNode(nodeId) {
   ensureAncestorsExpanded(nodeId);
   if (history.replaceState) history.replaceState(null, '', `#${encodeURIComponent(nodeId)}`);
   render();
+  if (state.viewMode === 'structure') {
+    requestAnimationFrame(() => {
+      scrollStructureToSelection();
+    });
+  }
 }
 
 function openDetail(detailKey) {
@@ -322,6 +358,229 @@ function closeDetail() {
 function togglePreviewMore(detailKey) {
   state.expandedPreviewByDetail[detailKey] = !state.expandedPreviewByDetail[detailKey];
   renderFocus();
+}
+
+function buildStructureLayout(rootNode, viewportWidth) {
+  if (!rootNode) return null;
+
+  const layoutNodes = [];
+  const layoutById = new Map();
+  const leftPadding = 52;
+  const rightPadding = 44;
+  const topPadding = 76;
+  const bottomPadding = 44;
+  const leafGap = 34;
+  const groupGap = 22;
+  const width = Math.max(viewportWidth || 920, 920);
+  const maxDepth = Math.max(...state.data.nodes.map((node) => node.level - 1), 0);
+  let cursorY = topPadding;
+
+  const nodeDimensions = (level) => {
+    if (level === 1) return { width: 250, height: 54, radius: 18 };
+    if (level === 2) return { width: 210, height: 40, radius: 16 };
+    return { width: 172, height: 28, radius: 14 };
+  };
+
+  const columnGap = maxDepth > 0
+    ? Math.max(240, (width - leftPadding - rightPadding - nodeDimensions(1).width) / maxDepth)
+    : width - leftPadding - rightPadding - nodeDimensions(1).width;
+
+  function getNodeX(level) {
+    const depth = level - 1;
+    const rightEdge = width - rightPadding - depth * columnGap;
+    return rightEdge - nodeDimensions(level).width;
+  }
+
+  function assignSubtree(node, isLastLevelTwoBranch = false) {
+    const dimensions = nodeDimensions(node.level);
+    let centerY = cursorY;
+
+    if (node.childIds.length > 0) {
+      const childCenters = node.childIds.map((childId, index) =>
+        assignSubtree(state.nodesById.get(childId), index === node.childIds.length - 1),
+      );
+      centerY = (childCenters[0] + childCenters.at(-1)) / 2;
+      if (node.level === 2 && !isLastLevelTwoBranch) {
+        cursorY += groupGap;
+      }
+    } else {
+      centerY = cursorY;
+      cursorY += leafGap;
+    }
+
+    const layoutNode = {
+      id: node.id,
+      parentId: node.parentId,
+      level: node.level,
+      name: node.name,
+      x: getNodeX(node.level),
+      y: centerY,
+      width: dimensions.width,
+      height: dimensions.height,
+      radius: dimensions.radius,
+    };
+
+    layoutNodes.push(layoutNode);
+    layoutById.set(node.id, layoutNode);
+    return centerY;
+  }
+
+  const childCenters = rootNode.childIds.map((childId, index) =>
+    assignSubtree(state.nodesById.get(childId), index === rootNode.childIds.length - 1),
+  );
+  const rootDimensions = nodeDimensions(rootNode.level);
+  const rootY = childCenters.length
+    ? (childCenters[0] + childCenters.at(-1)) / 2
+    : topPadding;
+
+  const rootLayoutNode = {
+    id: rootNode.id,
+    parentId: rootNode.parentId,
+    level: rootNode.level,
+    name: rootNode.name,
+    x: getNodeX(rootNode.level),
+    y: rootY,
+    width: rootDimensions.width,
+    height: rootDimensions.height,
+    radius: rootDimensions.radius,
+  };
+
+  layoutNodes.push(rootLayoutNode);
+  layoutById.set(rootNode.id, rootLayoutNode);
+
+  const height = Math.max(cursorY + bottomPadding, 540);
+  return { width, height, nodes: layoutNodes, byId: layoutById, columnGap };
+}
+
+function renderStructureSummary() {
+  const countsByLevel = new Map();
+  state.data.nodes.forEach((node) => {
+    countsByLevel.set(node.level, (countsByLevel.get(node.level) || 0) + 1);
+  });
+
+  const cards = [
+    {
+      label: 'Detailed work',
+      value: pluralize(countsByLevel.get(3) || 0, 'element'),
+      hint: 'Lower-level elements spread on the left side of the roll-up.',
+    },
+    {
+      label: 'Major parts',
+      value: pluralize(countsByLevel.get(2) || 0, 'element'),
+      hint: 'Middle-layer elements organize the program into major branches.',
+    },
+    {
+      label: 'Program roll-up',
+      value: pluralize(countsByLevel.get(1) || 0, 'program node'),
+      hint: 'The overall Gateway program sits on the right as the final roll-up.',
+    },
+  ];
+
+  structureLevelSummary.innerHTML = cards
+    .map(
+      (card) => `
+        <article class="structure-level-card">
+          <p class="structure-level-card__label">${escapeHtml(card.label)}</p>
+          <p class="structure-level-card__value">${escapeHtml(card.value)}</p>
+          <p class="structure-level-card__hint">${escapeHtml(card.hint)}</p>
+        </article>
+      `,
+    )
+    .join('');
+}
+
+function renderStructureView() {
+  const rootNode = getRootNode();
+  if (!rootNode) {
+    structureSvg.innerHTML = '';
+    return;
+  }
+
+  const queryActive = Boolean(state.searchQuery.trim());
+  const hasMatches = state.searchMatches.size > 0;
+  treeStatus.textContent = queryActive
+    ? hasMatches
+      ? `${pluralize(state.searchMatches.size, 'matching branch')} highlighted in Structure View while the full hierarchy remains visible.`
+      : 'No matching branches were found. Structure View keeps the full hierarchy visible for context.'
+    : 'Structure View shows the full roll-up at a glance: detailed work on the left, major elements in the middle, and the program on the right.';
+
+  renderStructureSummary();
+  const viewportWidth = Math.max(structureViewport.clientWidth - 36, 920);
+  const layout = buildStructureLayout(rootNode, viewportWidth);
+  state.structureLayout = layout;
+
+  const selectedNode = state.nodesById.get(state.selectedId);
+  const selectedPathIds = getSelectedPathIds(selectedNode);
+
+  const columnLabels = [
+    { label: 'Detailed Work', x: 70 },
+    { label: 'Major Elements', x: layout.width / 2 - 84 },
+    { label: 'Program Roll-Up', x: layout.width - 250 },
+  ];
+
+  const linksMarkup = layout.nodes
+    .filter((node) => node.parentId && layout.byId.has(node.parentId))
+    .map((node) => {
+      const parent = layout.byId.get(node.parentId);
+      const childRight = node.x + node.width;
+      const parentLeft = parent.x;
+      const curve = Math.max((parentLeft - childRight) * 0.42, 46);
+      const path = `M ${childRight} ${node.y} C ${childRight + curve} ${node.y}, ${parentLeft - curve} ${parent.y}, ${parentLeft} ${parent.y}`;
+      const selectedPath = selectedPathIds.has(node.id) && selectedPathIds.has(parent.id);
+      return `<path class="structure-link ${selectedPath ? 'structure-link--selected-path' : ''}" d="${path}" />`;
+    })
+    .join('');
+
+  const nodesMarkup = layout.nodes
+    .sort((left, right) => left.level - right.level || left.y - right.y)
+    .map((layoutNode) => {
+      const node = state.nodesById.get(layoutNode.id);
+      const isSelected = node.id === state.selectedId;
+      const isMatch = state.searchMatches.has(node.id);
+      const isDimmed = queryActive && hasMatches && !isMatch && !node.ancestorIds.some((id) => state.searchMatches.has(id));
+      const label = truncateLabel(node.name, layoutNode.level === 3 ? 24 : layoutNode.level === 2 ? 28 : 32);
+      const cardClasses = [
+        'structure-node',
+        `structure-node--level-${layoutNode.level}`,
+        isSelected ? 'structure-node--selected' : '',
+        isMatch ? 'structure-node--match' : '',
+        isDimmed ? 'structure-node--dim' : '',
+      ]
+        .filter(Boolean)
+        .join(' ');
+
+      const labelX = layoutNode.x + 12;
+      const labelY = layoutNode.y - (layoutNode.level === 3 ? 1 : 4);
+
+      return `
+        <g class="${cardClasses}" data-structure-node="true" data-id="${escapeHtml(node.id)}" tabindex="0" role="button" aria-label="${escapeHtml(`${node.id} ${node.name}`)}">
+          <rect class="structure-node__card" x="${layoutNode.x}" y="${layoutNode.y - layoutNode.height / 2}" width="${layoutNode.width}" height="${layoutNode.height}" rx="${layoutNode.radius}" ry="${layoutNode.radius}" />
+          <text class="structure-node__code" x="${labelX}" y="${labelY}">${escapeHtml(node.id)}</text>
+          <text class="structure-node__label" x="${labelX}" y="${labelY + (layoutNode.level === 3 ? 13 : 16)}">${escapeHtml(label)}</text>
+        </g>
+      `;
+    })
+    .join('');
+
+  const labelsMarkup = columnLabels
+    .map(
+      (item) => `<text class="structure-column-label" x="${item.x}" y="38">${escapeHtml(item.label)}</text>`,
+    )
+    .join('');
+
+  structureSvg.setAttribute('viewBox', `0 0 ${layout.width} ${layout.height}`);
+  structureSvg.setAttribute('width', `${layout.width}`);
+  structureSvg.setAttribute('height', `${layout.height}`);
+  structureSvg.innerHTML = `${labelsMarkup}${linksMarkup}${nodesMarkup}`;
+}
+
+function scrollStructureToSelection() {
+  if (!state.structureLayout || state.viewMode !== 'structure') return;
+  const layoutNode = state.structureLayout.byId.get(state.selectedId);
+  if (!layoutNode) return;
+
+  const targetTop = Math.max(layoutNode.y - structureViewport.clientHeight / 2, 0);
+  structureViewport.scrollTo({ top: targetTop, behavior: 'smooth' });
 }
 
 function renderTree() {
@@ -363,7 +622,7 @@ function renderTreeBranch(node) {
     <div class="tree-node">
       <div class="tree-row">
         <button class="tree-toggle" type="button" data-action="toggle" data-id="${escapeHtml(node.id)}" ${hasChildren ? '' : 'disabled'} aria-label="${expanded ? 'Collapse' : 'Expand'} ${escapeHtml(node.name)}" aria-expanded="${expanded ? 'true' : 'false'}">
-          ${hasChildren ? (expanded ? '−' : '+') : '•'}
+          ${hasChildren ? (expanded ? '-' : '+') : '.'}
         </button>
         <button class="tree-select ${selected ? 'tree-select--selected' : ''}" type="button" data-action="select" data-id="${escapeHtml(node.id)}">
           <span class="tree-select__code">${escapeHtml(node.id)}</span>
@@ -748,10 +1007,31 @@ function renderFocus() {
   `;
 }
 
+function renderNavigationMode() {
+  const explorerActive = state.viewMode === 'explorer';
+
+  explorerViewBtn.classList.toggle('view-switch__button--active', explorerActive);
+  explorerViewBtn.setAttribute('aria-selected', explorerActive ? 'true' : 'false');
+  structureViewBtn.classList.toggle('view-switch__button--active', !explorerActive);
+  structureViewBtn.setAttribute('aria-selected', explorerActive ? 'false' : 'true');
+
+  treeElement.hidden = !explorerActive;
+  structureView.hidden = explorerActive;
+  navActions.hidden = !explorerActive;
+
+  workspace.classList.toggle('workspace--structure-view', !explorerActive);
+
+  if (explorerActive) {
+    renderTree();
+  } else {
+    renderStructureView();
+  }
+}
+
 function render() {
-  renderTree();
-  renderOverview();
   renderFocus();
+  renderNavigationMode();
+  renderOverview();
 }
 
 async function loadData() {
@@ -789,6 +1069,11 @@ searchInput.addEventListener('input', (event) => {
   state.searchQuery = event.target.value || '';
   updateSearchState();
   render();
+  if (state.viewMode === 'structure') {
+    requestAnimationFrame(() => {
+      scrollStructureToSelection();
+    });
+  }
 });
 
 expandTopBtn.addEventListener('click', () => {
@@ -797,6 +1082,14 @@ expandTopBtn.addEventListener('click', () => {
 
 collapseBtn.addEventListener('click', () => {
   if (state.data) collapseToMajorParts();
+});
+
+explorerViewBtn.addEventListener('click', () => {
+  if (state.data) setViewMode('explorer');
+});
+
+structureViewBtn.addEventListener('click', () => {
+  if (state.data) setViewMode('structure');
 });
 
 treeElement.addEventListener('click', (event) => {
@@ -827,8 +1120,30 @@ focusContent.addEventListener('click', (event) => {
   if (control) closeDetail();
 });
 
+structureSvg.addEventListener('click', (event) => {
+  const control = event.target.closest('[data-structure-node]');
+  if (!control) return;
+  const nodeId = control.dataset.id;
+  if (nodeId && state.nodesById.has(nodeId)) selectNode(nodeId);
+});
+
+structureSvg.addEventListener('keydown', (event) => {
+  if (event.key !== 'Enter' && event.key !== ' ') return;
+  const control = event.target.closest('[data-structure-node]');
+  if (!control) return;
+  event.preventDefault();
+  const nodeId = control.dataset.id;
+  if (nodeId && state.nodesById.has(nodeId)) selectNode(nodeId);
+});
+
 window.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && state.activeDetail) closeDetail();
+});
+
+window.addEventListener('resize', () => {
+  if (state.data && state.viewMode === 'structure') {
+    renderStructureView();
+  }
 });
 
 loadData();

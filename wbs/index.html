@@ -38,6 +38,27 @@
           <p id="treeStatus" class="nav-zone__hint">Loading hierarchy...</p>
         </div>
 
+        <div class="view-switch" role="tablist" aria-label="Navigation view mode">
+          <button
+            id="explorerViewBtn"
+            class="view-switch__button view-switch__button--active"
+            type="button"
+            data-view-mode="explorer"
+            aria-selected="true"
+          >
+            Explorer View
+          </button>
+          <button
+            id="structureViewBtn"
+            class="view-switch__button"
+            type="button"
+            data-view-mode="structure"
+            aria-selected="false"
+          >
+            Structure View
+          </button>
+        </div>
+
         <label class="search-field" for="searchInput">
           <span class="search-field__label">Find a program part</span>
           <input
@@ -54,6 +75,20 @@
         </div>
 
         <nav id="tree" class="tree" aria-label="Work breakdown structure"></nav>
+
+        <section id="structureView" class="structure-view" aria-label="WBS structure visualization" hidden>
+          <div class="structure-view__summary">
+            <p class="structure-view__intro">
+              Read from left to right: detailed work rolls up into major Gateway elements, then into the
+              overall program.
+            </p>
+            <div id="structureLevelSummary" class="structure-levels" aria-label="Hierarchy level summary"></div>
+          </div>
+
+          <div id="structureViewport" class="structure-viewport">
+            <svg id="structureSvg" class="structure-svg" role="img" aria-label="Gateway WBS structure view"></svg>
+          </div>
+        </section>
       </aside>
 
       <section class="overview-zone" aria-label="Selected node overview">
