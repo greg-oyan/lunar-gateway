@@ -1,127 +1,127 @@
-wbs_id,fy,labor_cost,material_cost,integration_cost,total_cost
-1.1,FY2020,20.4,1.2,2.4,24.0
-1.1,FY2021,25.5,1.5,3.0,30.0
-1.1,FY2022,29.8,1.7,3.5,35.0
-1.1,FY2023,32.3,1.9,3.8,38.0
-1.1,FY2024,32.3,1.9,3.8,38.0
-1.1,FY2025,30.6,1.8,3.6,36.0
-1.1,FY2026,28.9,1.7,3.4,34.0
-1.1,FY2027,28.1,1.6,3.3,33.0
-1.1,FY2028,27.2,1.6,3.2,32.0
-1.1,FY2029,26.4,1.5,3.1,31.0
-1.1,FY2030,24.7,1.4,2.9,29.0
-1.1,FY2031,23.0,1.3,2.7,27.0
-1.1,FY2032,21.3,1.2,2.5,25.0
-1.1,FY2033,19.6,1.1,2.3,23.0
-1.2,FY2020,13.5,2.2,2.3,18.0
-1.2,FY2021,21.0,3.4,3.6,28.0
-1.2,FY2022,28.5,4.6,4.9,38.0
-1.2,FY2023,33.8,5.4,5.8,45.0
-1.2,FY2024,33.0,5.3,5.7,44.0
-1.2,FY2025,31.5,5.0,5.5,42.0
-1.2,FY2026,30.0,4.8,5.2,40.0
-1.2,FY2027,28.5,4.6,4.9,38.0
-1.2,FY2028,24.0,3.8,4.2,32.0
-1.2,FY2029,21.0,3.4,3.6,28.0
-1.2,FY2030,16.5,2.6,2.9,22.0
-1.2,FY2031,17.3,2.7,3.0,23.0
-1.3,FY2019,6.3,9.0,2.7,18.0
-1.3,FY2020,10.5,15.0,4.5,30.0
-1.3,FY2021,12.3,17.5,5.2,35.0
-1.3,FY2022,22.8,32.5,9.7,65.0
-1.3,FY2023,29.8,42.5,12.7,85.0
-1.3,FY2024,25.2,36.0,10.8,72.0
-1.3,FY2025,16.8,24.0,7.2,48.0
-1.3,FY2026,11.2,16.0,4.8,32.0
-1.3,FY2027,7.0,10.0,3.0,20.0
-1.4,FY2020,15.4,8.4,4.2,28.0
-1.4,FY2021,37.4,20.4,10.2,68.0
-1.4,FY2022,74.3,40.5,20.2,135.0
-1.4,FY2023,107.3,58.5,29.2,195.0
-1.4,FY2024,134.8,73.5,36.7,245.0
-1.4,FY2025,119.9,65.4,32.7,218.0
-1.4,FY2026,79.8,43.5,21.7,145.0
-1.4,FY2027,35.8,19.5,9.7,65.0
-1.4,FY2028,12.7,6.9,3.4,23.0
-1.5,FY2020,0.0,0.0,0.0,0.0
-1.5,FY2021,8.3,4.5,2.2,15.0
-1.5,FY2022,28.6,15.6,7.8,52.0
-1.5,FY2023,49.5,27.0,13.5,90.0
-1.5,FY2024,64.9,35.4,17.7,118.0
-1.5,FY2025,79.8,43.5,21.7,145.0
-1.5,FY2026,64.9,35.4,17.7,118.0
-1.5,FY2027,34.1,18.6,9.3,62.0
-1.5,FY2028,9.4,5.1,2.5,17.0
-1.5,FY2029,2.8,1.5,0.7,5.0
-1.6,FY2020,4.4,2.4,1.2,8.0
-1.6,FY2021,15.4,8.4,4.2,28.0
-1.6,FY2022,30.3,16.5,8.2,55.0
-1.6,FY2023,39.6,21.6,10.8,72.0
-1.6,FY2024,45.1,24.6,12.3,82.0
-1.6,FY2025,41.3,22.5,11.2,75.0
-1.6,FY2026,34.1,18.6,9.3,62.0
-1.6,FY2027,17.6,9.6,4.8,32.0
-1.6,FY2028,20.9,11.4,5.7,38.0
-1.6,FY2029,23.1,12.6,6.3,42.0
-1.6,FY2030,6.1,3.3,1.6,11.0
-1.7,FY2024,4.4,2.4,1.2,8.0
-1.7,FY2025,12.1,6.6,3.3,22.0
-1.7,FY2026,22.0,12.0,6.0,40.0
-1.7,FY2027,26.4,14.4,7.2,48.0
-1.7,FY2028,23.1,12.6,6.3,42.0
-1.7,FY2029,12.1,6.6,3.3,22.0
-1.7,FY2030,5.0,2.7,1.3,9.0
-1.7,FY2031,2.2,1.2,0.6,4.0
-1.8,FY2020,12.1,6.6,3.3,22.0
-1.8,FY2021,30.3,16.5,8.2,55.0
-1.8,FY2022,52.3,28.5,14.2,95.0
-1.8,FY2023,63.3,34.5,17.2,115.0
-1.8,FY2024,71.5,39.0,19.5,130.0
-1.8,FY2025,70.4,38.4,19.2,128.0
-1.8,FY2026,64.9,35.4,17.7,118.0
-1.8,FY2027,46.8,25.5,12.7,85.0
-1.8,FY2028,37.4,20.4,10.2,68.0
-1.8,FY2029,30.3,16.5,8.2,55.0
-1.8,FY2030,34.1,18.6,9.3,62.0
-1.8,FY2031,26.9,14.7,7.4,49.0
-1.9,FY2023,12.1,6.6,3.3,22.0
-1.9,FY2024,30.3,16.5,8.2,55.0
-1.9,FY2025,52.3,28.5,14.2,95.0
-1.9,FY2026,63.3,34.5,17.2,115.0
-1.9,FY2027,34.1,18.6,9.3,62.0
-1.9,FY2028,12.1,6.6,3.3,22.0
-1.9,FY2029,6.6,3.6,1.8,12.0
-1.9,FY2030,2.8,1.5,0.7,5.0
-1.10,FY2021,6.6,3.6,1.8,12.0
-1.10,FY2022,9.9,5.4,2.7,18.0
-1.10,FY2023,12.1,6.6,3.3,22.0
-1.10,FY2024,15.4,8.4,4.2,28.0
-1.10,FY2025,19.3,10.5,5.2,35.0
-1.10,FY2026,28.6,15.6,7.8,52.0
-1.10,FY2027,104.5,57.0,28.5,190.0
-1.10,FY2028,12.1,6.6,3.3,22.0
-1.10,FY2029,46.8,25.5,12.7,85.0
-1.10,FY2030,28.6,15.6,7.8,52.0
-1.10,FY2031,22.6,12.3,6.1,41.0
-1.11,FY2020,5.6,1.6,0.8,8.0
-1.11,FY2021,10.5,3.0,1.5,15.0
-1.11,FY2022,17.5,5.0,2.5,25.0
-1.11,FY2023,22.4,6.4,3.2,32.0
-1.11,FY2024,26.6,7.6,3.8,38.0
-1.11,FY2025,29.4,8.4,4.2,42.0
-1.11,FY2026,26.6,7.6,3.8,38.0
-1.11,FY2027,24.5,7.0,3.5,35.0
-1.11,FY2028,22.4,6.4,3.2,32.0
-1.11,FY2029,19.6,5.6,2.8,28.0
-1.11,FY2030,15.4,4.4,2.2,22.0
-1.11,FY2031,12.6,3.6,1.8,18.0
-1.11,FY2032,7.0,2.0,1.0,10.0
-1.11,FY2033,3.5,1.0,0.5,5.0
-1.12,FY2026,15.4,4.4,2.2,22.0
-1.12,FY2027,38.5,11.0,5.5,55.0
-1.12,FY2028,82.6,23.6,11.8,118.0
-1.12,FY2029,78.4,22.4,11.2,112.0
-1.12,FY2030,82.6,23.6,11.8,118.0
-1.12,FY2031,89.6,25.6,12.8,128.0
-1.12,FY2032,94.5,27.0,13.5,135.0
-1.12,FY2033,70.0,20.0,10.0,100.0
+﻿"wbs_id","fy","labor_cost","material_cost","integration_cost","total_cost","labor_cost_usd","material_cost_usd","integration_cost_usd","total_cost_usd","cost_scope","basis_type","source_id","traceability_note"
+"1.1","FY2020","20.4","1.2","2.4","24","20400000","1200000","2400000","24000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.1","FY2021","25.5","1.5","3","30","25500000","1500000","3000000","30000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.1","FY2022","29.8","1.7","3.5","35","29800000","1700000","3500000","35000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.1","FY2023","32.3","1.9","3.8","38","32300000","1900000","3800000","38000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.1","FY2024","32.3","1.9","3.8","38","32300000","1900000","3800000","38000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.1","FY2025","30.6","1.8","3.6","36","30600000","1800000","3600000","36000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.1","FY2026","28.9","1.7","3.4","34","28900000","1700000","3400000","34000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.1","FY2027","28.1","1.6","3.3","33","28100000","1600000","3300000","33000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.1","FY2028","27.2","1.6","3.2","32","27200000","1600000","3200000","32000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.1","FY2029","26.4","1.5","3.1","31","26400000","1500000","3100000","31000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.1","FY2030","24.7","1.4","2.9","29","24700000","1400000","2900000","29000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.1","FY2031","23","1.3","2.7","27","23000000","1300000","2700000","27000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.1","FY2032","21.3","1.2","2.5","25","21300000","1200000","2500000","25000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.1","FY2033","19.6","1.1","2.3","23","19600000","1100000","2300000","23000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.2","FY2020","13.5","2.2","2.3","18","13500000","2200000","2300000","18000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-003;WEB-006","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.2","FY2021","21","3.4","3.6","28","21000000","3400000","3600000","28000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-003;WEB-006","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.2","FY2022","28.5","4.6","4.9","38","28500000","4600000","4900000","38000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-003;WEB-006","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.2","FY2023","33.8","5.4","5.8","45","33800000","5400000","5800000","45000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-003;WEB-006","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.2","FY2024","33","5.3","5.7","44","33000000","5300000","5700000","44000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-003;WEB-006","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.2","FY2025","31.5","5","5.5","42","31500000","5000000","5500000","42000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-003;WEB-006","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.2","FY2026","30","4.8","5.2","40","30000000","4800000","5200000","40000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-003;WEB-006","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.2","FY2027","28.5","4.6","4.9","38","28500000","4600000","4900000","38000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-003;WEB-006","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.2","FY2028","24","3.8","4.2","32","24000000","3800000","4200000","32000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-003;WEB-006","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.2","FY2029","21","3.4","3.6","28","21000000","3400000","3600000","28000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-003;WEB-006","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.2","FY2030","16.5","2.6","2.9","22","16500000","2600000","2900000","22000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-003;WEB-006","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.2","FY2031","17.3","2.7","3","23","17300000","2700000","3000000","23000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-003;WEB-006","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.3","FY2019","6.3","9","2.7","18","6300000","9000000","2700000","18000000","program_reference_nasa_led","direct_contract_plus_program_estimate","WEB-001;INT-003;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.3","FY2020","10.5","15","4.5","30","10500000","15000000","4500000","30000000","program_reference_nasa_led","direct_contract_plus_program_estimate","WEB-001;INT-003;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.3","FY2021","12.3","17.5","5.2","35","12300000","17500000","5200000","35000000","program_reference_nasa_led","direct_contract_plus_program_estimate","WEB-001;INT-003;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.3","FY2022","22.8","32.5","9.7","65","22800000","32500000","9700000","65000000","program_reference_nasa_led","direct_contract_plus_program_estimate","WEB-001;INT-003;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.3","FY2023","29.8","42.5","12.7","85","29800000","42500000","12700000","85000000","program_reference_nasa_led","direct_contract_plus_program_estimate","WEB-001;INT-003;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.3","FY2024","25.2","36","10.8","72","25200000","36000000","10800000","72000000","program_reference_nasa_led","direct_contract_plus_program_estimate","WEB-001;INT-003;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.3","FY2025","16.8","24","7.2","48","16800000","24000000","7200000","48000000","program_reference_nasa_led","direct_contract_plus_program_estimate","WEB-001;INT-003;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.3","FY2026","11.2","16","4.8","32","11200000","16000000","4800000","32000000","program_reference_nasa_led","direct_contract_plus_program_estimate","WEB-001;INT-003;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.3","FY2027","7","10","3","20","7000000","10000000","3000000","20000000","program_reference_nasa_led","direct_contract_plus_program_estimate","WEB-001;INT-003;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.4","FY2020","15.4","8.4","4.2","28","15400000","8400000","4200000","28000000","program_reference_nasa_led","direct_contract_plus_program_estimate","WEB-002;WEB-003;WEB-006","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.4","FY2021","37.4","20.4","10.2","68","37400000","20400000","10200000","68000000","program_reference_nasa_led","direct_contract_plus_program_estimate","WEB-002;WEB-003;WEB-006","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.4","FY2022","74.3","40.5","20.2","135","74300000","40500000","20200000","135000000","program_reference_nasa_led","direct_contract_plus_program_estimate","WEB-002;WEB-003;WEB-006","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.4","FY2023","107.3","58.5","29.2","195","107300000","58500000","29200000","195000000","program_reference_nasa_led","direct_contract_plus_program_estimate","WEB-002;WEB-003;WEB-006","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.4","FY2024","134.8","73.5","36.7","245","134800000","73500000","36700000","245000000","program_reference_nasa_led","direct_contract_plus_program_estimate","WEB-002;WEB-003;WEB-006","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.4","FY2025","119.9","65.4","32.7","218","119900000","65400000","32700000","218000000","program_reference_nasa_led","direct_contract_plus_program_estimate","WEB-002;WEB-003;WEB-006","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.4","FY2026","79.8","43.5","21.7","145","79800000","43500000","21700000","145000000","program_reference_nasa_led","direct_contract_plus_program_estimate","WEB-002;WEB-003;WEB-006","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.4","FY2027","35.8","19.5","9.7","65","35800000","19500000","9700000","65000000","program_reference_nasa_led","direct_contract_plus_program_estimate","WEB-002;WEB-003;WEB-006","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.4","FY2028","12.7","6.9","3.4","23","12700000","6900000","3400000","23000000","program_reference_nasa_led","direct_contract_plus_program_estimate","WEB-002;WEB-003;WEB-006","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.5","FY2020","0","0","0","0","0","0","0","0","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-010","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.5","FY2021","8.3","4.5","2.2","15","8300000","4500000","2200000","15000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-010","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.5","FY2022","28.6","15.6","7.8","52","28600000","15600000","7800000","52000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-010","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.5","FY2023","49.5","27","13.5","90","49500000","27000000","13500000","90000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-010","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.5","FY2024","64.9","35.4","17.7","118","64900000","35400000","17700000","118000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-010","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.5","FY2025","79.8","43.5","21.7","145","79800000","43500000","21700000","145000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-010","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.5","FY2026","64.9","35.4","17.7","118","64900000","35400000","17700000","118000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-010","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.5","FY2027","34.1","18.6","9.3","62","34100000","18600000","9300000","62000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-010","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.5","FY2028","9.4","5.1","2.5","17","9400000","5100000","2500000","17000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-010","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.5","FY2029","2.8","1.5","0.7","5","2800000","1500000","700000","5000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-010","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.6","FY2020","4.4","2.4","1.2","8","4400000","2400000","1200000","8000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-011;WEB-012","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.6","FY2021","15.4","8.4","4.2","28","15400000","8400000","4200000","28000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-011;WEB-012","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.6","FY2022","30.3","16.5","8.2","55","30300000","16500000","8200000","55000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-011;WEB-012","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.6","FY2023","39.6","21.6","10.8","72","39600000","21600000","10800000","72000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-011;WEB-012","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.6","FY2024","45.1","24.6","12.3","82","45100000","24600000","12300000","82000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-011;WEB-012","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.6","FY2025","41.3","22.5","11.2","75","41300000","22500000","11200000","75000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-011;WEB-012","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.6","FY2026","34.1","18.6","9.3","62","34100000","18600000","9300000","62000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-011;WEB-012","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.6","FY2027","17.6","9.6","4.8","32","17600000","9600000","4800000","32000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-011;WEB-012","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.6","FY2028","20.9","11.4","5.7","38","20900000","11400000","5700000","38000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-011;WEB-012","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.6","FY2029","23.1","12.6","6.3","42","23100000","12600000","6300000","42000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-011;WEB-012","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.6","FY2030","6.1","3.3","1.6","11","6100000","3300000","1600000","11000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-011;WEB-012","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.7","FY2024","4.4","2.4","1.2","8","4400000","2400000","1200000","8000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-005","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.7","FY2025","12.1","6.6","3.3","22","12100000","6600000","3300000","22000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-005","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.7","FY2026","22","12","6","40","22000000","12000000","6000000","40000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-005","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.7","FY2027","26.4","14.4","7.2","48","26400000","14400000","7200000","48000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-005","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.7","FY2028","23.1","12.6","6.3","42","23100000","12600000","6300000","42000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-005","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.7","FY2029","12.1","6.6","3.3","22","12100000","6600000","3300000","22000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-005","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.7","FY2030","5","2.7","1.3","9","5000000","2700000","1300000","9000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-005","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.7","FY2031","2.2","1.2","0.6","4","2200000","1200000","600000","4000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-005","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.8","FY2020","12.1","6.6","3.3","22","12100000","6600000","3300000","22000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-008;WEB-009","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.8","FY2021","30.3","16.5","8.2","55","30300000","16500000","8200000","55000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-008;WEB-009","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.8","FY2022","52.3","28.5","14.2","95","52300000","28500000","14200000","95000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-008;WEB-009","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.8","FY2023","63.3","34.5","17.2","115","63300000","34500000","17200000","115000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-008;WEB-009","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.8","FY2024","71.5","39","19.5","130","71500000","39000000","19500000","130000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-008;WEB-009","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.8","FY2025","70.4","38.4","19.2","128","70400000","38400000","19200000","128000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-008;WEB-009","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.8","FY2026","64.9","35.4","17.7","118","64900000","35400000","17700000","118000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-008;WEB-009","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.8","FY2027","46.8","25.5","12.7","85","46800000","25500000","12700000","85000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-008;WEB-009","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.8","FY2028","37.4","20.4","10.2","68","37400000","20400000","10200000","68000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-008;WEB-009","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.8","FY2029","30.3","16.5","8.2","55","30300000","16500000","8200000","55000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-008;WEB-009","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.8","FY2030","34.1","18.6","9.3","62","34100000","18600000","9300000","62000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-008;WEB-009","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.8","FY2031","26.9","14.7","7.4","49","26900000","14700000","7400000","49000000","program_reference_partner_value","partner_reference_plus_integration_estimate","INT-001;WEB-008;WEB-009","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.9","FY2023","12.1","6.6","3.3","22","12100000","6600000","3300000","22000000","program_reference_nasa_led","facility_test_build_up","INT-003;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.9","FY2024","30.3","16.5","8.2","55","30300000","16500000","8200000","55000000","program_reference_nasa_led","facility_test_build_up","INT-003;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.9","FY2025","52.3","28.5","14.2","95","52300000","28500000","14200000","95000000","program_reference_nasa_led","facility_test_build_up","INT-003;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.9","FY2026","63.3","34.5","17.2","115","63300000","34500000","17200000","115000000","program_reference_nasa_led","facility_test_build_up","INT-003;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.9","FY2027","34.1","18.6","9.3","62","34100000","18600000","9300000","62000000","program_reference_nasa_led","facility_test_build_up","INT-003;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.9","FY2028","12.1","6.6","3.3","22","12100000","6600000","3300000","22000000","program_reference_nasa_led","facility_test_build_up","INT-003;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.9","FY2029","6.6","3.6","1.8","12","6600000","3600000","1800000","12000000","program_reference_nasa_led","facility_test_build_up","INT-003;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.9","FY2030","2.8","1.5","0.7","5","2800000","1500000","700000","5000000","program_reference_nasa_led","facility_test_build_up","INT-003;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.10","FY2021","6.6","3.6","1.8","12","6600000","3600000","1800000","12000000","program_reference_nasa_led","launch_service_and_campaign_estimate","WEB-004;INT-003","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.10","FY2022","9.9","5.4","2.7","18","9900000","5400000","2700000","18000000","program_reference_nasa_led","launch_service_and_campaign_estimate","WEB-004;INT-003","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.10","FY2023","12.1","6.6","3.3","22","12100000","6600000","3300000","22000000","program_reference_nasa_led","launch_service_and_campaign_estimate","WEB-004;INT-003","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.10","FY2024","15.4","8.4","4.2","28","15400000","8400000","4200000","28000000","program_reference_nasa_led","launch_service_and_campaign_estimate","WEB-004;INT-003","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.10","FY2025","19.3","10.5","5.2","35","19300000","10500000","5200000","35000000","program_reference_nasa_led","launch_service_and_campaign_estimate","WEB-004;INT-003","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.10","FY2026","28.6","15.6","7.8","52","28600000","15600000","7800000","52000000","program_reference_nasa_led","launch_service_and_campaign_estimate","WEB-004;INT-003","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.10","FY2027","104.5","57","28.5","190","104500000","57000000","28500000","190000000","program_reference_nasa_led","launch_service_and_campaign_estimate","WEB-004;INT-003","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.10","FY2028","12.1","6.6","3.3","22","12100000","6600000","3300000","22000000","program_reference_nasa_led","launch_service_and_campaign_estimate","WEB-004;INT-003","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.10","FY2029","46.8","25.5","12.7","85","46800000","25500000","12700000","85000000","program_reference_nasa_led","launch_service_and_campaign_estimate","WEB-004;INT-003","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.10","FY2030","28.6","15.6","7.8","52","28600000","15600000","7800000","52000000","program_reference_nasa_led","launch_service_and_campaign_estimate","WEB-004;INT-003","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.10","FY2031","22.6","12.3","6.1","41","22600000","12300000","6100000","41000000","program_reference_nasa_led","launch_service_and_campaign_estimate","WEB-004;INT-003","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.11","FY2020","5.6","1.6","0.8","8","5600000","1600000","800000","8000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.11","FY2021","10.5","3","1.5","15","10500000","3000000","1500000","15000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.11","FY2022","17.5","5","2.5","25","17500000","5000000","2500000","25000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.11","FY2023","22.4","6.4","3.2","32","22400000","6400000","3200000","32000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.11","FY2024","26.6","7.6","3.8","38","26600000","7600000","3800000","38000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.11","FY2025","29.4","8.4","4.2","42","29400000","8400000","4200000","42000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.11","FY2026","26.6","7.6","3.8","38","26600000","7600000","3800000","38000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.11","FY2027","24.5","7","3.5","35","24500000","7000000","3500000","35000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.11","FY2028","22.4","6.4","3.2","32","22400000","6400000","3200000","32000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.11","FY2029","19.6","5.6","2.8","28","19600000","5600000","2800000","28000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.11","FY2030","15.4","4.4","2.2","22","15400000","4400000","2200000","22000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.11","FY2031","12.6","3.6","1.8","18","12600000","3600000","1800000","18000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.11","FY2032","7","2","1","10","7000000","2000000","1000000","10000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.11","FY2033","3.5","1","0.5","5","3500000","1000000","500000","5000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;INT-004","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.12","FY2026","15.4","4.4","2.2","22","15400000","4400000","2200000","22000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;WEB-007","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.12","FY2027","38.5","11","5.5","55","38500000","11000000","5500000","55000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;WEB-007","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.12","FY2028","82.6","23.6","11.8","118","82600000","23600000","11800000","118000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;WEB-007","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.12","FY2029","78.4","22.4","11.2","112","78400000","22400000","11200000","112000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;WEB-007","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.12","FY2030","82.6","23.6","11.8","118","82600000","23600000","11800000","118000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;WEB-007","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.12","FY2031","89.6","25.6","12.8","128","89600000","25600000","12800000","128000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;WEB-007","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.12","FY2032","94.5","27","13.5","135","94500000","27000000","13500000","135000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;WEB-007","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."
+"1.12","FY2033","70","20","10","100","70000000","20000000","10000000","100000000","program_reference_nasa_led","engineering_build_up_and_schedule_phased","INT-001;WEB-007","Annual current-cost phasing in explicit dollars. Legacy component fields remain in USD millions for backward compatibility with the local app server."

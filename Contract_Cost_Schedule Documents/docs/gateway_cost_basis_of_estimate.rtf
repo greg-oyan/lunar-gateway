@@ -1,0 +1,141 @@
+{\rtf1\ansi\ansicpg1252\deff0\deflang1033
+{\fonttbl
+{\f0\froman\fcharset0 Times New Roman;}
+{\f1\fswiss\fcharset0 Arial;}
+{\f2\fmodern\fcharset0 Courier New;}
+}
+{\colortbl;\red0\green0\blue0;\red0\green0\blue128;\red96\green96\blue96;}
+{\stylesheet
+{\s0\f0\fs24 Normal;}
+{\s1\f1\fs36\b\cf2 Heading 1;}
+{\s2\f1\fs28\b\cf2 Heading 2;}
+{\s3\f1\fs24\b\cf2 Heading 3;}
+}
+\widowctrl\hyphauto
+\margl1800\margr1800\margt1440\margb1440
+\paperw12240\paperh15840
+
+{\pard\s1\f1\fs40\b\cf2\qc NASA LUNAR GATEWAY PROGRAM\par}
+{\pard\f1\fs32\b\qc COST BASIS OF ESTIMATE AND TRACEABILITY GUIDE\par}
+{\pard\f1\fs24\qc Version 1.0\par}
+{\pard\f1\fs24\qc Updated: March 17, 2026\par}
+\pard\par
+{\pard\f0\fs20\cf3\qc Supporting files: gateway_cost_estimate.csv, gateway_cost_phasing.csv, gateway_cost_estimate_detail.csv, gateway_section_b_pricing.csv, gateway_source_reference_register.csv\par}
+\pard\par
+
+{\pard\s2\f1\fs28\b 1. Purpose\par}
+\pard\par
+{\pard\f0\fs24 This document explains how the Gateway cost support layer was rebuilt into a presentation-grade and analytically defensible authority source. The goal is to make the cost files understandable on their own, traceable to specific source material, and usable as the authority layer beneath the web applications.\par}
+\pard\par
+{\pard\f0\fs24 The rebuild keeps the existing strong CARD in place as the primary internal scope and methodology anchor. This document does not replace the CARD. Instead, it translates the CARD and supporting public sources into explicit annual values, clearer rollups, and a repeatable traceability structure.\par}
+\pard\par
+
+{\pard\s2\f1\fs28\b 2. What Was Rebuilt\par}
+\pard\par
+{\pard\f0\fs24 The rebuilt cost layer now does the following:\par}
+\pard\par
+{\pard\f0\fs24\li360 \bullet\tab Shows year-by-year values in explicit U.S. dollars through new *_usd columns.\par}
+{\pard\f0\fs24\li360 \bullet\tab Preserves legacy million-scale fields only for backward compatibility with the existing standalone WBS server.\par}
+{\pard\f0\fs24\li360 \bullet\tab Reconciles level-2 current-cost rollups to the annual phasing file so the annual profile and the rolled current cost agree.\par}
+{\pard\f0\fs24\li360 \bullet\tab Adds a grouped detail file so costs can be followed from WBS branch to cost component to fiscal year.\par}
+{\pard\f0\fs24\li360 \bullet\tab Distinguishes direct source values, derived values, analog estimates, and partner reference values.\par}
+{\pard\f0\fs24\li360 \bullet\tab Centralizes public and internal citations in a source register instead of burying citations in note text.\par}
+\pard\par
+
+{\pard\s2\f1\fs28\b 3. Scope Definition\par}
+\pard\par
+{\pard\f0\fs24 Two cost views are now carried explicitly in the data logic:\par}
+\pard\par
+{\pard\f0\fs24\li360 {\b Program-reference current cost.} This is the broad ecosystem view used for structural understanding and app-facing rollups. It includes NASA-managed cost plus clearly flagged partner contribution reference values where that improves program-level comprehension.\par}
+\pard\par
+{\pard\f0\fs24\li360 {\b NASA-accountable baseline context.} The CARD remains the controlling definition of NASA-funded ICE scope. Where the rebuilt estimate extends beyond that scope for ecosystem completeness, the files mark those rows as partner-reference values rather than NASA budget authority.\par}
+\pard\par
+{\pard\f0\fs24 This separation matters. The web apps are allowed to simplify or aggregate. The source documents must say what is NASA-funded, what is partner-funded, what is directly sourced, and what is inferred for program-reference completeness.\par}
+\pard\par
+
+{\pard\s2\f1\fs28\b 4. Data Products\par}
+\pard\par
+{\pard\f0\fs24\li360 {\b gateway_cost_estimate.csv}\tab Current-cost rollup by WBS, including uncertainty range, basis type, scope flag, source IDs, and explicit-dollar companion fields.\par}
+{\pard\f0\fs24\li360 {\b gateway_cost_phasing.csv}\tab Annual phasing by WBS with explicit-dollar columns and source/basis metadata.\par}
+{\pard\f0\fs24\li360 {\b gateway_cost_estimate_detail.csv}\tab Grouped detail layer that rolls from WBS total to cost component to fiscal year, plus explicit reserve detail.\par}
+{\pard\f0\fs24\li360 {\b gateway_section_b_pricing.csv}\tab Contract-backed priced lines with added scope, contract type, source ID, and traceability fields.\par}
+{\pard\f0\fs24\li360 {\b gateway_source_reference_register.csv}\tab Source authority register listing internal documents and public references used by the rebuilt cost layer.\par}
+\pard\par
+
+{\pard\s2\f1\fs28\b 5. Methodology\par}
+\pard\par
+{\pard\s3\f1\fs24\b 5.1 Source Hierarchy\par}
+\pard\par
+{\pard\f0\fs24 The rebuild used a simple source hierarchy:\par}
+\pard\par
+{\pard\f0\fs24\li360 1.\tab Internal controlling documents already present in the repository, led by the CARD and WBS Dictionary.\par}
+{\pard\f0\fs24\li360 2.\tab Internal working data already present in the repository, especially the master schedule and Section B pricing extract.\par}
+{\pard\f0\fs24\li360 3.\tab Authoritative public sources, led by NASA press releases, NASA budget material, GAO oversight, and official partner agency publications.\par}
+{\pard\f0\fs24\li360 4.\tab Credible partner-industry releases only where the contract value or scope detail was clearer there than on an agency page.\par}
+\pard\par
+
+{\pard\s3\f1\fs24\b 5.2 Current-Cost Rollup Logic\par}
+\pard\par
+{\pard\f0\fs24 Level-2 WBS current costs were set equal to the sum of the annual phasing rows for that WBS. This makes the rolled current cost mathematically traceable to the fiscal-year structure instead of leaving the annual and current-cost views disconnected.\par}
+\pard\par
+{\pard\f0\fs24 Level-3 WBS values were then scaled within each parent using the prior technical weighting of the legacy estimate. This approach preserves the established subsystem split while forcing the child rows to reconcile to the refreshed parent total.\par}
+\pard\par
+
+{\pard\s3\f1\fs24\b 5.3 Annual Phasing\par}
+\pard\par
+{\pard\f0\fs24 Annual phasing remains schedule-driven. The master schedule extract is the primary driver for when work peaks, when integration happens, when environmental test activity concentrates, and when operations ramp after crewed activation. The phasing file now carries explicit-dollar values in addition to the legacy million-scale values retained for backward compatibility.\par}
+\pard\par
+
+{\pard\s3\f1\fs24\b 5.4 Reserve Treatment\par}
+\pard\par
+{\pard\f0\fs24 Explicit reserve detail is carried in the grouped detail file rather than hidden in a single sentence. Three reserve buckets are broken out: estimation uncertainty reserve, schedule recovery reserve, and mass-reduction engineering change reserve. Reserve rows are not silently mixed into every subsystem line; they are visible as program-level management choices.\par}
+\pard\par
+
+{\pard\s3\f1\fs24\b 5.5 Uncertainty Ranges\par}
+\pard\par
+{\pard\f0\fs24 The low and high values were preserved as structured uncertainty bounds and scaled with the rebuilt current-cost totals where rollup reconciliation required adjustment. This keeps the original estimate's relative uncertainty posture while removing the prior disconnect between current-cost totals and annual phasing.\par}
+\pard\par
+
+{\pard\s2\f1\fs28\b 6. Key Assumptions\par}
+\pard\par
+{\pard\f0\fs24\li360 {\b A-01}\tab Explicit-dollar companion fields represent then-year current cost in U.S. dollars.\par}
+{\pard\f0\fs24\li360 {\b A-02}\tab Legacy base_cost, low_cost, high_cost, and phasing component fields remain in USD millions only to preserve compatibility with the existing local WBS server and demo app.\par}
+{\pard\f0\fs24\li360 {\b A-03}\tab Partner contribution rows are retained for program-reference completeness but are labeled as partner-reference scope rather than NASA budget authority.\par}
+{\pard\f0\fs24\li360 {\b A-04}\tab The master schedule extract is treated as the governing timing source for phasing unless a direct public award date or contract milestone provides a more authoritative timing anchor.\par}
+{\pard\f0\fs24\li360 {\b A-05}\tab Where only public contract value was available but annual spend profile was not, annual distribution remained a schedule-weighted estimate tied to design, fabrication, integration, test, and operations windows.\par}
+{\pard\f0\fs24\li360 {\b A-06}\tab Currency conversion logic already embedded in the legacy estimate notes was preserved as a reference assumption for partner contribution rows unless a better public update was available.\par}
+\pard\par
+
+{\pard\s2\f1\fs28\b 7. Direct Public Sources Used\par}
+\pard\par
+{\pard\f0\fs24 The rebuild uses public web sources primarily in the places where they most improve defensibility:\par}
+\pard\par
+{\pard\f0\fs24\li360 \bullet\tab NASA contract announcements for PPE, HALO, and Falcon Heavy launch services.\par}
+{\pard\f0\fs24\li360 \bullet\tab GAO reporting for Gateway mass risk and associated reserve/schedule pressure.\par}
+{\pard\f0\fs24\li360 \bullet\tab NASA budget material as an external reasonableness check on annual phasing and program framing.\par}
+{\pard\f0\fs24\li360 \bullet\tab Canadian Space Agency publications for Canadarm3 commitment and design-phase spending anchor.\par}
+{\pard\f0\fs24\li360 \bullet\tab Thales Alenia Space releases for I-HAB and ESPRIT contract values where a clearer public primary value was available there than on agency pages.\par}
+\pard\par
+
+{\pard\s2\f1\fs28\b 8. Remaining Estimation Judgment\par}
+\pard\par
+{\pard\f0\fs24 Some judgment remains and is intentionally disclosed rather than hidden:\par}
+\pard\par
+{\pard\f0\fs24\li360 \bullet\tab Partner contribution values are still program-reference values, not audited agency budget authority as carried in NASA appropriations tables.\par}
+{\pard\f0\fs24\li360 \bullet\tab Public contract announcements rarely provide the full year-by-year burn plan, so annual spend still requires schedule-based phasing judgment.\par}
+{\pard\f0\fs24\li360 \bullet\tab Level-3 subsystem splits below refreshed parent totals remain weighted allocations unless a priced line or direct source supported a sharper allocation.\par}
+{\pard\f0\fs24\li360 \bullet\tab Reserve annual placement is managerial judgment informed by risk and schedule concentration, not a published appropriation profile.\par}
+\pard\par
+
+{\pard\s2\f1\fs28\b 9. Read This Layer Correctly\par}
+\pard\par
+{\pard\f0\fs24 These cost files are now designed to answer four questions cleanly:\par}
+\pard\par
+{\pard\f0\fs24\li360 1.\tab What is the current rolled cost for this WBS branch?\par}
+{\pard\f0\fs24\li360 2.\tab How does that cost phase by fiscal year?\par}
+{\pard\f0\fs24\li360 3.\tab What source or method supports the figure?\par}
+{\pard\f0\fs24\li360 4.\tab Is the figure directly sourced, derived, or judgment-based?\par}
+\pard\par
+{\pard\f0\fs24 That is the authority-layer standard the web apps should sit on top of.\par}
+
+}
