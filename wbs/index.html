@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gateway WBS Explorer</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="intro">
+      <div class="intro__copy">
+        <p class="eyebrow">Gateway Program Map</p>
+        <h1 id="appTitle">Gateway WBS Explorer</h1>
+        <p id="appSubtitle" class="intro__subtitle">
+          Use this as the ecosystem map: understand how Gateway is organized, what a selected branch means,
+          and preview the dimensions attached to it without leaving the structural view.
+        </p>
+      </div>
+
+      <div class="intro__guide">
+        <p class="guide__label">Structure first. Meaning second. Evidence third.</p>
+        <ol class="intro__steps">
+          <li>Start with the major parts of the program on the left.</li>
+          <li>Use the center panel to understand what a selected branch does and why it matters.</li>
+          <li>Preview Cost, Schedule, Risks, or Documents here, then leave room for future specialist apps.</li>
+        </ol>
+
+        <div id="appSignals" class="intro__signals" aria-label="Program signals"></div>
+      </div>
+    </header>
+
+    <main id="workspace" class="workspace">
+      <aside class="nav-zone" aria-label="WBS navigation">
+        <div class="nav-zone__header">
+          <p class="section-kicker">Navigation</p>
+          <h2>Program structure</h2>
+          <p id="treeStatus" class="nav-zone__hint">Loading hierarchy...</p>
+        </div>
+
+        <label class="search-field" for="searchInput">
+          <span class="search-field__label">Find a program part</span>
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="Search nodes, subsystems, risks, or documents"
+            autocomplete="off"
+          />
+        </label>
+
+        <div class="nav-zone__actions">
+          <button id="expandTopBtn" class="toolbar-button" type="button">Show top levels</button>
+          <button id="collapseBtn" class="toolbar-button" type="button">Major parts only</button>
+        </div>
+
+        <nav id="tree" class="tree" aria-label="Work breakdown structure"></nav>
+      </aside>
+
+      <section class="overview-zone" aria-label="Selected node overview">
+        <div id="overviewContent" class="overview-content">
+          <section class="loading-state">
+            <h2>Loading program structure</h2>
+            <p>The standalone app is waiting for the local JSON data source.</p>
+          </section>
+        </div>
+      </section>
+
+      <aside id="focusZone" class="focus-zone" aria-label="Focused detail" aria-live="polite" hidden>
+        <div id="focusContent" class="focus-content"></div>
+      </aside>
+    </main>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
