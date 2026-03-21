@@ -19,27 +19,33 @@
       </div>
 
       <div class="hero__aside">
-        <section class="hero-guide" aria-label="How to use the cost explorer">
-          <p class="guide__label">How to use this lens</p>
-          <p class="guide__copy">
-            Start with the headline estimate. Then open only the sections you want: year profile,
-            cost drivers, methodology, or traceability.
-          </p>
-
-          <div class="hero-actions">
-            <button class="hero-action" type="button" data-action="open-disclosure" data-disclosure="yearDisclosure">
-              Open year profile
-            </button>
-            <button class="hero-action" type="button" data-action="open-disclosure" data-disclosure="breakdownDisclosure">
-              Open cost drivers
-            </button>
-            <button class="hero-action hero-action--secondary" type="button" data-action="open-disclosure" data-disclosure="methodologyDisclosure">
-              Open methodology
-            </button>
-          </div>
-        </section>
-
         <div id="storySignals" class="story-signals" aria-label="Cost signals"></div>
+
+        <details class="hero-guide" aria-label="Quick guide for the cost explorer">
+          <summary class="hero-guide__summary">
+            <span class="guide__label">Quick guide</span>
+            <span class="hero-guide__toggle">Optional orientation</span>
+          </summary>
+
+          <div class="hero-guide__body">
+            <p class="guide__copy">
+              Start with the headline estimate. Then open only the sections you want: year profile,
+              cost drivers, methodology, or traceability.
+            </p>
+
+            <div class="hero-actions">
+              <button class="hero-action" type="button" data-action="open-disclosure" data-disclosure="yearDisclosure">
+                Open year profile
+              </button>
+              <button class="hero-action" type="button" data-action="open-disclosure" data-disclosure="breakdownDisclosure">
+                Open cost drivers
+              </button>
+              <button class="hero-action hero-action--secondary" type="button" data-action="open-disclosure" data-disclosure="methodologyDisclosure">
+                Open methodology
+              </button>
+            </div>
+          </div>
+        </details>
       </div>
     </header>
 

@@ -161,6 +161,11 @@ function buildSignalPills() {
 function renderOverview() {
   const { overview } = state.data;
   const selectedCategory = getSelectedCategory() || getDefaultCategory();
+  const contextNotes = [
+    { title: 'What is included', body: overview.includedSummary },
+    { title: 'What is judgment-based', body: overview.judgmentSummary },
+    { title: 'What is directly anchored', body: overview.directSummary },
+  ];
 
   const majorDrivers = overview.majorDrivers
     .map((driver) => {
@@ -227,21 +232,20 @@ function renderOverview() {
         </div>
       </section>
 
-      <div class="story-grid">
-        <section class="story-card">
-          <h3>What is included</h3>
-          <p>${escapeHtml(overview.includedSummary)}</p>
-        </section>
-
-        <section class="story-card">
-          <h3>What is judgment-based</h3>
-          <p>${escapeHtml(overview.judgmentSummary)}</p>
-        </section>
-
-        <section class="story-card">
-          <h3>What is directly anchored</h3>
-          <p>${escapeHtml(overview.directSummary)}</p>
-        </section>
+      <div class="story-grid story-grid--context" aria-label="Overview context notes">
+        ${contextNotes
+          .map(
+            (note) => `
+              <details class="story-card story-card--context">
+                <summary class="story-card__summary">
+                  <span class="story-card__title">${escapeHtml(note.title)}</span>
+                  <span class="story-card__toggle">Open</span>
+                </summary>
+                <p class="story-card__body">${escapeHtml(note.body)}</p>
+              </details>
+            `,
+          )
+          .join('')}
       </div>
     </div>
 
