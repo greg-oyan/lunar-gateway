@@ -18,13 +18,26 @@
         </p>
       </div>
 
-      <div class="hero__guide">
-        <p class="guide__label">Meaning first. Numbers second. Evidence third.</p>
-        <ol class="hero__steps">
-          <li>Start with the executive story to understand what is included in the estimate.</li>
-          <li>Use the year-by-year and major-driver views to see how cost moves and what drives it.</li>
-          <li>Open the focused panel only when you want line items, basis types, source IDs, or traceability.</li>
-        </ol>
+      <div class="hero__aside">
+        <section class="hero-guide" aria-label="How to use the cost explorer">
+          <p class="guide__label">How to use this lens</p>
+          <p class="guide__copy">
+            Start with the headline estimate. Then open only the sections you want: year profile,
+            cost drivers, methodology, or traceability.
+          </p>
+
+          <div class="hero-actions">
+            <button class="hero-action" type="button" data-action="open-disclosure" data-disclosure="yearDisclosure">
+              Open year profile
+            </button>
+            <button class="hero-action" type="button" data-action="open-disclosure" data-disclosure="breakdownDisclosure">
+              Open cost drivers
+            </button>
+            <button class="hero-action hero-action--secondary" type="button" data-action="open-disclosure" data-disclosure="methodologyDisclosure">
+              Open methodology
+            </button>
+          </div>
+        </section>
 
         <div id="storySignals" class="story-signals" aria-label="Cost signals"></div>
       </div>
@@ -49,50 +62,57 @@
       </section>
 
       <section class="analysis-section" aria-labelledby="analysisHeading">
-        <div class="section-heading">
+        <div class="section-heading section-heading--compact">
           <div>
             <p class="section-kicker">Analysis</p>
-            <h2 id="analysisHeading">How cost changes over time and where it concentrates</h2>
+            <h2 id="analysisHeading">Open the layer you want to explore</h2>
           </div>
-          <p class="section-meta">Select a year or major bucket to inspect it in context.</p>
+          <p class="section-meta">The deeper analysis stays collapsed until you ask for it.</p>
         </div>
 
-        <div class="analysis-grid">
-          <div class="analysis-main">
-            <section class="panel yearly-panel" aria-labelledby="yearlyHeading">
-              <div class="panel-header">
-                <div>
-                  <p class="section-kicker">Cost By Year</p>
-                  <h3 id="yearlyHeading">Year-by-year current cost</h3>
-                </div>
-                <p id="yearlyHint" class="panel-meta">Loading annual cost profile...</p>
+        <div class="disclosure-stack">
+          <details id="yearDisclosure" class="panel disclosure-panel" open>
+            <summary class="disclosure-summary">
+              <div>
+                <p class="section-kicker">Cost By Year</p>
+                <h3>Year-by-year current cost</h3>
               </div>
+              <p id="yearlyHint" class="panel-meta">Loading annual cost profile...</p>
+            </summary>
 
+            <div class="disclosure-body">
               <div id="yearStory" class="year-story"></div>
               <div id="yearChart" class="year-chart" role="list" aria-label="Year-by-year cost profile"></div>
-            </section>
+            </div>
+          </details>
 
-            <section class="panel breakdown-panel" aria-labelledby="breakdownHeading">
-              <div class="panel-header">
-                <div>
-                  <p class="section-kicker">Cost Drivers</p>
-                  <h3 id="breakdownHeading">Major categories and modules</h3>
-                </div>
-                <p class="panel-meta">Start with the biggest buckets, then drill down only when needed.</p>
+          <details id="breakdownDisclosure" class="panel disclosure-panel">
+            <summary class="disclosure-summary">
+              <div>
+                <p class="section-kicker">Cost Drivers</p>
+                <h3>Major categories and modules</h3>
               </div>
+              <p id="breakdownPreview" class="panel-meta">Open the ranked category view.</p>
+            </summary>
 
+            <div class="disclosure-body">
               <div id="breakdownSummary" class="breakdown-summary"></div>
               <div id="breakdownCards" class="breakdown-cards" role="list" aria-label="Major cost categories"></div>
-            </section>
-          </div>
+            </div>
+          </details>
 
-          <aside class="panel inspector-panel" aria-labelledby="inspectorHeading">
-            <div class="panel-header">
+          <details id="inspectorDisclosure" class="panel disclosure-panel">
+            <summary class="disclosure-summary">
               <div>
                 <p class="section-kicker">Focused View</p>
-                <h3 id="inspectorHeading">Detail only after you click</h3>
+                <h3>Story, evidence, and sources for the selected item</h3>
               </div>
+              <p id="inspectorPreview" class="panel-meta">
+                Select a year or category to open focused analysis.
+              </p>
+            </summary>
 
+            <div class="disclosure-body">
               <div class="inspector-tabs" role="tablist" aria-label="Focused detail tabs">
                 <button id="storyTab" class="inspector-tab inspector-tab--active" type="button" data-tab="story" aria-selected="true">
                   Story
@@ -104,54 +124,72 @@
                   Sources
                 </button>
               </div>
-            </div>
 
-            <div id="inspectorContent" class="inspector-content">
-              <section class="loading-state loading-state--compact">
-                <h3>Preparing focused view</h3>
-                <p>The inspector will show deeper cost context for the currently selected year or category.</p>
-              </section>
+              <div id="inspectorContent" class="inspector-content">
+                <section class="loading-state loading-state--compact">
+                  <h3>Preparing focused view</h3>
+                  <p>The inspector will show deeper cost context for the currently selected year or category.</p>
+                </section>
+              </div>
             </div>
-          </aside>
+          </details>
         </div>
       </section>
 
-      <section class="panel methodology-panel" aria-labelledby="methodologyHeading">
-        <div class="section-heading">
+      <details id="methodologyDisclosure" class="panel section-disclosure">
+        <summary class="section-disclosure__summary">
           <div>
             <p class="section-kicker">Methodology</p>
-            <h2 id="methodologyHeading">Why the numbers are defensible</h2>
+            <h2>Why the numbers are defensible</h2>
           </div>
-          <p class="section-meta">Assumptions, methods, reserves, and judgment are visible on purpose.</p>
+          <p id="methodologyPreview" class="section-meta">
+            Open assumptions, reserve logic, and authority discipline.
+          </p>
+        </summary>
+
+        <div class="section-disclosure__body">
+          <div id="methodologySummary" class="methodology-summary"></div>
+          <div id="methodologyCards" class="methodology-cards"></div>
         </div>
+      </details>
 
-        <div id="methodologySummary" class="methodology-summary"></div>
-        <div id="methodologyCards" class="methodology-cards"></div>
-      </section>
-
-      <section class="panel traceability-panel" aria-labelledby="traceabilityHeading">
-        <div class="section-heading">
+      <details id="traceabilityDisclosure" class="panel section-disclosure">
+        <summary class="section-disclosure__summary">
           <div>
             <p class="section-kicker">Traceability</p>
-            <h2 id="traceabilityHeading">What came from sources, priced lines, or judgment</h2>
+            <h2>What came from sources, priced lines, or judgment</h2>
           </div>
-          <p class="section-meta">The goal is to connect the estimate back to authority material, not to hide the basis.</p>
+          <p id="traceabilityPreview" class="section-meta">
+            Open the authority artifacts and linked source register.
+          </p>
+        </summary>
+
+        <div class="section-disclosure__body">
+          <div id="traceabilitySummary" class="traceability-summary"></div>
+
+          <div class="traceability-grid">
+            <section class="traceability-column" aria-labelledby="artifactHeading">
+              <div class="subsection-heading">
+                <div>
+                  <p class="subsection-kicker">Authority Artifacts</p>
+                  <h3 id="artifactHeading">Authority files behind the estimate</h3>
+                </div>
+              </div>
+              <div id="artifactList" class="artifact-list"></div>
+            </section>
+
+            <section class="traceability-column" aria-labelledby="sourceHeading">
+              <div class="subsection-heading">
+                <div>
+                  <p class="subsection-kicker">Source Register</p>
+                  <h3 id="sourceHeading">Public and internal source anchors</h3>
+                </div>
+              </div>
+              <div id="sourceList" class="source-list"></div>
+            </section>
+          </div>
         </div>
-
-        <div id="traceabilitySummary" class="traceability-summary"></div>
-
-        <div class="traceability-grid">
-          <section class="traceability-column" aria-labelledby="artifactHeading">
-            <h3 id="artifactHeading">Authority artifacts</h3>
-            <div id="artifactList" class="artifact-list"></div>
-          </section>
-
-          <section class="traceability-column" aria-labelledby="sourceHeading">
-            <h3 id="sourceHeading">Source register</h3>
-            <div id="sourceList" class="source-list"></div>
-          </section>
-        </div>
-      </section>
+      </details>
     </main>
   </div>
 

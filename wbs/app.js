@@ -23,6 +23,7 @@ const structureView = document.getElementById('structureView');
 const structureLevelSummary = document.getElementById('structureLevelSummary');
 const structureViewport = document.getElementById('structureViewport');
 const structureSvg = document.getElementById('structureSvg');
+const structureSelectedSummary = document.getElementById('structureSelectedSummary');
 const overviewContent = document.getElementById('overviewContent');
 const focusZone = document.getElementById('focusZone');
 const focusContent = document.getElementById('focusContent');
@@ -365,24 +366,24 @@ function buildStructureLayout(rootNode, viewportWidth) {
 
   const layoutNodes = [];
   const layoutById = new Map();
-  const leftPadding = 52;
-  const rightPadding = 44;
-  const topPadding = 76;
-  const bottomPadding = 44;
-  const leafGap = 34;
-  const groupGap = 22;
-  const width = Math.max(viewportWidth || 920, 920);
+  const leftPadding = 76;
+  const rightPadding = 58;
+  const topPadding = 86;
+  const bottomPadding = 56;
+  const leafGap = 40;
+  const groupGap = 28;
+  const width = Math.max(viewportWidth || 1180, 1180);
   const maxDepth = Math.max(...state.data.nodes.map((node) => node.level - 1), 0);
   let cursorY = topPadding;
 
   const nodeDimensions = (level) => {
-    if (level === 1) return { width: 250, height: 54, radius: 18 };
-    if (level === 2) return { width: 210, height: 40, radius: 16 };
-    return { width: 172, height: 28, radius: 14 };
+    if (level === 1) return { width: 292, height: 62, radius: 20 };
+    if (level === 2) return { width: 236, height: 46, radius: 18 };
+    return { width: 190, height: 34, radius: 16 };
   };
 
   const columnGap = maxDepth > 0
-    ? Math.max(240, (width - leftPadding - rightPadding - nodeDimensions(1).width) / maxDepth)
+    ? Math.max(292, (width - leftPadding - rightPadding - nodeDimensions(1).width) / maxDepth)
     : width - leftPadding - rightPadding - nodeDimensions(1).width;
 
   function getNodeX(level) {
@@ -448,7 +449,7 @@ function buildStructureLayout(rootNode, viewportWidth) {
   layoutNodes.push(rootLayoutNode);
   layoutById.set(rootNode.id, rootLayoutNode);
 
-  const height = Math.max(cursorY + bottomPadding, 540);
+  const height = Math.max(cursorY + bottomPadding, 680);
   return { width, height, nodes: layoutNodes, byId: layoutById, columnGap };
 }
 
@@ -489,10 +490,76 @@ function renderStructureSummary() {
     .join('');
 }
 
+function renderStructureSelectedSummary(node) {
+  if (!node) {
+    structureSelectedSummary.innerHTML = '';
+    return;
+  }
+
+  const summaryItems = [
+    {
+      label: 'Roll-up size',
+      value: node.metrics.descendantCount
+        ? pluralize(node.metrics.descendantCount, 'lower-level part')
+        : node.childIds.length
+          ? pluralize(node.childIds.length, 'direct branch')
+          : 'Leaf branch',
+    },
+    {
+      label: 'Schedule signal',
+      value: node.related.schedule.milestones.length
+        ? pluralize(node.related.schedule.milestones.length, 'milestone')
+        : node.metrics.taskCount
+          ? pluralize(node.metrics.taskCount, 'activity', 'activities')
+          : 'No linked schedule',
+    },
+    {
+      label: 'Support linked',
+      value: node.metrics.documentCount
+        ? pluralize(node.metrics.documentCount, 'document')
+        : node.metrics.activeRiskCount
+          ? pluralize(node.metrics.activeRiskCount, 'active risk')
+          : 'No linked support',
+    },
+  ];
+
+  structureSelectedSummary.innerHTML = `
+    <div class="structure-selected__main">
+      <p class="structure-selected__eyebrow">Selected branch</p>
+      <h3 class="structure-selected__title">
+        <span class="structure-selected__code">${escapeHtml(node.id)}</span>
+        ${escapeHtml(node.name)}
+      </h3>
+      <p class="structure-selected__text">${escapeHtml(buildShortExplanation(node))}</p>
+      <p class="structure-selected__why">${escapeHtml(truncateText(buildWhyItMatters(node), 150))}</p>
+    </div>
+
+    <div class="structure-selected__meta">
+      ${summaryItems
+        .map(
+          (item) => `
+            <article class="structure-selected__metric">
+              <p class="structure-selected__metric-label">${escapeHtml(item.label)}</p>
+              <p class="structure-selected__metric-value">${escapeHtml(item.value)}</p>
+            </article>
+          `,
+        )
+        .join('')}
+    </div>
+
+    <div class="structure-selected__actions">
+      <button class="structure-selected__button" type="button" data-action="switch-explorer">
+        Open full overview in Explorer View
+      </button>
+    </div>
+  `;
+}
+
 function renderStructureView() {
   const rootNode = getRootNode();
   if (!rootNode) {
     structureSvg.innerHTML = '';
+    structureSelectedSummary.innerHTML = '';
     return;
   }
 
@@ -510,12 +577,13 @@ function renderStructureView() {
   state.structureLayout = layout;
 
   const selectedNode = state.nodesById.get(state.selectedId);
+  renderStructureSelectedSummary(selectedNode);
   const selectedPathIds = getSelectedPathIds(selectedNode);
 
   const columnLabels = [
-    { label: 'Detailed Work', x: 70 },
-    { label: 'Major Elements', x: layout.width / 2 - 84 },
-    { label: 'Program Roll-Up', x: layout.width - 250 },
+    { label: 'Detailed Work', x: 88 },
+    { label: 'Major Elements', x: layout.width / 2 - 96 },
+    { label: 'Program Roll-Up', x: layout.width - 310 },
   ];
 
   const linksMarkup = layout.nodes
@@ -969,7 +1037,7 @@ function renderDocumentDetail(node) {
 
 function renderFocus() {
   const node = state.nodesById.get(state.selectedId);
-  if (!node || !state.activeDetail) {
+  if (!node || !state.activeDetail || state.viewMode === 'structure') {
     focusZone.hidden = true;
     focusContent.innerHTML = '';
     workspace.classList.remove('workspace--detail-open');
@@ -1118,6 +1186,13 @@ focusContent.addEventListener('click', (event) => {
 
   const control = event.target.closest('[data-action="close-detail"]');
   if (control) closeDetail();
+});
+
+structureView.addEventListener('click', (event) => {
+  const control = event.target.closest('[data-action="switch-explorer"]');
+  if (!control) return;
+  state.activeDetail = null;
+  setViewMode('explorer');
 });
 
 structureSvg.addEventListener('click', (event) => {
