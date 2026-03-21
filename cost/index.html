@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gateway Cost Explorer</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div class="hero__copy">
+        <p class="eyebrow">Gateway Cost Lens</p>
+        <h1 id="appTitle">Gateway Cost Explorer</h1>
+        <p id="appSubtitle" class="hero__subtitle">
+          This is where the program cost comes from, how it is distributed over time, and why the
+          estimate looks the way it does.
+        </p>
+      </div>
+
+      <div class="hero__guide">
+        <p class="guide__label">Meaning first. Numbers second. Evidence third.</p>
+        <ol class="hero__steps">
+          <li>Start with the executive story to understand what is included in the estimate.</li>
+          <li>Use the year-by-year and major-driver views to see how cost moves and what drives it.</li>
+          <li>Open the focused panel only when you want line items, basis types, source IDs, or traceability.</li>
+        </ol>
+
+        <div id="storySignals" class="story-signals" aria-label="Cost signals"></div>
+      </div>
+    </header>
+
+    <main class="page">
+      <section class="panel overview-panel" aria-labelledby="overviewHeading">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">Overview</p>
+            <h2 id="overviewHeading">The cost story, before the detail</h2>
+          </div>
+          <p id="generatedAt" class="section-meta">Loading authority data...</p>
+        </div>
+
+        <div id="overviewContent" class="overview-content">
+          <section class="loading-state">
+            <h3>Loading cost authority layer</h3>
+            <p>The standalone Cost Explorer is waiting for the local preprocessed JSON payload.</p>
+          </section>
+        </div>
+      </section>
+
+      <section class="analysis-section" aria-labelledby="analysisHeading">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">Analysis</p>
+            <h2 id="analysisHeading">How cost changes over time and where it concentrates</h2>
+          </div>
+          <p class="section-meta">Select a year or major bucket to inspect it in context.</p>
+        </div>
+
+        <div class="analysis-grid">
+          <div class="analysis-main">
+            <section class="panel yearly-panel" aria-labelledby="yearlyHeading">
+              <div class="panel-header">
+                <div>
+                  <p class="section-kicker">Cost By Year</p>
+                  <h3 id="yearlyHeading">Year-by-year current cost</h3>
+                </div>
+                <p id="yearlyHint" class="panel-meta">Loading annual cost profile...</p>
+              </div>
+
+              <div id="yearStory" class="year-story"></div>
+              <div id="yearChart" class="year-chart" role="list" aria-label="Year-by-year cost profile"></div>
+            </section>
+
+            <section class="panel breakdown-panel" aria-labelledby="breakdownHeading">
+              <div class="panel-header">
+                <div>
+                  <p class="section-kicker">Cost Drivers</p>
+                  <h3 id="breakdownHeading">Major categories and modules</h3>
+                </div>
+                <p class="panel-meta">Start with the biggest buckets, then drill down only when needed.</p>
+              </div>
+
+              <div id="breakdownSummary" class="breakdown-summary"></div>
+              <div id="breakdownCards" class="breakdown-cards" role="list" aria-label="Major cost categories"></div>
+            </section>
+          </div>
+
+          <aside class="panel inspector-panel" aria-labelledby="inspectorHeading">
+            <div class="panel-header">
+              <div>
+                <p class="section-kicker">Focused View</p>
+                <h3 id="inspectorHeading">Detail only after you click</h3>
+              </div>
+
+              <div class="inspector-tabs" role="tablist" aria-label="Focused detail tabs">
+                <button id="storyTab" class="inspector-tab inspector-tab--active" type="button" data-tab="story" aria-selected="true">
+                  Story
+                </button>
+                <button id="evidenceTab" class="inspector-tab" type="button" data-tab="evidence" aria-selected="false">
+                  Evidence
+                </button>
+                <button id="sourceTab" class="inspector-tab" type="button" data-tab="sources" aria-selected="false">
+                  Sources
+                </button>
+              </div>
+            </div>
+
+            <div id="inspectorContent" class="inspector-content">
+              <section class="loading-state loading-state--compact">
+                <h3>Preparing focused view</h3>
+                <p>The inspector will show deeper cost context for the currently selected year or category.</p>
+              </section>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="panel methodology-panel" aria-labelledby="methodologyHeading">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">Methodology</p>
+            <h2 id="methodologyHeading">Why the numbers are defensible</h2>
+          </div>
+          <p class="section-meta">Assumptions, methods, reserves, and judgment are visible on purpose.</p>
+        </div>
+
+        <div id="methodologySummary" class="methodology-summary"></div>
+        <div id="methodologyCards" class="methodology-cards"></div>
+      </section>
+
+      <section class="panel traceability-panel" aria-labelledby="traceabilityHeading">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">Traceability</p>
+            <h2 id="traceabilityHeading">What came from sources, priced lines, or judgment</h2>
+          </div>
+          <p class="section-meta">The goal is to connect the estimate back to authority material, not to hide the basis.</p>
+        </div>
+
+        <div id="traceabilitySummary" class="traceability-summary"></div>
+
+        <div class="traceability-grid">
+          <section class="traceability-column" aria-labelledby="artifactHeading">
+            <h3 id="artifactHeading">Authority artifacts</h3>
+            <div id="artifactList" class="artifact-list"></div>
+          </section>
+
+          <section class="traceability-column" aria-labelledby="sourceHeading">
+            <h3 id="sourceHeading">Source register</h3>
+            <div id="sourceList" class="source-list"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
