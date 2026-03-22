@@ -1,28 +1,29 @@
 :root {
-  --bg: #e9eff4;
-  --bg-strong: #d7e3ec;
-  --surface: rgba(255, 255, 255, 0.95);
-  --surface-soft: #f6f9fb;
-  --surface-strong: #fffdfb;
-  --ink: #16212c;
-  --ink-soft: #5c6771;
-  --ink-faint: #7a8792;
-  --line: rgba(22, 33, 44, 0.13);
-  --line-strong: rgba(22, 33, 44, 0.22);
-  --brand: #0f6d82;
-  --brand-strong: #0b4655;
-  --brand-soft: rgba(15, 109, 130, 0.18);
-  --forest: #456d54;
-  --forest-soft: rgba(69, 109, 84, 0.18);
-  --copper: #a16022;
-  --copper-soft: rgba(161, 96, 34, 0.18);
-  --plum: #6d5592;
-  --plum-soft: rgba(109, 85, 146, 0.18);
-  --danger: #b05046;
-  --danger-soft: rgba(176, 80, 70, 0.18);
-  --shadow-lg: 0 28px 72px rgba(22, 33, 44, 0.11);
-  --shadow-md: 0 18px 40px rgba(22, 33, 44, 0.08);
-  --shadow-sm: 0 10px 24px rgba(22, 33, 44, 0.06);
+  color-scheme: dark;
+  --bg: #071018;
+  --bg-strong: #0c1620;
+  --surface: rgba(13, 24, 36, 0.9);
+  --surface-soft: rgba(12, 23, 34, 0.94);
+  --surface-strong: rgba(17, 31, 46, 0.97);
+  --ink: #eef6ff;
+  --ink-soft: #a0b4c7;
+  --ink-faint: #7790a4;
+  --line: rgba(148, 184, 214, 0.16);
+  --line-strong: rgba(148, 184, 214, 0.28);
+  --brand: #6fcfff;
+  --brand-strong: #a7e4ff;
+  --brand-soft: rgba(111, 207, 255, 0.16);
+  --forest: #94d7a9;
+  --forest-soft: rgba(148, 215, 169, 0.16);
+  --copper: #f1bc7d;
+  --copper-soft: rgba(241, 188, 125, 0.16);
+  --plum: #c8b4ff;
+  --plum-soft: rgba(200, 180, 255, 0.16);
+  --danger: #ff9086;
+  --danger-soft: rgba(255, 144, 134, 0.16);
+  --shadow-lg: 0 28px 60px rgba(0, 0, 0, 0.34);
+  --shadow-md: 0 18px 34px rgba(0, 0, 0, 0.26);
+  --shadow-sm: 0 10px 24px rgba(0, 0, 0, 0.22);
   --radius-xl: 30px;
   --radius-lg: 24px;
   --radius-md: 18px;
@@ -45,9 +46,9 @@ body {
   font-family: var(--body-font);
   color: var(--ink);
   background:
-    radial-gradient(circle at top left, rgba(27, 96, 113, 0.14), transparent 30%),
-    radial-gradient(circle at bottom right, rgba(151, 96, 45, 0.12), transparent 26%),
-    linear-gradient(180deg, #f9fbfd 0%, var(--bg) 54%, var(--bg-strong) 100%);
+    radial-gradient(circle at top left, rgba(111, 207, 255, 0.12), transparent 26%),
+    radial-gradient(circle at top right, rgba(241, 188, 125, 0.08), transparent 20%),
+    linear-gradient(180deg, #061018 0%, var(--bg) 54%, var(--bg-strong) 100%);
 }
 
 button,
@@ -65,7 +66,7 @@ button:focus-visible,
 a:focus-visible,
 summary:focus-visible,
 [tabindex]:focus-visible {
-  outline: 3px solid rgba(27, 96, 113, 0.22);
+  outline: 3px solid rgba(111, 207, 255, 0.24);
   outline-offset: 3px;
 }
 
@@ -94,9 +95,11 @@ a {
   padding: 18px 22px;
   border: 1px solid var(--line);
   border-radius: var(--radius-xl);
-  background: rgba(255, 255, 255, 0.84);
+  background:
+    radial-gradient(circle at top left, rgba(111, 207, 255, 0.12), transparent 36%),
+    linear-gradient(180deg, rgba(17, 31, 46, 0.98), rgba(11, 22, 32, 0.96));
   box-shadow: var(--shadow-md);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px);
 }
 
 .hero__copy,
@@ -195,7 +198,7 @@ a {
 .evidence-card {
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(12, 24, 35, 0.82);
   box-shadow: var(--shadow-sm);
 }
 
@@ -204,7 +207,7 @@ a {
   gap: 4px;
   min-width: 118px;
   padding: 10px 12px;
-  background: linear-gradient(135deg, rgba(27, 96, 113, 0.09), rgba(255, 255, 255, 0.92));
+  background: linear-gradient(135deg, rgba(111, 207, 255, 0.15), rgba(13, 24, 36, 0.92));
 }
 
 .signal-pill__value {
@@ -224,6 +227,7 @@ a {
   background: var(--surface);
   box-shadow: var(--shadow-md);
   overflow: hidden;
+  backdrop-filter: blur(14px);
 }
 
 .stage-panel {
@@ -233,7 +237,8 @@ a {
   min-height: calc(100vh - 150px);
   padding: 24px 24px 26px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(239, 246, 249, 0.95));
+    radial-gradient(circle at top left, rgba(111, 207, 255, 0.1), transparent 34%),
+    linear-gradient(180deg, rgba(17, 31, 46, 0.98), rgba(11, 22, 32, 0.96));
   box-shadow: var(--shadow-lg);
 }
 
@@ -242,7 +247,7 @@ a {
   position: absolute;
   inset: 0 0 auto 0;
   height: 5px;
-  background: linear-gradient(90deg, rgba(27, 96, 113, 0.95), rgba(151, 96, 45, 0.58));
+  background: linear-gradient(90deg, rgba(111, 207, 255, 0.92), rgba(241, 188, 125, 0.58));
 }
 
 .stage-panel__header {
@@ -292,7 +297,7 @@ a {
   padding: 24px;
   border: 1px dashed var(--line-strong);
   border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.78);
+  background: rgba(11, 22, 32, 0.78);
 }
 
 .loading-state--compact {
@@ -337,8 +342,9 @@ a {
 .source-card {
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(13, 24, 36, 0.86);
   box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(12px);
 }
 
 .stage-story__primary,
@@ -357,8 +363,8 @@ a {
   display: grid;
   gap: 16px;
   background:
-    linear-gradient(180deg, rgba(27, 96, 113, 0.11), rgba(255, 255, 255, 0.98)),
-    rgba(255, 255, 255, 0.92);
+    linear-gradient(180deg, rgba(111, 207, 255, 0.14), rgba(17, 31, 46, 0.96)),
+    rgba(13, 24, 36, 0.92);
 }
 
 .stage-story__label {
@@ -386,7 +392,7 @@ a {
   display: grid;
   gap: 12px;
   align-content: start;
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(10, 20, 29, 0.78);
 }
 
 .stage-stat-grid,
@@ -429,8 +435,8 @@ a {
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background:
-    linear-gradient(180deg, rgba(27, 96, 113, 0.05), rgba(255, 255, 255, 0.98)),
-    rgba(255, 255, 255, 0.95);
+    radial-gradient(circle at top left, rgba(111, 207, 255, 0.08), transparent 30%),
+    linear-gradient(180deg, rgba(15, 28, 41, 0.98), rgba(10, 20, 29, 0.96));
   overflow-x: auto;
 }
 
@@ -479,7 +485,7 @@ a {
   top: 0;
   width: 1px;
   height: 42px;
-  background: rgba(22, 33, 44, 0.12);
+  background: rgba(148, 184, 214, 0.18);
 }
 
 .timeline-year__label {
@@ -503,7 +509,7 @@ a {
   top: 88px;
   height: 12px;
   border-radius: 999px;
-  background: rgba(22, 33, 44, 0.07);
+  background: rgba(148, 184, 214, 0.1);
 }
 
 .timeline-phase {
@@ -519,7 +525,7 @@ a {
   border: 1px solid transparent;
   border-radius: 22px;
   text-align: left;
-  background: rgba(27, 96, 113, 0.12);
+  background: rgba(111, 207, 255, 0.12);
   transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, opacity 160ms ease;
 }
 
@@ -531,27 +537,27 @@ a {
 .trace-button:hover {
   transform: translateY(-1px);
   box-shadow: var(--shadow-sm);
-  border-color: rgba(27, 96, 113, 0.24);
+  border-color: rgba(111, 207, 255, 0.24);
 }
 
 .timeline-phase--brand {
-  background: rgba(27, 96, 113, 0.15);
+  background: rgba(111, 207, 255, 0.18);
 }
 
 .timeline-phase--forest {
-  background: rgba(77, 109, 83, 0.15);
+  background: rgba(148, 215, 169, 0.17);
 }
 
 .timeline-phase--copper {
-  background: rgba(151, 96, 45, 0.15);
+  background: rgba(241, 188, 125, 0.17);
 }
 
 .timeline-phase--plum {
-  background: rgba(107, 90, 130, 0.15);
+  background: rgba(200, 180, 255, 0.16);
 }
 
 .timeline-phase--danger {
-  background: rgba(153, 71, 66, 0.15);
+  background: rgba(255, 144, 134, 0.16);
 }
 
 .timeline-phase--active,
@@ -560,8 +566,8 @@ a {
 .support-tab--active,
 .driver-card--active,
 .trace-button--active {
-  border-color: rgba(27, 96, 113, 0.34);
-  background: linear-gradient(180deg, rgba(27, 96, 113, 0.14), rgba(255, 255, 255, 0.98));
+  border-color: rgba(111, 207, 255, 0.34);
+  background: linear-gradient(180deg, rgba(111, 207, 255, 0.18), rgba(15, 28, 41, 0.96));
   box-shadow: var(--shadow-md);
 }
 
@@ -589,10 +595,10 @@ a {
   width: 18px;
   height: 18px;
   padding: 0;
-  border: 3px solid rgba(255, 255, 255, 0.96);
+  border: 3px solid rgba(7, 16, 24, 0.96);
   border-radius: 999px;
   background: var(--brand-strong);
-  box-shadow: 0 0 0 1px rgba(22, 33, 44, 0.08);
+  box-shadow: 0 0 0 1px rgba(148, 184, 214, 0.12);
   transform: translateX(-50%);
 }
 
@@ -600,7 +606,7 @@ a {
   width: 22px;
   height: 22px;
   background: var(--copper);
-  box-shadow: 0 0 0 4px rgba(151, 96, 45, 0.16);
+  box-shadow: 0 0 0 4px rgba(241, 188, 125, 0.18);
 }
 
 .stage-anchors {
@@ -652,7 +658,7 @@ a {
   padding: 16px 18px;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(13, 24, 36, 0.86);
   box-shadow: var(--shadow-sm);
 }
 
@@ -686,17 +692,17 @@ a {
   display: inline-flex;
   align-items: center;
   padding: 10px 14px;
-  border: 1px solid rgba(27, 96, 113, 0.14);
+  border: 1px solid rgba(111, 207, 255, 0.14);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.94);
-  color: #214a57;
+  background: rgba(10, 20, 29, 0.86);
+  color: var(--brand-strong);
   font-size: 0.92rem;
   font-weight: 700;
-  box-shadow: 0 8px 18px rgba(22, 33, 44, 0.05);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
 }
 
 .stage-pill--primary {
-  background: linear-gradient(135deg, rgba(15, 109, 130, 0.16), rgba(255, 255, 255, 0.96));
+  background: linear-gradient(135deg, rgba(111, 207, 255, 0.18), rgba(13, 24, 36, 0.96));
 }
 
 .stage-pill--ghost {
@@ -709,8 +715,8 @@ a {
   border: 0;
   border-radius: calc(var(--radius-xl) - 4px);
   background:
-    radial-gradient(circle at top left, rgba(27, 96, 113, 0.08), transparent 28%),
-    linear-gradient(180deg, rgba(248, 251, 253, 0.98), rgba(238, 245, 248, 0.96));
+    radial-gradient(circle at top left, rgba(111, 207, 255, 0.12), transparent 30%),
+    linear-gradient(180deg, rgba(17, 31, 46, 0.98), rgba(10, 20, 29, 0.96));
   overflow-x: auto;
 }
 
@@ -731,7 +737,7 @@ a {
 .schedule-map__hint {
   margin: 0;
   max-width: 38ch;
-  color: #50616d;
+  color: var(--ink-soft);
   text-align: right;
   line-height: 1.5;
 }
@@ -750,21 +756,21 @@ a {
 .schedule-axis__plot {
   position: relative;
   height: 48px;
-  border-bottom: 1px solid rgba(22, 33, 44, 0.16);
+  border-bottom: 1px solid rgba(148, 184, 214, 0.22);
 }
 
 .schedule-axis__year {
   position: absolute;
   inset: 0 auto 0 0;
   width: 1px;
-  background: rgba(22, 33, 44, 0.16);
+  background: rgba(148, 184, 214, 0.22);
 }
 
 .schedule-axis__label {
   position: absolute;
   top: 0;
   left: 8px;
-  color: var(--ink-faint);
+  color: #90a8bc;
   font-size: 0.84rem;
   font-weight: 700;
 }
@@ -811,8 +817,8 @@ a {
   position: relative;
   height: 76px;
   border-radius: 22px;
-  background: rgba(255, 255, 255, 0.7);
-  box-shadow: inset 0 0 0 1px rgba(22, 33, 44, 0.09);
+  background: rgba(12, 23, 34, 0.84);
+  box-shadow: inset 0 0 0 1px rgba(148, 184, 214, 0.16);
 }
 
 .schedule-lane__baseline {
@@ -821,16 +827,16 @@ a {
   right: 0;
   top: 50%;
   height: 1px;
-  background: rgba(22, 33, 44, 0.12);
+  background: rgba(148, 184, 214, 0.18);
 }
 
 .schedule-lane__bar {
   position: absolute;
   top: 12px;
   bottom: 12px;
-  border: 1px solid rgba(22, 33, 44, 0.08);
+  border: 1px solid rgba(148, 184, 214, 0.1);
   border-radius: 20px;
-  box-shadow: 0 12px 28px rgba(22, 33, 44, 0.09);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
   transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, opacity 160ms ease;
 }
 
@@ -840,56 +846,56 @@ a {
 }
 
 .schedule-lane__bar--brand {
-  background: linear-gradient(135deg, rgba(15, 109, 130, 0.48), rgba(15, 109, 130, 0.22));
-  border-color: rgba(11, 70, 85, 0.2);
+  background: linear-gradient(135deg, rgba(111, 207, 255, 0.64), rgba(111, 207, 255, 0.34));
+  border-color: rgba(111, 207, 255, 0.3);
 }
 
 .schedule-lane__bar--forest {
-  background: linear-gradient(135deg, rgba(69, 109, 84, 0.48), rgba(69, 109, 84, 0.22));
-  border-color: rgba(46, 78, 58, 0.22);
+  background: linear-gradient(135deg, rgba(148, 215, 169, 0.6), rgba(148, 215, 169, 0.3));
+  border-color: rgba(148, 215, 169, 0.28);
 }
 
 .schedule-lane__bar--copper {
-  background: linear-gradient(135deg, rgba(161, 96, 34, 0.48), rgba(161, 96, 34, 0.22));
-  border-color: rgba(112, 67, 24, 0.22);
+  background: linear-gradient(135deg, rgba(241, 188, 125, 0.62), rgba(241, 188, 125, 0.32));
+  border-color: rgba(241, 188, 125, 0.3);
 }
 
 .schedule-lane__bar--plum {
-  background: linear-gradient(135deg, rgba(109, 85, 146, 0.46), rgba(109, 85, 146, 0.2));
-  border-color: rgba(74, 53, 107, 0.22);
+  background: linear-gradient(135deg, rgba(200, 180, 255, 0.58), rgba(200, 180, 255, 0.28));
+  border-color: rgba(200, 180, 255, 0.28);
 }
 
 .schedule-lane__bar--danger {
-  background: linear-gradient(135deg, rgba(176, 80, 70, 0.46), rgba(176, 80, 70, 0.2));
-  border-color: rgba(122, 55, 48, 0.22);
+  background: linear-gradient(135deg, rgba(255, 144, 134, 0.58), rgba(255, 144, 134, 0.28));
+  border-color: rgba(255, 144, 134, 0.28);
 }
 
 .schedule-lane__bar--active {
-  border-color: rgba(22, 33, 44, 0.28);
+  border-color: rgba(148, 184, 214, 0.24);
   box-shadow:
-    0 0 0 3px rgba(255, 255, 255, 0.72),
-    0 18px 36px rgba(22, 33, 44, 0.16);
-  filter: saturate(1.16);
+    0 0 0 3px rgba(111, 207, 255, 0.24),
+    0 18px 36px rgba(0, 0, 0, 0.26);
+  filter: saturate(1.12) brightness(1.04);
 }
 
 .schedule-lane--brand .schedule-lane__label strong {
-  color: #0d5567;
+  color: var(--brand-strong);
 }
 
 .schedule-lane--forest .schedule-lane__label strong {
-  color: #395942;
+  color: var(--forest);
 }
 
 .schedule-lane--copper .schedule-lane__label strong {
-  color: #8a531f;
+  color: var(--copper);
 }
 
 .schedule-lane--plum .schedule-lane__label strong {
-  color: #5f457f;
+  color: var(--plum);
 }
 
 .schedule-lane--danger .schedule-lane__label strong {
-  color: #944139;
+  color: var(--danger);
 }
 
 .schedule-lane--active .schedule-lane__label strong {
@@ -902,7 +908,7 @@ a {
   gap: 22px;
   align-items: start;
   padding-top: 18px;
-  border-top: 1px solid rgba(22, 33, 44, 0.08);
+  border-top: 1px solid rgba(148, 184, 214, 0.12);
 }
 
 .schedule-milestones__label {
@@ -919,8 +925,8 @@ a {
   position: relative;
   height: 236px;
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow: inset 0 0 0 1px rgba(22, 33, 44, 0.09);
+  background: rgba(12, 23, 34, 0.84);
+  box-shadow: inset 0 0 0 1px rgba(148, 184, 214, 0.16);
 }
 
 .schedule-milestones__spine {
@@ -930,7 +936,7 @@ a {
   top: 50%;
   height: 8px;
   border-radius: 999px;
-  background: linear-gradient(90deg, rgba(15, 109, 130, 0.16), rgba(161, 96, 34, 0.14));
+  background: linear-gradient(90deg, rgba(111, 207, 255, 0.28), rgba(241, 188, 125, 0.22));
 }
 
 .schedule-marker {
@@ -955,10 +961,10 @@ a {
   top: 50%;
   width: 16px;
   height: 16px;
-  border: 3px solid rgba(255, 255, 255, 0.96);
+  border: 3px solid rgba(7, 16, 24, 0.96);
   border-radius: 999px;
   background: var(--brand-strong);
-  box-shadow: 0 0 0 2px rgba(22, 33, 44, 0.08);
+  box-shadow: 0 0 0 2px rgba(148, 184, 214, 0.18);
   transform: translate(-50%, -50%);
 }
 
@@ -966,7 +972,7 @@ a {
   position: absolute;
   left: 0;
   width: 2px;
-  background: rgba(22, 33, 44, 0.22);
+  background: rgba(148, 184, 214, 0.3);
   transform: translateX(-50%);
 }
 
@@ -977,10 +983,10 @@ a {
   gap: 6px;
   width: 150px;
   padding: 12px 14px;
-  border: 1px solid rgba(22, 33, 44, 0.14);
+  border: 1px solid rgba(148, 184, 214, 0.2);
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 249, 251, 0.96));
-  box-shadow: 0 14px 28px rgba(22, 33, 44, 0.08);
+  background: linear-gradient(180deg, rgba(16, 30, 44, 0.98), rgba(11, 22, 32, 0.96));
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.26);
   line-height: 1.22;
 }
 
@@ -1015,23 +1021,23 @@ a {
 }
 
 .schedule-marker--brand .schedule-marker__card {
-  border-top: 4px solid rgba(15, 109, 130, 0.75);
+  border-top: 4px solid rgba(111, 207, 255, 0.82);
 }
 
 .schedule-marker--forest .schedule-marker__card {
-  border-top: 4px solid rgba(69, 109, 84, 0.75);
+  border-top: 4px solid rgba(148, 215, 169, 0.82);
 }
 
 .schedule-marker--copper .schedule-marker__card {
-  border-top: 4px solid rgba(161, 96, 34, 0.75);
+  border-top: 4px solid rgba(241, 188, 125, 0.82);
 }
 
 .schedule-marker--plum .schedule-marker__card {
-  border-top: 4px solid rgba(109, 85, 146, 0.75);
+  border-top: 4px solid rgba(200, 180, 255, 0.82);
 }
 
 .schedule-marker--danger .schedule-marker__card {
-  border-top: 4px solid rgba(176, 80, 70, 0.75);
+  border-top: 4px solid rgba(255, 144, 134, 0.82);
 }
 
 .schedule-marker--upper .schedule-marker__stem {
@@ -1067,22 +1073,22 @@ a {
 .schedule-marker--active .schedule-marker__dot {
   width: 20px;
   height: 20px;
-  box-shadow: 0 0 0 6px rgba(22, 33, 44, 0.12);
+  box-shadow: 0 0 0 6px rgba(111, 207, 255, 0.2);
 }
 
 .schedule-marker--active .schedule-marker__card {
-  border-color: rgba(22, 33, 44, 0.18);
-  box-shadow: 0 18px 36px rgba(22, 33, 44, 0.14);
+  border-color: rgba(148, 184, 214, 0.18);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.3);
 }
 
 .schedule-marker:hover .schedule-marker__card {
-  border-color: rgba(22, 33, 44, 0.18);
-  box-shadow: 0 18px 36px rgba(22, 33, 44, 0.12);
+  border-color: rgba(148, 184, 214, 0.18);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28);
 }
 
 .focus-layer,
 .support-layer {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 250, 252, 0.96));
+  background: linear-gradient(180deg, rgba(15, 28, 41, 0.98), rgba(10, 20, 29, 0.96));
 }
 
 .text-action,
@@ -1090,9 +1096,9 @@ a {
 .trace-button,
 .support-tab {
   appearance: none;
-  border: 1px solid rgba(27, 96, 113, 0.14);
+  border: 1px solid rgba(111, 207, 255, 0.16);
   border-radius: 999px;
-  background: rgba(27, 96, 113, 0.08);
+  background: rgba(111, 207, 255, 0.08);
   color: var(--brand-strong);
   font-weight: 700;
 }
@@ -1115,14 +1121,14 @@ a {
 
 .focus-card--primary {
   background:
-    linear-gradient(180deg, rgba(27, 96, 113, 0.11), rgba(255, 255, 255, 0.98)),
-    rgba(255, 255, 255, 0.92);
+    linear-gradient(180deg, rgba(111, 207, 255, 0.14), rgba(17, 31, 46, 0.96)),
+    rgba(13, 24, 36, 0.92);
 }
 
 .focus-card--secondary {
   background:
-    linear-gradient(180deg, rgba(77, 109, 83, 0.08), rgba(255, 255, 255, 0.98)),
-    rgba(255, 255, 255, 0.92);
+    linear-gradient(180deg, rgba(148, 215, 169, 0.12), rgba(17, 31, 46, 0.96)),
+    rgba(13, 24, 36, 0.92);
 }
 
 .focus-header {
@@ -1306,8 +1312,8 @@ a {
   display: grid;
   gap: 16px;
   background:
-    linear-gradient(180deg, rgba(107, 90, 130, 0.08), rgba(255, 255, 255, 0.98)),
-    rgba(255, 255, 255, 0.92);
+    linear-gradient(180deg, rgba(200, 180, 255, 0.12), rgba(17, 31, 46, 0.96)),
+    rgba(13, 24, 36, 0.92);
 }
 
 .driver-detail__header {
