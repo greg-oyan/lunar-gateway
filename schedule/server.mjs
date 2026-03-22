@@ -920,6 +920,11 @@ const server = http.createServer(async (request, response) => {
     const url = new URL(request.url, `http://${request.headers.host}`);
     const pathname = decodeURIComponent(url.pathname);
 
+    if (pathname === '/index.html' || pathname === '/simulation' || pathname === '/simulation/') {
+      await serveStaticFile(response, 'index.html');
+      return;
+    }
+
     if (pathname === '/') {
       response.writeHead(302, { Location: '/schedule/' });
       response.end();

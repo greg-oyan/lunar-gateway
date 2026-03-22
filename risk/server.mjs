@@ -4,6 +4,7 @@ import { promises as fs } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(currentDir, '..');
 const host = '127.0.0.1';
 const port = Number(process.env.PORT || 4573);
 
@@ -38,6 +39,11 @@ const server = http.createServer(async (request, response) => {
   try {
     const url = new URL(request.url || '/', `http://${host}:${port}`);
     const pathname = decodeURIComponent(url.pathname);
+
+    if (pathname === '/index.html' || pathname === '/simulation' || pathname === '/simulation/') {
+      await sendFile(response, path.join(repoRoot, 'index.html'));
+      return;
+    }
 
     if (pathname === '/') {
       response.writeHead(302, { Location: '/risk/' });

@@ -641,6 +641,11 @@ const server = http.createServer(async (request, response) => {
   const requestUrl = new URL(request.url || '/', `http://${host}:${port}`);
   const pathname = decodeURIComponent(requestUrl.pathname);
 
+  if (pathname === '/simulation' || pathname === '/simulation/') {
+    await sendStaticFile(response, '/index.html');
+    return;
+  }
+
   if (pathname === '/wbs' || pathname === '/wbs/') {
     await sendStaticFile(response, '/wbs/index.html');
     return;

@@ -8,6 +8,17 @@
 </head>
 <body>
   <div class="app-shell">
+    <nav class="suite-nav" aria-label="Gateway suite navigation">
+      <a class="suite-nav__home" href="/index.html">Simulation Home</a>
+      <div class="suite-nav__links">
+        <a class="suite-nav__link" href="#" data-suite-app="documents">Documents</a>
+        <a class="suite-nav__link" href="#" data-suite-app="wbs">WBS</a>
+        <a class="suite-nav__link" href="#" data-suite-app="schedule">Schedule</a>
+        <a class="suite-nav__link suite-nav__link--active" href="#" data-suite-app="cost" aria-current="page">Cost</a>
+        <a class="suite-nav__link" href="#" data-suite-app="risk">Risk</a>
+      </div>
+    </nav>
+
     <header class="hero">
       <div class="hero__copy">
         <p class="eyebrow">Gateway Cost Lens</p>
@@ -199,6 +210,17 @@
     </main>
   </div>
 
+  <script>
+    (function () {
+      const suitePorts = { documents: 4473, wbs: 4173, schedule: 4373, cost: 4273, risk: 4573 };
+      const suiteHost = window.location.hostname || '127.0.0.1';
+      document.querySelectorAll('[data-suite-app]').forEach((link) => {
+        const app = link.getAttribute('data-suite-app');
+        if (!suitePorts[app]) return;
+        link.href = `http://${suiteHost}:${suitePorts[app]}/${app}/`;
+      });
+    })();
+  </script>
   <script type="module" src="./app.js"></script>
 </body>
 </html>
