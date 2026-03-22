@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gateway Schedule Explorer</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div class="hero__copy">
+        <p class="eyebrow">Gateway Schedule Lens</p>
+        <h1 id="appTitle">Gateway Schedule Explorer</h1>
+        <p id="appSubtitle" class="hero__subtitle">
+          This is how the Gateway program unfolds over time, what moments matter most, and which
+          schedule branches drive everything else.
+        </p>
+      </div>
+
+      <div class="hero__meta">
+        <div id="storySignals" class="story-signals" aria-label="Schedule signals"></div>
+        <p id="generatedAt" class="generated-at">Loading authority data...</p>
+      </div>
+    </header>
+
+    <main class="page">
+      <section class="panel stage-panel" aria-labelledby="stageHeading">
+        <div class="stage-panel__header">
+          <div>
+            <p class="section-kicker">Layer 1</p>
+            <h2 id="stageHeading">Visual schedule overview</h2>
+            <p id="stageFrame" class="section-lead">
+              2017 to 2031. Major phases. Key milestone dates.
+            </p>
+          </div>
+          <div id="overviewContent" class="stage-overview">
+            <section class="loading-state loading-state--compact">
+              <h3>Loading schedule overview</h3>
+              <p>The standalone Schedule Explorer is preparing the timeline authority layer.</p>
+            </section>
+          </div>
+        </div>
+
+        <div id="timelineChart" class="timeline-chart" aria-label="Gateway schedule timeline"></div>
+      </section>
+
+      <section id="focusLayer" class="panel focus-layer" hidden aria-labelledby="focusHeading">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">Layer 2</p>
+            <h2 id="focusHeading">Focused schedule view</h2>
+            <p id="focusSubtitle" class="section-lead">
+              Select a phase or milestone to understand what it is, when it happens, and why it matters.
+            </p>
+          </div>
+          <button class="text-action" type="button" data-action="clear-focus">
+            Back to big picture
+          </button>
+        </div>
+
+        <div id="focusContent" class="focus-content">
+          <section class="loading-state loading-state--compact">
+            <h3>Preparing focused view</h3>
+            <p>The selected phase or milestone will appear here after you click the big-picture layer.</p>
+          </section>
+        </div>
+      </section>
+
+      <section id="supportLayer" class="panel support-layer" hidden aria-labelledby="supportHeading">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">Layer 3</p>
+            <h2 id="supportHeading">Detailed support view</h2>
+            <p id="supportSubtitle" class="section-lead">
+              The deeper schedule support stays grouped into simple, readable lenses.
+            </p>
+          </div>
+          <button class="text-action" type="button" data-action="close-support">
+            Back to focused view
+          </button>
+        </div>
+
+        <div id="supportTabs" class="support-tabs" role="tablist" aria-label="Detailed schedule views"></div>
+
+        <div id="supportContent" class="support-content">
+          <section class="loading-state loading-state--compact">
+            <h3>Preparing support view</h3>
+            <p>Detailed schedule support will appear here after you deliberately open it.</p>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
