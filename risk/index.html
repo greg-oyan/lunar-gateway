@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gateway Risk Explorer</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="topbar__identity">
+          <p class="topbar__eyebrow">Gateway Decision Support</p>
+          <h1 id="appTitle">Risk Explorer</h1>
+          <p id="appSubtitle" class="topbar__subtitle">
+            Focus on the risks that matter most, then inspect why they matter and
+            what mitigation is in motion.
+          </p>
+          <div class="topbar__meta-row">
+            <span id="headerCount" class="header-count">0 risks</span>
+          </div>
+        </div>
+
+        <div class="topbar__controls">
+          <div class="search-field">
+            <label class="sr-only" for="searchInput">Search risks</label>
+            <input
+              id="searchInput"
+              type="search"
+              placeholder="Search title, category, tags, owner, or description"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="filter-row">
+            <label class="sr-only" for="categoryFilter">Filter by category</label>
+            <select id="categoryFilter">
+              <option value="">All categories</option>
+            </select>
+
+            <label class="sr-only" for="statusFilter">Filter by status</label>
+            <select id="statusFilter">
+              <option value="">All statuses</option>
+            </select>
+
+            <label class="sr-only" for="priorityFilter">Filter by priority band</label>
+            <select id="priorityFilter">
+              <option value="">All priority bands</option>
+              <option value="critical">Critical</option>
+              <option value="high">High</option>
+              <option value="moderate">Moderate</option>
+              <option value="watch">Watch</option>
+            </select>
+
+            <button id="clearFiltersButton" class="secondary-button" type="button">
+              Clear
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <section class="summary-strip" aria-label="Risk summary">
+        <div class="summary-strip__stat">
+          <span class="summary-strip__label">Visible Risks</span>
+          <strong id="totalRisksStat">0</strong>
+        </div>
+        <div class="summary-strip__stat">
+          <span class="summary-strip__label">Needs Attention</span>
+          <strong id="attentionStat">0</strong>
+        </div>
+        <div class="summary-strip__stat">
+          <span class="summary-strip__label">Open Risks</span>
+          <strong id="openStat">0</strong>
+        </div>
+        <div class="summary-strip__stat">
+          <span class="summary-strip__label">Categories</span>
+          <strong id="categoryStat">0</strong>
+        </div>
+        <div class="summary-strip__context">
+          <div class="summary-strip__context-copy">
+            <p id="summaryNarrative">
+              Priority, owner, and mitigation are kept visible without turning the
+              first screen into a dashboard.
+            </p>
+            <p id="summaryMethod" class="summary-strip__method">
+              Scoring: Likelihood × Impact. Bands are derived from the resulting score.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <main class="workspace">
+        <aside class="list-pane" aria-labelledby="listPaneTitle">
+          <div class="pane-header">
+            <div>
+              <p class="pane-header__eyebrow">Browse</p>
+              <h2 id="listPaneTitle">Risk Set</h2>
+            </div>
+
+            <div class="pane-header__controls">
+              <p id="resultsLabel" class="pane-header__meta">0 results</p>
+
+              <label class="sr-only" for="sortSelect">Sort risks</label>
+              <select id="sortSelect" class="sort-select">
+                <option value="priority_desc">Highest Priority</option>
+                <option value="impact_desc">Highest Impact</option>
+                <option value="likelihood_desc">Highest Likelihood</option>
+                <option value="title_asc">Title A-Z</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="list-pane__body">
+            <div id="activeFilters" class="active-filters" aria-live="polite"></div>
+            <div id="listState" class="list-state" hidden></div>
+            <div id="riskList" class="risk-list" role="listbox" aria-label="Risks"></div>
+          </div>
+        </aside>
+
+        <section class="detail-pane" aria-label="Risk detail pane">
+          <div id="detailPaneContent" class="detail-pane__content"></div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
