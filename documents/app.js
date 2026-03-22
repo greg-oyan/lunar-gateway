@@ -1,0 +1,414 @@
+const DATA_URL = './data/documents.json';
+
+const state = {
+  allDocuments: [],
+  visibleDocuments: [],
+  selectedDocumentId: null,
+  searchQuery: '',
+  fileType: '',
+  category: '',
+  loadState: 'loading',
+  loadError: '',
+};
+
+const elements = {};
+
+function normalizeText(value) {
+  return String(value ?? '').trim().toLowerCase();
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getSearchIndex(documentRecord) {
+  return [
+    documentRecord.title,
+    documentRecord.filename,
+    documentRecord.category,
+    documentRecord.shortDescription,
+    ...(Array.isArray(documentRecord.tags) ? documentRecord.tags : []),
+  ]
+    .map((value) => normalizeText(value))
+    .join(' ');
+}
+
+export function filterDocuments(documents, filters = {}) {
+  const query = normalizeText(filters.searchQuery);
+  const fileType = normalizeText(filters.fileType);
+  const category = normalizeText(filters.category);
+
+  return documents.filter((documentRecord) => {
+    const matchesQuery = !query || getSearchIndex(documentRecord).includes(query);
+    const matchesFileType =
+      !fileType || normalizeText(documentRecord.fileType) === fileType;
+    const matchesCategory =
+      !category || normalizeText(documentRecord.category) === category;
+
+    return matchesQuery && matchesFileType && matchesCategory;
+  });
+}
+
+function openDocumentHref(relativePath) {
+  return `/documents/source/${encodeURIComponent(relativePath)}`;
+}
+
+function getSelectedDocument() {
+  if (!state.selectedDocumentId) return null;
+  return (
+    state.visibleDocuments.find(
+      (documentRecord) => documentRecord.id === state.selectedDocumentId,
+    ) || null
+  );
+}
+
+function renderFilters(documents) {
+  const fileTypes = Array.from(
+    new Set(documents.map((documentRecord) => documentRecord.fileType).filter(Boolean)),
+  ).sort();
+  const categories = Array.from(
+    new Set(documents.map((documentRecord) => documentRecord.category).filter(Boolean)),
+  ).sort();
+
+  elements.typeFilter.innerHTML =
+    '<option value="">All file types</option>' +
+    fileTypes
+      .map((fileType) => `<option value="${fileType}">${fileType}</option>`)
+      .join('');
+
+  elements.categoryFilter.innerHTML =
+    '<option value="">All categories</option>' +
+    categories
+      .map((category) => `<option value="${category}">${category}</option>`)
+      .join('');
+
+  elements.categoryCount.textContent = String(categories.length);
+  elements.fileTypeCount.textContent = String(fileTypes.length);
+  elements.typeFilter.value = state.fileType;
+  elements.categoryFilter.value = state.category;
+}
+
+function renderActiveFilters() {
+  const chips = [];
+
+  if (state.searchQuery) chips.push(`Search: ${state.searchQuery}`);
+  if (state.fileType) chips.push(`Type: ${state.fileType}`);
+  if (state.category) chips.push(`Category: ${state.category}`);
+
+  if (!chips.length) {
+    elements.activeFilters.innerHTML = '';
+    return;
+  }
+
+  elements.activeFilters.innerHTML = chips
+    .map((label) => `<span class="filter-chip">${label}</span>`)
+    .join('');
+}
+
+function renderList() {
+  const selectedDocument = getSelectedDocument();
+  const documents = state.visibleDocuments;
+
+  elements.visibleCount.textContent = documents.length
+    ? documents.length === state.allDocuments.length
+      ? String(documents.length)
+      : `${documents.length}/${state.allDocuments.length}`
+    : '0';
+  elements.headerCount.textContent =
+    documents.length === state.allDocuments.length
+      ? `${state.allDocuments.length} documents`
+      : `${documents.length} of ${state.allDocuments.length} documents`;
+
+  elements.resultsLabel.textContent =
+    documents.length === 1 ? '1 result' : `${documents.length} results`;
+
+  if (state.loadState === 'error') {
+    elements.listState.hidden = false;
+    elements.listState.innerHTML =
+      `<strong>Unable to load the document corpus.</strong><br />${state.loadError}`;
+    elements.documentList.innerHTML = '';
+    elements.resultsLabel.textContent = 'Load error';
+    return;
+  }
+
+  if (!documents.length) {
+    elements.listState.hidden = false;
+    elements.listState.innerHTML =
+      '<strong>No matching documents.</strong><br />Try a broader search, another category, or a different file type.';
+    elements.documentList.innerHTML = '';
+    return;
+  }
+
+  elements.listState.hidden = true;
+  elements.listState.textContent = '';
+
+  elements.documentList.innerHTML = documents
+    .map((documentRecord) => {
+      const isSelected = selectedDocument?.id === documentRecord.id;
+      const summaryTags = documentRecord.tags.slice(0, 3);
+
+      return `
+        <button
+          class="document-item${isSelected ? ' is-selected' : ''}"
+          type="button"
+          data-document-id="${documentRecord.id}"
+          role="option"
+          aria-selected="${String(isSelected)}"
+        >
+          <div class="document-item__meta">
+            <span class="file-badge">${documentRecord.fileType}</span>
+            <span class="meta-chip">${documentRecord.category}</span>
+          </div>
+          <h3 class="document-item__title">${documentRecord.title}</h3>
+          <p class="document-item__description">${documentRecord.shortDescription}</p>
+          <div class="document-item__footer">
+            ${summaryTags.map((tag) => `<span class="tag-chip">${tag}</span>`).join('')}
+          </div>
+        </button>
+      `;
+    })
+    .join('');
+}
+
+function renderDetailEmptyState(eyebrow, title, body) {
+  elements.detailPaneContent.innerHTML = `
+    <div class="detail-empty">
+      <div>
+        <p class="detail-empty__eyebrow">${escapeHtml(eyebrow)}</p>
+        <h2>${escapeHtml(title)}</h2>
+        <p>${escapeHtml(body)}</p>
+      </div>
+    </div>
+  `;
+}
+
+function renderDetailCard(documentRecord) {
+  const tags = Array.isArray(documentRecord.tags) ? documentRecord.tags : [];
+  const detailUseNote =
+    `${documentRecord.title} sits in the corpus as a ${documentRecord.category.toLowerCase()} artifact and helps anchor the Gateway briefing set without forcing the user into raw folder browsing.`;
+
+  elements.detailPaneContent.innerHTML = `
+    <article class="detail-card">
+      <header class="detail-card__hero">
+        <div class="detail-card__hero-copy">
+          <p class="detail-card__eyebrow">${escapeHtml(documentRecord.category)}</p>
+          <h2>${escapeHtml(documentRecord.title)}</h2>
+          <p class="detail-card__description">${escapeHtml(documentRecord.shortDescription)}</p>
+        </div>
+        <div class="detail-card__hero-actions">
+          <span class="file-badge">${escapeHtml(documentRecord.fileType)}</span>
+          <a
+            class="primary-button"
+            href="${escapeHtml(openDocumentHref(documentRecord.relativePath))}"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Open Document
+          </a>
+        </div>
+      </header>
+
+      <section class="detail-grid" aria-label="Document metadata">
+        <div class="detail-meta-card">
+          <p class="detail-meta-card__label">Filename</p>
+          <code>${escapeHtml(documentRecord.filename)}</code>
+        </div>
+        <div class="detail-meta-card">
+          <p class="detail-meta-card__label">Relative Path</p>
+          <code>${escapeHtml(documentRecord.relativePath)}</code>
+        </div>
+        <div class="detail-meta-card">
+          <p class="detail-meta-card__label">Category</p>
+          <span>${escapeHtml(documentRecord.category)}</span>
+        </div>
+        <div class="detail-meta-card">
+          <p class="detail-meta-card__label">Document ID</p>
+          <code>${escapeHtml(documentRecord.id)}</code>
+        </div>
+      </section>
+
+      <section class="detail-section">
+        <div class="detail-section__header">
+          <p class="detail-section__eyebrow">Research Use</p>
+          <h3>Why this artifact is in the corpus</h3>
+        </div>
+        <p class="detail-section__body">${escapeHtml(detailUseNote)}</p>
+      </section>
+
+      <section class="detail-section">
+        <div class="detail-section__header">
+          <p class="detail-section__eyebrow">Tags</p>
+          <h3>Searchable handles</h3>
+        </div>
+        <div class="tag-row">
+          ${tags.map((tag) => `<span class="tag-chip">${escapeHtml(tag)}</span>`).join('')}
+        </div>
+      </section>
+    </article>
+  `;
+}
+
+function renderDetail() {
+  if (state.loadState === 'error') {
+    renderDetailEmptyState(
+      'Load Error',
+      'Unable to load documents.',
+      state.loadError,
+    );
+    return;
+  }
+
+  const selectedDocument = getSelectedDocument();
+
+  if (!selectedDocument) {
+    renderDetailEmptyState(
+      'No Results',
+      'No documents match the current filters.',
+      'Try a broader search, another category, or a different file type to repopulate the detail pane.',
+    );
+    return;
+  }
+
+  renderDetailCard(selectedDocument);
+}
+
+function syncSelectedDocumentId() {
+  if (!state.visibleDocuments.length) {
+    state.selectedDocumentId = null;
+    return;
+  }
+
+  const selectedStillVisible = state.visibleDocuments.some(
+    (documentRecord) => documentRecord.id === state.selectedDocumentId,
+  );
+
+  if (!selectedStillVisible) {
+    state.selectedDocumentId = state.visibleDocuments[0].id;
+  }
+}
+
+function updateVisibleDocuments() {
+  state.visibleDocuments = filterDocuments(state.allDocuments, {
+    searchQuery: state.searchQuery,
+    fileType: state.fileType,
+    category: state.category,
+  });
+
+  syncSelectedDocumentId();
+}
+
+function render() {
+  renderActiveFilters();
+  renderList();
+  renderDetail();
+}
+
+function handleListClick(event) {
+  const button = event.target.closest('[data-document-id]');
+  if (!button) return;
+
+  state.selectedDocumentId = button.getAttribute('data-document-id');
+  syncSelectedDocumentId();
+  render();
+}
+
+function attachEvents() {
+  elements.searchInput.addEventListener('input', (event) => {
+    state.searchQuery = event.target.value.trim();
+    updateVisibleDocuments();
+    render();
+  });
+
+  elements.typeFilter.addEventListener('change', (event) => {
+    state.fileType = event.target.value;
+    updateVisibleDocuments();
+    render();
+  });
+
+  elements.categoryFilter.addEventListener('change', (event) => {
+    state.category = event.target.value;
+    updateVisibleDocuments();
+    render();
+  });
+
+  elements.clearFiltersButton.addEventListener('click', () => {
+    state.searchQuery = '';
+    state.fileType = '';
+    state.category = '';
+    elements.searchInput.value = '';
+    elements.typeFilter.value = '';
+    elements.categoryFilter.value = '';
+    updateVisibleDocuments();
+    render();
+  });
+
+  elements.documentList.addEventListener('click', handleListClick);
+}
+
+function cacheElements() {
+  elements.appTitle = document.getElementById('appTitle');
+  elements.searchInput = document.getElementById('searchInput');
+  elements.headerCount = document.getElementById('headerCount');
+  elements.typeFilter = document.getElementById('typeFilter');
+  elements.categoryFilter = document.getElementById('categoryFilter');
+  elements.clearFiltersButton = document.getElementById('clearFiltersButton');
+  elements.visibleCount = document.getElementById('visibleCount');
+  elements.categoryCount = document.getElementById('categoryCount');
+  elements.fileTypeCount = document.getElementById('fileTypeCount');
+  elements.resultsLabel = document.getElementById('resultsLabel');
+  elements.activeFilters = document.getElementById('activeFilters');
+  elements.listState = document.getElementById('listState');
+  elements.documentList = document.getElementById('documentList');
+  elements.detailPaneContent = document.getElementById('detailPaneContent');
+}
+
+async function loadManifest() {
+  const response = await fetch(DATA_URL);
+  if (!response.ok) {
+    throw new Error(`Unable to load document manifest (${response.status})`);
+  }
+
+  return response.json();
+}
+
+function initializeFromManifest(manifest) {
+  state.allDocuments = Array.isArray(manifest.documents) ? manifest.documents : [];
+  state.selectedDocumentId = state.allDocuments[0]?.id || null;
+  state.loadState = 'ready';
+  state.loadError = '';
+  elements.appTitle.textContent = manifest.appTitle || 'Documents Explorer';
+  renderFilters(state.allDocuments);
+  updateVisibleDocuments();
+  render();
+}
+
+function renderFatalError(message) {
+  state.loadState = 'error';
+  state.loadError = message;
+  state.allDocuments = [];
+  state.visibleDocuments = [];
+  state.selectedDocumentId = null;
+  render();
+}
+
+async function initializeApp() {
+  cacheElements();
+  attachEvents();
+
+  try {
+    const manifest = await loadManifest();
+    initializeFromManifest(manifest);
+  } catch (error) {
+    console.error('Failed to load documents.json', error);
+    renderFatalError(error instanceof Error ? error.message : 'Unknown error');
+  }
+}
+
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+  window.addEventListener('DOMContentLoaded', initializeApp);
+}

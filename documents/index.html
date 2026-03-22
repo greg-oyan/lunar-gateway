@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gateway Documents Explorer</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="topbar__identity">
+          <p class="topbar__eyebrow">Gateway Source Corpus</p>
+          <h1 id="appTitle">Documents Explorer</h1>
+          <p class="topbar__subtitle">
+            A document intelligence view over the Gateway authority layer.
+          </p>
+          <div class="topbar__meta-row">
+            <span id="headerCount" class="header-count">0 documents</span>
+          </div>
+        </div>
+
+        <div class="topbar__controls">
+          <div class="search-field">
+            <label class="sr-only" for="searchInput">Search documents</label>
+            <input
+              id="searchInput"
+              type="search"
+              placeholder="Search title, filename, tags, category, or description"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="filter-row">
+            <label class="sr-only" for="typeFilter">Filter by file type</label>
+            <select id="typeFilter">
+              <option value="">All file types</option>
+            </select>
+
+            <label class="sr-only" for="categoryFilter">Filter by category</label>
+            <select id="categoryFilter">
+              <option value="">All categories</option>
+            </select>
+
+            <button id="clearFiltersButton" class="secondary-button" type="button">
+              Clear
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <section class="summary-strip" aria-label="Corpus summary">
+        <div class="summary-strip__stat">
+          <span class="summary-strip__label">Documents</span>
+          <strong id="visibleCount">0</strong>
+        </div>
+        <div class="summary-strip__stat">
+          <span class="summary-strip__label">Categories</span>
+          <strong id="categoryCount">0</strong>
+        </div>
+        <div class="summary-strip__stat">
+          <span class="summary-strip__label">File Types</span>
+          <strong id="fileTypeCount">0</strong>
+        </div>
+        <div class="summary-strip__context">
+          <p>
+            Start with the list, then select a document to reveal richer context,
+            metadata, and a direct link back to the source file.
+          </p>
+        </div>
+      </section>
+
+      <main class="workspace">
+        <aside class="list-pane" aria-labelledby="listPaneTitle">
+          <div class="pane-header">
+            <div>
+              <p class="pane-header__eyebrow">Browse</p>
+              <h2 id="listPaneTitle">Document Corpus</h2>
+            </div>
+            <p id="resultsLabel" class="pane-header__meta">0 results</p>
+          </div>
+
+          <div class="list-pane__body">
+            <div id="activeFilters" class="active-filters" aria-live="polite"></div>
+            <div id="listState" class="list-state" hidden></div>
+            <div
+              id="documentList"
+              class="document-list"
+              role="listbox"
+              aria-label="Documents"
+            ></div>
+          </div>
+        </aside>
+
+        <section class="detail-pane" aria-label="Document detail pane">
+          <div id="detailPaneContent" class="detail-pane__content"></div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

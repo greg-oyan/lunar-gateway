@@ -1,0 +1,156 @@
+{
+  "appTitle": "Gateway Documents Explorer",
+  "generatedAt": "2026-03-21T00:00:00.000Z",
+  "documents": [
+    {
+      "id": "doc-card",
+      "title": "Gateway Cost Analysis Requirements Description",
+      "filename": "gateway_CARD.rtf",
+      "relativePath": "Contract_Cost_Schedule Documents/docs/gateway_CARD.rtf",
+      "fileType": "RTF",
+      "category": "Authority Narrative",
+      "tags": ["cost", "requirements", "authority", "program basis"],
+      "shortDescription": "Program-level cost analysis requirements description used to frame scope, assumptions, and estimating discipline."
+    },
+    {
+      "id": "doc-wbs-dictionary",
+      "title": "Gateway WBS Dictionary",
+      "filename": "gateway_wbs_dictionary.rtf",
+      "relativePath": "Contract_Cost_Schedule Documents/docs/gateway_wbs_dictionary.rtf",
+      "fileType": "RTF",
+      "category": "Authority Narrative",
+      "tags": ["wbs", "definitions", "structure", "authority"],
+      "shortDescription": "Controlled definition of the Gateway WBS hierarchy and the intended meaning of each major element."
+    },
+    {
+      "id": "doc-authority-guide",
+      "title": "Gateway Data Authority Guide",
+      "filename": "gateway_data_authority_guide.rtf",
+      "relativePath": "Contract_Cost_Schedule Documents/docs/gateway_data_authority_guide.rtf",
+      "fileType": "RTF",
+      "category": "Authority Narrative",
+      "tags": ["authority", "traceability", "sources", "methodology"],
+      "shortDescription": "Companion guidance explaining how source-document rigor, authority tiers, and app-level interpretation are separated."
+    },
+    {
+      "id": "doc-cost-basis",
+      "title": "Gateway Cost Basis of Estimate",
+      "filename": "gateway_cost_basis_of_estimate.rtf",
+      "relativePath": "Contract_Cost_Schedule Documents/docs/gateway_cost_basis_of_estimate.rtf",
+      "fileType": "RTF",
+      "category": "Authority Narrative",
+      "tags": ["cost", "methodology", "assumptions", "reserve"],
+      "shortDescription": "Narrative basis-of-estimate document covering scope, reserve treatment, annual phasing logic, and remaining judgment."
+    },
+    {
+      "id": "doc-wbs",
+      "title": "Gateway WBS Hierarchy Dataset",
+      "filename": "gateway_wbs.csv",
+      "relativePath": "Contract_Cost_Schedule Documents/data/gateway_wbs.csv",
+      "fileType": "CSV",
+      "category": "WBS Dataset",
+      "tags": ["wbs", "hierarchy", "structure", "responsibility"],
+      "shortDescription": "Tabular WBS hierarchy with parent-child structure, responsibility assignments, and short element descriptions."
+    },
+    {
+      "id": "doc-cost-estimate",
+      "title": "Gateway Cost Estimate Rollup",
+      "filename": "gateway_cost_estimate.csv",
+      "relativePath": "Contract_Cost_Schedule Documents/data/gateway_cost_estimate.csv",
+      "fileType": "CSV",
+      "category": "Cost Dataset",
+      "tags": ["cost", "estimate", "rollup", "traceability"],
+      "shortDescription": "Top-level cost estimate rollup by WBS branch with explicit-dollar fields, basis types, and traceability notes."
+    },
+    {
+      "id": "doc-cost-detail",
+      "title": "Gateway Cost Estimate Detail",
+      "filename": "gateway_cost_estimate_detail.csv",
+      "relativePath": "Contract_Cost_Schedule Documents/data/gateway_cost_estimate_detail.csv",
+      "fileType": "CSV",
+      "category": "Cost Dataset",
+      "tags": ["cost", "detail", "reserve", "yearly"],
+      "shortDescription": "Detail-level cost lines supporting grouped rollups, reserve visibility, fiscal-year allocation, and deeper traceability."
+    },
+    {
+      "id": "doc-cost-phasing",
+      "title": "Gateway Cost Phasing by Year",
+      "filename": "gateway_cost_phasing.csv",
+      "relativePath": "Contract_Cost_Schedule Documents/data/gateway_cost_phasing.csv",
+      "fileType": "CSV",
+      "category": "Cost Dataset",
+      "tags": ["cost", "phasing", "fiscal year", "time series"],
+      "shortDescription": "Year-by-year current-cost phasing with explicit labor, material, integration, and total-cost values."
+    },
+    {
+      "id": "doc-section-b",
+      "title": "Gateway Section B Pricing Evidence",
+      "filename": "gateway_section_b_pricing.csv",
+      "relativePath": "Contract_Cost_Schedule Documents/data/gateway_section_b_pricing.csv",
+      "fileType": "CSV",
+      "category": "Contract Pricing Dataset",
+      "tags": ["pricing", "clin", "contract", "cost evidence"],
+      "shortDescription": "Priced contract line-item evidence retained as direct numeric support for portions of the Gateway estimate."
+    },
+    {
+      "id": "doc-master-schedule",
+      "title": "Gateway Master Schedule Extract",
+      "filename": "gateway_master_schedule.csv",
+      "relativePath": "Contract_Cost_Schedule Documents/data/gateway_master_schedule.csv",
+      "fileType": "CSV",
+      "category": "Schedule Dataset",
+      "tags": ["schedule", "tasks", "critical path", "predecessors"],
+      "shortDescription": "Task-level schedule extract with dates, predecessors, milestone flags, and critical-task indicators."
+    },
+    {
+      "id": "doc-milestones",
+      "title": "Gateway Program Milestones",
+      "filename": "gateway_milestones.csv",
+      "relativePath": "Contract_Cost_Schedule Documents/data/gateway_milestones.csv",
+      "fileType": "CSV",
+      "category": "Schedule Dataset",
+      "tags": ["schedule", "milestones", "dates", "authority"],
+      "shortDescription": "Named program milestones with date basis, source IDs, confidence annotations, and related task links."
+    },
+    {
+      "id": "doc-risk-register",
+      "title": "Gateway Risk Register",
+      "filename": "gateway_risk_register.csv",
+      "relativePath": "Contract_Cost_Schedule Documents/data/gateway_risk_register.csv",
+      "fileType": "CSV",
+      "category": "Risk Dataset",
+      "tags": ["risk", "mitigation", "likelihood", "consequence"],
+      "shortDescription": "Program and schedule-linked risk register with likelihood, consequence, mitigation, and supporting source references."
+    },
+    {
+      "id": "doc-doc-tracker",
+      "title": "Gateway Contract Documents Tracker",
+      "filename": "gateway_contract_documents_tracker.csv",
+      "relativePath": "Contract_Cost_Schedule Documents/data/gateway_contract_documents_tracker.csv",
+      "fileType": "CSV",
+      "category": "Document Control Dataset",
+      "tags": ["documents", "tracker", "authority tier", "evidence role"],
+      "shortDescription": "Tracker linking controlled documents to WBS elements, milestones, authority tiers, and evidence roles."
+    },
+    {
+      "id": "doc-source-register",
+      "title": "Gateway Source Reference Register",
+      "filename": "gateway_source_reference_register.csv",
+      "relativePath": "Contract_Cost_Schedule Documents/data/gateway_source_reference_register.csv",
+      "fileType": "CSV",
+      "category": "Reference Dataset",
+      "tags": ["sources", "references", "public", "traceability"],
+      "shortDescription": "Register of public and internal references used to anchor the rebuilt Gateway authority layer."
+    },
+    {
+      "id": "doc-glossary",
+      "title": "Gateway Glossary",
+      "filename": "gateway_glossary.csv",
+      "relativePath": "Contract_Cost_Schedule Documents/data/gateway_glossary.csv",
+      "fileType": "CSV",
+      "category": "Reference Dataset",
+      "tags": ["glossary", "definitions", "terms", "reference"],
+      "shortDescription": "Reference glossary of terms used across the Gateway corpus to keep terminology consistent across artifacts."
+    }
+  ]
+}
