@@ -272,6 +272,151 @@
       #suite-dock .suite-dock__link { width: 100%; justify-content: center; }
     }
 
+    #tour-overlay {
+      position: fixed;
+      left: 50%;
+      bottom: 28px;
+      z-index: 95;
+      width: min(640px, calc(100vw - 40px));
+      padding: 16px 18px 18px;
+      border: 1px solid rgba(84, 148, 198, 0.28);
+      border-radius: 22px;
+      background:
+        linear-gradient(180deg, rgba(9, 18, 31, 0.92), rgba(5, 11, 21, 0.96));
+      box-shadow:
+        0 20px 48px rgba(0, 0, 0, 0.55),
+        inset 0 1px 0 rgba(156, 211, 255, 0.08);
+      backdrop-filter: blur(18px);
+      color: #d7eeff;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.9px;
+      transform: translate(-50%, 20px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.28s ease, transform 0.28s ease;
+    }
+    #tour-overlay.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+      pointer-events: auto;
+    }
+    .tour-overlay__eyebrow {
+      color: #79bae7;
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+    .tour-overlay__header {
+      margin-top: 10px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .tour-overlay__copy {
+      min-width: 0;
+      flex: 1;
+    }
+    .tour-overlay__title {
+      color: #f1f8ff;
+      font-size: 22px;
+      line-height: 1.2;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+    }
+    .tour-overlay__caption {
+      margin-top: 6px;
+      color: #87aecd;
+      font-size: 12px;
+      line-height: 1.65;
+      letter-spacing: 0.6px;
+      text-transform: none;
+    }
+    #tour-skip {
+      appearance: none;
+      border: 1px solid #2d5676;
+      border-radius: 999px;
+      background: rgba(11, 28, 49, 0.9);
+      color: #b7ddf7;
+      font: 11px/1 'Courier New', monospace;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      padding: 11px 14px;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+      white-space: nowrap;
+    }
+    #tour-skip:hover {
+      background: rgba(18, 42, 68, 0.96);
+      border-color: #5f9cc5;
+      color: #e5f5ff;
+    }
+    .tour-overlay__footer {
+      margin-top: 14px;
+      display: grid;
+      gap: 8px;
+    }
+    .tour-overlay__count {
+      color: #6c95b2;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .tour-overlay__track {
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(21, 40, 58, 0.92);
+      overflow: hidden;
+    }
+    .tour-overlay__fill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #4f8cc0, #9cd7ff);
+      box-shadow: 0 0 16px rgba(120, 190, 244, 0.45);
+      transition: width 0.3s ease;
+    }
+    body.tour-mode #suite-dock {
+      opacity: 0;
+      pointer-events: none;
+    }
+    body.tour-mode #info {
+      opacity: 0;
+      transform: translateX(calc(100% + 26px));
+      pointer-events: none;
+    }
+    body.tour-mode #hud.show {
+      opacity: 0.24;
+    }
+    body.tour-mode .corner.show {
+      opacity: 0.16;
+    }
+    body.tour-mode .h-speed button,
+    body.tour-mode .h-cams button,
+    body.tour-mode #focus-gw {
+      opacity: 0.34;
+      pointer-events: none;
+    }
+    body.tour-mode #tooltip {
+      display: none !important;
+    }
+    @media (max-width: 760px) {
+      #tour-overlay {
+        width: calc(100vw - 24px);
+        bottom: 16px;
+        padding: 14px 14px 16px;
+      }
+      .tour-overlay__header {
+        flex-direction: column;
+      }
+      #tour-skip {
+        width: 100%;
+      }
+      .tour-overlay__title {
+        font-size: 18px;
+      }
+    }
+
     /* ═══ HUD ══════════════════════════════════════════════════════ */
     #hud {
       position: fixed; top: 20px; left: 20px;
@@ -442,6 +587,25 @@
     <div class="ld-msg"  id="ld-msg">Initializing renderer…</div>
   </div>
 
+  <div id="tour-overlay" aria-live="polite" aria-atomic="true" aria-hidden="true">
+    <div class="tour-overlay__eyebrow">Tour Mode</div>
+    <div class="tour-overlay__header">
+      <div class="tour-overlay__copy">
+        <div class="tour-overlay__title" id="tour-title">Guided Gateway Tour</div>
+        <div class="tour-overlay__caption" id="tour-caption">
+          A guided camera pass is highlighting the Gateway mission context.
+        </div>
+      </div>
+      <button id="tour-skip" type="button">Skip Tour</button>
+    </div>
+    <div class="tour-overlay__footer">
+      <div class="tour-overlay__count" id="tour-count">Shot 1 of 1</div>
+      <div class="tour-overlay__track" aria-hidden="true">
+        <div class="tour-overlay__fill" id="tour-progress"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- HUD -->
   <div id="hud">
     <div class="h-title">◈  LUNAR GATEWAY  ·  DSG-RQMT-001  ◈</div>
@@ -589,6 +753,12 @@
     const launchStartBtn = document.getElementById('launch-start');
     const launchTourBtn = document.getElementById('launch-tour');
     const launchWebglStatus = document.getElementById('launch-webgl-status');
+    const tourOverlay = document.getElementById('tour-overlay');
+    const tourTitleEl = document.getElementById('tour-title');
+    const tourCaptionEl = document.getElementById('tour-caption');
+    const tourCountEl = document.getElementById('tour-count');
+    const tourProgressEl = document.getElementById('tour-progress');
+    const tourSkipBtn = document.getElementById('tour-skip');
 
     (function checkWebGL() {
       const c = document.createElement('canvas');
@@ -1517,6 +1687,74 @@
     // ═══════════════════════════════════════════════════════════════
     const ray=new THREE.Raycaster(); const ptr=new THREE.Vector2();
     let selKey=null, mDown={x:0,y:0}, dragged=false;
+    const TOUR_SHOTS = [
+      {
+        title: 'Lunar Operating Context',
+        caption: 'Gateway is positioned first in relation to the Moon, its primary operating frame.',
+        camAnchor:'moon', camOff:new THREE.Vector3( 34, 12, 74), tgtAnchor:'moon', tgtOff:new THREE.Vector3(0,0,0), dur: 8.5, hold:2.0
+      },
+      {
+        title: 'Gateway In View',
+        caption: 'The outpost comes forward as the focal system inside the cislunar orbit.',
+        camAnchor:'gateway', camOff:new THREE.Vector3( 14,  5, 24), tgtAnchor:'gateway', tgtOff:new THREE.Vector3(0,0,0), dur:10.0, hold:2.0
+      },
+      {
+        title: 'Orbit And Outpost',
+        caption: 'This angle ties the vehicle to the broader orbital geometry rather than showing hardware alone.',
+        camAnchor:'gateway', camOff:new THREE.Vector3(-26, 11, 16), tgtAnchor:'moon', tgtOff:new THREE.Vector3(0,0,0), dur:10.0, hold:2.0
+      },
+      {
+        title: 'Polar Trajectory',
+        caption: 'The camera emphasizes how Gateway swings over the lunar poles in NRHO.',
+        camAnchor:'moon', camOff:new THREE.Vector3(  0, 40, 20), tgtAnchor:'gateway', tgtOff:new THREE.Vector3(0,0,0), dur:10.0, hold:2.0
+      },
+      {
+        title: 'Earth Connection',
+        caption: 'Gateway stays lunar-centered while retaining a clear mission relationship back toward Earth.',
+        camAnchor:'earth', camOff:new THREE.Vector3( 38, 10, 44), tgtAnchor:'gateway', tgtOff:new THREE.Vector3(0,0,0), dur:10.0, hold:2.0
+      },
+      {
+        title: 'Module Assembly',
+        caption: 'A closer pass highlights the assembled elements that provide power, habitation, and logistics.',
+        camAnchor:'gateway', camOff:new THREE.Vector3(-20, -3,-18), tgtAnchor:'gateway', tgtOff:new THREE.Vector3(0,0,0), dur: 9.0, hold:2.0
+      },
+      {
+        title: 'Return To Context',
+        caption: 'The station is set back against the Moon to reinforce where the program lives and why the orbit matters.',
+        camAnchor:'moon', camOff:new THREE.Vector3(-30,  4, 52), tgtAnchor:'gateway', tgtOff:new THREE.Vector3(0,0,0), dur: 9.0, hold:2.0
+      },
+      {
+        title: 'Ready To Explore',
+        caption: 'The guided sequence concludes and hands back to free exploration.',
+        camAnchor:'gateway', camOff:new THREE.Vector3( 10,  3, 16), tgtAnchor:'gateway', tgtOff:new THREE.Vector3(0,0,0), dur: 7.0, hold:0.0
+      },
+    ];
+
+    function hideTooltip() {
+      _ttEl.style.display='none';
+      renderer.domElement.style.cursor='';
+    }
+    function setTourOverlayVisible(active) {
+      document.body.classList.toggle('tour-mode', active);
+      tourOverlay.classList.toggle('show', active);
+      tourOverlay.setAttribute('aria-hidden', active ? 'false' : 'true');
+    }
+    function updateTourOverlay(shot, idx, total) {
+      tourTitleEl.textContent = shot.title;
+      tourCaptionEl.textContent = shot.caption;
+      tourCountEl.textContent = `Shot ${idx + 1} of ${total}`;
+      tourProgressEl.style.width = `${((idx + 1) / total) * 100}%`;
+    }
+    function handoffFromTour() {
+      followGateway=false;
+      followEarth=false;
+      hideTooltip();
+      controls.enabled=false;
+      lerpTo(new THREE.Vector3(0,75,195),new THREE.Vector3(0,70,0),2.0,()=>{
+        controls.enabled=true;
+        controls.autoRotate=true;
+      });
+    }
 
     function clearHL() {
       gatewayGroup.traverse(c=>{
@@ -1549,6 +1787,10 @@
     renderer.domElement.addEventListener('mousedown', e=>{mDown={x:e.clientX,y:e.clientY};dragged=false;});
     const _ttEl = document.getElementById('tooltip');
     renderer.domElement.addEventListener('mousemove', e=>{
+      if(tourActive){
+        hideTooltip();
+        return;
+      }
       const dx=e.clientX-mDown.x,dy=e.clientY-mDown.y;
       if(dx*dx+dy*dy>25) dragged=true;
       // Hover tooltip
@@ -1568,6 +1810,7 @@
       }
     });
     renderer.domElement.addEventListener('click', e=>{
+      if(tourActive) return;
       if(dragged) return;
       ptr.x=(e.clientX/window.innerWidth)*2-1; ptr.y=-(e.clientY/window.innerHeight)*2+1;
       ray.setFromCamera(ptr,camera);
@@ -1601,6 +1844,7 @@
     const speedMap={'sp-0':0,'sp-1':1,'sp-100':100,'sp-600':600,'sp-9360':9360};
     Object.entries(speedMap).forEach(([id,s])=>{
       document.getElementById(id).addEventListener('click',()=>{
+        if(tourActive) return;
         simScale=s; simPaused=s===0;
         document.querySelectorAll('.h-speed button').forEach(b=>b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
@@ -1619,10 +1863,12 @@
              tc:camTo,tt:targetTo,t:0,dur:dur||1.8,onDone:onDone||null};
       controls.autoRotate=false;
     }
-    function stopTourMode() {
+    function stopTourMode({ handoff = true } = {}) {
       tourActive=false;
       if(tourTimer){ clearTimeout(tourTimer); tourTimer=null; }
-      controls.enabled=true;
+      setTourOverlayVisible(false);
+      if(handoff) handoffFromTour();
+      else controls.enabled=true;
     }
     function anchorPoint(name, gwPos) {
       if(name==='moon') return moonMesh.position;
@@ -1630,28 +1876,21 @@
       return gwPos || gatewayGroup.position;
     }
     function startTourMode() {
-      stopTourMode();
+      stopTourMode({ handoff:false });
       followGateway=false;
       followEarth=false;
+      if(selKey) selectModule(selKey);
+      hideTooltip();
       tourActive=true;
       controls.autoRotate=false;
       controls.enabled=false;
-
-      const shots=[
-        {camAnchor:'moon',    camOff:new THREE.Vector3( 34, 12, 74), tgtAnchor:'moon',    tgtOff:new THREE.Vector3(0,0,0), dur: 8.5, hold:2.0},
-        {camAnchor:'gateway', camOff:new THREE.Vector3( 14,  5, 24), tgtAnchor:'gateway', tgtOff:new THREE.Vector3(0,0,0), dur:10.0, hold:2.0},
-        {camAnchor:'gateway', camOff:new THREE.Vector3(-26, 11, 16), tgtAnchor:'moon',    tgtOff:new THREE.Vector3(0,0,0), dur:10.0, hold:2.0},
-        {camAnchor:'moon',    camOff:new THREE.Vector3(  0, 40, 20), tgtAnchor:'gateway', tgtOff:new THREE.Vector3(0,0,0), dur:10.0, hold:2.0},
-        {camAnchor:'earth',   camOff:new THREE.Vector3( 38, 10, 44), tgtAnchor:'gateway', tgtOff:new THREE.Vector3(0,0,0), dur:10.0, hold:2.0},
-        {camAnchor:'gateway', camOff:new THREE.Vector3(-20, -3,-18), tgtAnchor:'gateway', tgtOff:new THREE.Vector3(0,0,0), dur: 9.0, hold:2.0},
-        {camAnchor:'moon',    camOff:new THREE.Vector3(-30,  4, 52), tgtAnchor:'gateway', tgtOff:new THREE.Vector3(0,0,0), dur: 9.0, hold:2.0},
-        {camAnchor:'gateway', camOff:new THREE.Vector3( 10,  3, 16), tgtAnchor:'gateway', tgtOff:new THREE.Vector3(0,0,0), dur: 7.0, hold:0.0},
-      ];
+      setTourOverlayVisible(true);
 
       const playShot=(idx)=>{
         if(!tourActive) return;
-        if(idx>=shots.length){ stopTourMode(); return; }
-        const s=shots[idx];
+        if(idx>=TOUR_SHOTS.length){ stopTourMode({ handoff:true }); return; }
+        const s=TOUR_SHOTS[idx];
+        updateTourOverlay(s, idx, TOUR_SHOTS.length);
         const gwNow=gatewayGroup.position.clone();
         const camTo=anchorPoint(s.camAnchor,gwNow).clone().add(s.camOff);
         const tgtTo=anchorPoint(s.tgtAnchor,gwNow).clone().add(s.tgtOff);
@@ -1694,6 +1933,13 @@
     // ── Keyboard shortcuts ─────────────────────────────────────────
     document.addEventListener('keydown', e=>{
       if(e.target.tagName==='INPUT') return;
+      if(tourActive){
+        if(e.code==='Escape'){
+          e.preventDefault();
+          stopTourMode({ handoff:true });
+        }
+        return;
+      }
       switch(e.code){
         case 'Space': e.preventDefault();
           document.getElementById(simPaused?'sp-600':'sp-0').click(); break;
@@ -1710,6 +1956,12 @@
         case 'Digit4': document.getElementById('sp-9360').click(); break;
       }
     });
+    if (tourSkipBtn) {
+      tourSkipBtn.addEventListener('click', () => {
+        if (!tourActive) return;
+        stopTourMode({ handoff:true });
+      });
+    }
 
     // ═══════════════════════════════════════════════════════════════
     //  HUD UPDATE
