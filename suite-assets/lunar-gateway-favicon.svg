@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Lunar Gateway favicon</title>
+  <desc id="desc">A stylized lunar orbit and station icon for the Lunar Gateway application ecosystem.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#10243d" />
+      <stop offset="100%" stop-color="#08101c" />
+    </linearGradient>
+    <linearGradient id="orbit" x1="0%" x2="100%" y1="50%" y2="50%">
+      <stop offset="0%" stop-color="#8ec5ff" />
+      <stop offset="100%" stop-color="#d7e7ff" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)" />
+  <circle cx="23" cy="34" r="11" fill="#f0c98a" opacity="0.92" />
+  <path
+    d="M14 36c2.8-9.9 11.6-17 21.8-17 7.2 0 13.7 3.5 17.8 9.2"
+    fill="none"
+    stroke="url(#orbit)"
+    stroke-linecap="round"
+    stroke-width="3.4"
+  />
+  <path
+    d="M29 18.5c6.2 1.1 11.8 4.9 15.3 10.3"
+    fill="none"
+    opacity="0.4"
+    stroke="#d7e7ff"
+    stroke-linecap="round"
+    stroke-width="1.5"
+  />
+  <rect x="38" y="28" width="10" height="8" rx="2.2" fill="#edf4ff" />
+  <rect x="36" y="31" width="2.5" height="2" rx="1" fill="#6ea4df" />
+  <rect x="48" y="31" width="2.5" height="2" rx="1" fill="#6ea4df" />
+  <path d="M43 25v3" fill="none" stroke="#edf4ff" stroke-linecap="round" stroke-width="1.8" />
+</svg>

@@ -20,6 +20,11 @@ const dataFiles = {
   pricing: 'Contract_Cost_Schedule Documents/data/gateway_section_b_pricing.csv',
 };
 
+const suiteAssets = {
+  'lunar-gateway-favicon.svg': 'suite-assets/lunar-gateway-favicon.svg',
+  'lunar-gateway-share-card.svg': 'suite-assets/lunar-gateway-share-card.svg',
+};
+
 const mimeTypes = {
   '.css': 'text/css; charset=utf-8',
   '.csv': 'text/csv; charset=utf-8',
@@ -643,6 +648,16 @@ const server = http.createServer(async (request, response) => {
 
   if (pathname === '/simulation' || pathname === '/simulation/') {
     await sendStaticFile(response, '/index.html');
+    return;
+  }
+
+  if (pathname.startsWith('/suite-assets/')) {
+    const fileName = pathname.replace('/suite-assets/', '');
+    if (!Object.prototype.hasOwnProperty.call(suiteAssets, fileName)) {
+      notFound(response);
+      return;
+    }
+    await sendFile(response, path.join(repoRoot, suiteAssets[fileName]));
     return;
   }
 

@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Lunar Gateway Application Ecosystem social preview</title>
+  <desc id="desc">A placeholder social preview image for the Lunar Gateway simulation and decision-support application suite.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#07101c" />
+      <stop offset="55%" stop-color="#0d1b2c" />
+      <stop offset="100%" stop-color="#10243d" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" x2="100%" y1="50%" y2="50%">
+      <stop offset="0%" stop-color="#7eb5ff" />
+      <stop offset="100%" stop-color="#d8ebff" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <circle cx="913" cy="200" r="106" fill="#f0c98a" opacity="0.88" />
+  <path
+    d="M751 247c38-93 130-158 237-158 69 0 133 27 180 75"
+    fill="none"
+    stroke="url(#accent)"
+    stroke-linecap="round"
+    stroke-width="12"
+  />
+  <path
+    d="M820 301c26-60 85-102 154-102 42 0 81 16 111 43"
+    fill="none"
+    opacity="0.28"
+    stroke="#d8ebff"
+    stroke-linecap="round"
+    stroke-width="6"
+  />
+  <rect x="877" y="254" width="121" height="81" rx="18" fill="#edf4ff" />
+  <rect x="852" y="285" width="28" height="17" rx="8.5" fill="#7eb5ff" />
+  <rect x="997" y="285" width="28" height="17" rx="8.5" fill="#7eb5ff" />
+  <path d="M937 222v28" fill="none" stroke="#edf4ff" stroke-linecap="round" stroke-width="8" />
+  <text x="92" y="178" fill="#7eb5ff" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700" letter-spacing="2.4">LUNAR GATEWAY</text>
+  <text x="92" y="260" fill="#f7fbff" font-family="Segoe UI, Arial, sans-serif" font-size="66" font-weight="700">Application Ecosystem</text>
+  <text x="92" y="334" fill="#d7e5f6" font-family="Segoe UI, Arial, sans-serif" font-size="29">
+    Interconnected simulation and decision-support tools built from public NASA source material.
+  </text>
+  <rect x="92" y="398" width="182" height="58" rx="29" fill="rgba(126,181,255,0.12)" stroke="#2c4f78" />
+  <rect x="290" y="398" width="145" height="58" rx="29" fill="rgba(240,201,138,0.12)" stroke="#6f5731" />
+  <rect x="451" y="398" width="176" height="58" rx="29" fill="rgba(216,235,255,0.08)" stroke="#3d536c" />
+  <text x="183" y="435" fill="#e7f2ff" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="600" text-anchor="middle">Simulation</text>
+  <text x="362" y="435" fill="#ffe7c4" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="600" text-anchor="middle">Decision Support</text>
+  <text x="539" y="435" fill="#e7f2ff" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="600" text-anchor="middle">Source-Driven</text>
+  <text x="92" y="540" fill="#9eb2cb" font-family="Consolas, Menlo, monospace" font-size="24">Modules: Documents | WBS | Schedule | Cost | Risk</text>
+</svg>

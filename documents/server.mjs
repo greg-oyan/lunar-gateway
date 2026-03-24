@@ -16,6 +16,7 @@ const mimeTypes = {
   '.js': 'text/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
   '.rtf': 'application/rtf',
+  '.svg': 'image/svg+xml',
 };
 
 function getMimeType(filePath) {
@@ -83,6 +84,16 @@ const server = http.createServer(async (request, response) => {
 
     if (pathname === '/index.html' || pathname === '/simulation' || pathname === '/simulation/') {
       await sendFile(response, path.join(repoRoot, 'index.html'));
+      return;
+    }
+
+    if (pathname === '/suite-assets/lunar-gateway-favicon.svg') {
+      await sendFile(response, path.join(repoRoot, 'suite-assets/lunar-gateway-favicon.svg'));
+      return;
+    }
+
+    if (pathname === '/suite-assets/lunar-gateway-share-card.svg') {
+      await sendFile(response, path.join(repoRoot, 'suite-assets/lunar-gateway-share-card.svg'));
       return;
     }
 
