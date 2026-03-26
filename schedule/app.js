@@ -8,9 +8,11 @@ const stageFrame = document.getElementById('stageFrame');
 const overviewContent = document.getElementById('overviewContent');
 const timelineChart = document.getElementById('timelineChart');
 const focusLayer = document.getElementById('focusLayer');
+const focusHeading = document.getElementById('focusHeading');
 const focusSubtitle = document.getElementById('focusSubtitle');
 const focusContent = document.getElementById('focusContent');
 const supportLayer = document.getElementById('supportLayer');
+const supportHeading = document.getElementById('supportHeading');
 const supportSubtitle = document.getElementById('supportSubtitle');
 const supportTabs = document.getElementById('supportTabs');
 const supportContent = document.getElementById('supportContent');
@@ -30,7 +32,6 @@ const state = {
   activeDriverId: null,
   support: {
     open: false,
-    tab: 'support',
   },
   reveal: {
     phaseMilestones: false,
@@ -175,15 +176,19 @@ function syncActiveDriver(selection) {
 function setSelection(selection, options = {}) {
   state.selection = selection;
   state.reveal.phaseMilestones = false;
+  state.reveal.artifacts = false;
+  state.reveal.sources = false;
 
-  if (options.context === 'stage') {
+  if (!selection || selection.type === 'phase') {
     state.support.open = false;
+  } else if (selection.type === 'milestone') {
+    state.support.open = true;
   }
 
   syncActiveDriver(selection);
   renderApp();
 
-  if (options.context === 'support' && state.support.open) {
+  if (selection?.type === 'milestone' && state.support.open) {
     scrollToId('supportLayer');
     return;
   }
@@ -334,9 +339,9 @@ function buildScheduleMarkers() {
 function buildScheduleVisualHint() {
   const milestone = getSelectedMilestone();
   const phase = getFocusedPhase();
-  if (milestone) return `${milestone.shortName} is highlighted. Layer 2 explains what it is and why it matters.`;
-  if (phase) return `${phase.name} is highlighted. Layer 2 explains the phase without opening the full evidence layer.`;
-  return 'The visual overview shows the full program arc first. Click a phase or marker to go deeper.';
+  if (milestone) return `${milestone.shortName} is highlighted. Layer 2 now explains this date before the evidence layer opens.`;
+  if (phase) return `${phase.name} is highlighted. Layer 2 now shows the key milestones inside this phase.`;
+  return 'The big-picture schedule comes first. Click a phase band, then choose a key date to go deeper.';
 }
 
 function renderTimeline() {
@@ -356,43 +361,15 @@ function renderTimeline() {
       </div>
 
       <div class="schedule-milestones">
-        <div class="schedule-milestones__label">
-          <span class="section-kicker">Key milestone dates</span>
-          <strong>Click a marker to open the focused schedule view.</strong>
-        </div>
+      <div class="schedule-milestones__label">
+        <span class="section-kicker">Key milestone dates</span>
+          <strong>Click a marker to open the selected milestone view.</strong>
+      </div>
         <div class="schedule-milestones__plot">
           <div class="schedule-milestones__spine"></div>
           ${buildScheduleMarkers()}
         </div>
       </div>
-    </div>
-  `;
-}
-
-function buildRelatedMilestones(milestone) {
-  const phase = state.phasesById.get(milestone.phaseId);
-  if (!phase) return [];
-
-  const milestones = phase.milestones.map((item) => state.milestonesById.get(item.id)).filter(Boolean);
-  const index = milestones.findIndex((item) => item.id === milestone.id);
-  return [milestones[index - 1], milestones[index + 1]].filter(Boolean);
-}
-
-function buildFocusActions() {
-  return `
-    <div class="focus-actions">
-      <button class="action-pill" type="button" data-action="open-support" data-support-tab="support">
-        Open detailed support
-      </button>
-      <button class="action-pill" type="button" data-action="open-support" data-support-tab="drivers">
-        Open schedule drivers
-      </button>
-      <button class="action-pill" type="button" data-action="open-support" data-support-tab="methodology">
-        Open methodology
-      </button>
-      <button class="action-pill" type="button" data-action="open-support" data-support-tab="traceability">
-        Open traceability
-      </button>
     </div>
   `;
 }
@@ -403,7 +380,7 @@ function buildLinkedMomentButtons(items) {
   }
 
   return `
-    <div class="related-moments">
+    <div class="milestone-choice-grid">
       ${items
         .map(
           (item) => `
@@ -416,7 +393,7 @@ function buildLinkedMomentButtons(items) {
             >
               <span class="linked-moment__date mono">${escapeHtml(item.dateLabel)}</span>
               <strong>${escapeHtml(item.shortName)}</strong>
-              <span class="linked-moment__date">${escapeHtml(item.phaseName)}</span>
+              <span class="linked-moment__summary">${escapeHtml(compactText(item.whyItMatters, 14))}</span>
             </button>
           `,
         )
@@ -426,158 +403,86 @@ function buildLinkedMomentButtons(items) {
 }
 
 function buildFocusPhaseView(phase) {
-  const relatedDrivers = getPhaseDrivers(phase.id);
+  const selectedMilestone = getSelectedMilestone();
   const focusMilestones = phase.keyMilestoneIds.map((id) => state.milestonesById.get(id)).filter(Boolean);
+  const relatedRisks = uniqueById(focusMilestones.flatMap((item) => item.linkedRisks));
+  const relatedDocuments = uniqueById(focusMilestones.flatMap((item) => item.linkedDocuments));
 
+  focusHeading.textContent = 'Selected phase';
   focusSubtitle.textContent =
-    'This layer explains one selected phase without opening the full support and evidence structure yet.';
+    'Choose one key milestone in this phase to open the evidence behind that date.';
 
   return `
-    <div class="focus-layout">
+    <div class="focus-layout focus-layout--phase">
       <section class="focus-card focus-card--primary">
         <div class="focus-header">
           <p class="section-kicker">Selected phase</p>
-          <h3>${escapeHtml(phase.summaryTitle)}</h3>
+          <h3>${escapeHtml(phase.name)}</h3>
           <div class="focus-meta">
-            <span>${escapeHtml(phase.name)}</span>
             <span class="mono">${escapeHtml(phase.rangeLabel)}</span>
+            <span>${escapeHtml(pluralize(focusMilestones.length, 'anchor milestone'))}</span>
           </div>
         </div>
 
-        <p class="focus-summary">${escapeHtml(firstSentence(phase.summary))}</p>
+        <p class="focus-summary">${escapeHtml(firstSentence(phase.whyItMatters || phase.summary))}</p>
 
-        <div class="fact-grid">
-          <div class="fact-card">
-            <span class="fact-card__label">When it happens</span>
-            <strong class="fact-card__value">${escapeHtml(phase.rangeLabel)}</strong>
-            <p class="fact-card__copy">This is the schedule window where this phase dominates.</p>
+        <div class="phase-summary-strip" aria-label="Selected phase summary">
+          <div class="phase-summary-stat">
+            <span class="phase-summary-stat__label">Date span</span>
+            <strong class="phase-summary-stat__value mono">${escapeHtml(phase.rangeLabel)}</strong>
           </div>
-          <div class="fact-card">
-            <span class="fact-card__label">Why it matters</span>
-            <strong class="fact-card__value">${escapeHtml(pluralize(phase.milestoneCount, 'milestone'))}</strong>
-            <p class="fact-card__copy">${escapeHtml(compactText(phase.whyItMatters, 14))}</p>
+          <div class="phase-summary-stat">
+            <span class="phase-summary-stat__label">Key milestones</span>
+            <strong class="phase-summary-stat__value">${escapeHtml(String(focusMilestones.length))}</strong>
           </div>
-          <div class="fact-card">
-            <span class="fact-card__label">Critical work</span>
-            <strong class="fact-card__value">${escapeHtml(String(phase.criticalTaskCount))}</strong>
-            <p class="fact-card__copy">Critical tasks are concentrated here more than the overview alone can show.</p>
+          <div class="phase-summary-stat">
+            <span class="phase-summary-stat__label">Linked tasks</span>
+            <strong class="phase-summary-stat__value">${escapeHtml(String(phase.representativeTasks.length))}</strong>
           </div>
-          <div class="fact-card">
-            <span class="fact-card__label">Linked drivers</span>
-            <strong class="fact-card__value">${escapeHtml(String(relatedDrivers.length))}</strong>
-            <p class="fact-card__copy">The deeper driver lens shows how this phase creates timing pressure downstream.</p>
+          <div class="phase-summary-stat">
+            <span class="phase-summary-stat__label">Risks / docs</span>
+            <strong class="phase-summary-stat__value">${escapeHtml(`${relatedRisks.length} / ${relatedDocuments.length}`)}</strong>
           </div>
-        </div>
-
-        <div class="chip-row">
-          <span class="${tagClass(phase.tone)}">${escapeHtml(phase.name)}</span>
-          ${phase.takeaways.slice(0, 2).map((item) => `<span class="tag tag--brand">${escapeHtml(compactText(item, 7))}</span>`).join('')}
         </div>
       </section>
 
       <section class="focus-card focus-card--secondary">
-        <div class="focus-next">
-          <div class="focus-header">
-            <p class="section-kicker">What to click next</p>
-            <h3>${escapeHtml(firstSentence(phase.whyItMatters))}</h3>
-            <p class="focus-summary">Start with one of the milestone anchors in this phase, or open the detailed support layer for tasks, risks, and source boundaries.</p>
-          </div>
-
-          <div>
-            <p class="section-kicker">Anchor moments in this phase</p>
-            ${buildLinkedMomentButtons(focusMilestones)}
-          </div>
-
-          ${buildFocusActions()}
-        </div>
-      </section>
-    </div>
-  `;
-}
-
-function buildFocusMilestoneView(milestone) {
-  const phase = state.phasesById.get(milestone.phaseId);
-  const relatedMilestones = buildRelatedMilestones(milestone);
-
-  focusSubtitle.textContent =
-    'This layer explains one selected milestone, then lets you deliberately open the deeper schedule support behind it.';
-
-  return `
-    <div class="focus-layout">
-      <section class="focus-card focus-card--primary">
         <div class="focus-header">
-          <p class="section-kicker">Selected milestone</p>
-          <h3>${escapeHtml(milestone.shortName)}</h3>
-          <div class="focus-meta">
-            <span class="mono">${escapeHtml(milestone.id)}</span>
-            <span>${escapeHtml(milestone.dateLabel)}</span>
-            <span>${escapeHtml(milestone.phaseName)}</span>
-          </div>
+          <p class="section-kicker">Key milestones in this phase</p>
+          <h3>Choose one date to inspect</h3>
+          <p class="focus-summary">Each card below opens the evidence behind that milestone.</p>
         </div>
 
-        <p class="focus-summary">${escapeHtml(firstSentence(milestone.whyItMatters))}</p>
+        ${buildLinkedMomentButtons(focusMilestones)}
 
-        <div class="fact-grid">
-          <div class="fact-card">
-            <span class="fact-card__label">What it is</span>
-            <strong class="fact-card__value">${escapeHtml(milestone.typeLabel)}</strong>
-            <p class="fact-card__copy">This is the schedule role this milestone plays inside the program arc.</p>
-          </div>
-          <div class="fact-card">
-            <span class="fact-card__label">Source basis</span>
-            <strong class="fact-card__value">${escapeHtml(milestone.directnessLabel)}</strong>
-            <p class="fact-card__copy">The app keeps direct anchors separate from linked or interpretive schedule meaning.</p>
-          </div>
-          <div class="fact-card">
-            <span class="fact-card__label">Confidence</span>
-            <strong class="fact-card__value">${escapeHtml(milestone.confidenceLabel)}</strong>
-            <p class="fact-card__copy">Confidence comes from the authority-side milestone record, not from UI inference.</p>
-          </div>
-          <div class="fact-card">
-            <span class="fact-card__label">Linked support</span>
-            <strong class="fact-card__value">${escapeHtml(pluralize(milestone.linkedSources.length, 'source'))}</strong>
-            <p class="fact-card__copy">${escapeHtml(`${pluralize(milestone.linkedRisks.length, 'risk')} and ${pluralize(milestone.linkedDocuments.length, 'document')} connect to this date.`)}</p>
-          </div>
-        </div>
-
-        <div class="chip-row">
-          <span class="${tagClass(milestone.tone)}">${escapeHtml(milestone.phaseName)}</span>
-          <span class="${tagClass(milestone.directnessTone)}">${escapeHtml(milestone.directnessLabel)}</span>
-          ${milestone.task ? `<span class="tag tag--forest">${escapeHtml(milestone.task.name)}</span>` : ''}
-        </div>
-      </section>
-
-      <section class="focus-card focus-card--secondary">
-        <div class="focus-next">
-          <div class="focus-header">
-            <p class="section-kicker">Why it matters</p>
-            <h3>${escapeHtml(phase?.summaryTitle || milestone.phaseName)}</h3>
-            <p class="focus-summary">${escapeHtml(compactText(milestone.whyItMatters, 18))}</p>
-          </div>
-
-          <div>
-            <p class="section-kicker">Nearby moments</p>
-            ${buildLinkedMomentButtons(relatedMilestones)}
-          </div>
-
-          ${buildFocusActions()}
-        </div>
+        ${
+          selectedMilestone && selectedMilestone.phaseId === phase.id
+            ? `
+              <div class="focus-note" aria-live="polite">
+                <span class="focus-note__label">Selected milestone</span>
+                <strong>${escapeHtml(selectedMilestone.shortName)}</strong>
+                <p>${escapeHtml(`Evidence for ${selectedMilestone.dateLabel} is open below.`)}</p>
+              </div>
+            `
+            : ''
+        }
       </section>
     </div>
   `;
 }
 
 function renderFocus() {
-  const milestone = getSelectedMilestone();
-  const phase = getSelectedPhase();
+  const phase = getFocusedPhase();
 
-  if (!milestone && !phase) {
+  if (!phase) {
+    focusHeading.textContent = 'Selected phase';
+    focusSubtitle.textContent = 'Choose one key milestone in this phase to open the evidence behind that date.';
     focusLayer.hidden = true;
     return;
   }
 
   focusLayer.hidden = false;
-  focusContent.innerHTML = milestone ? buildFocusMilestoneView(milestone) : buildFocusPhaseView(phase);
+  focusContent.innerHTML = buildFocusPhaseView(phase);
 }
 
 function buildSupportList(items, builder) {
@@ -590,156 +495,53 @@ function buildSupportList(items, builder) {
   `;
 }
 
-function buildPhaseSupport(phase) {
-  const fullMilestones = phase.milestones.map((item) => state.milestonesById.get(item.id)).filter(Boolean);
-  const relatedDrivers = getPhaseDrivers(phase.id);
-  const risks = uniqueById(fullMilestones.flatMap((item) => item.linkedRisks));
-  const documents = uniqueById(fullMilestones.flatMap((item) => item.linkedDocuments));
-  const sources = uniqueById(fullMilestones.flatMap((item) => item.linkedSources));
-  const visibleMilestones = state.reveal.phaseMilestones ? fullMilestones : fullMilestones.slice(0, 4);
-
-  return `
-    <div class="support-shell">
-      <section class="support-card">
-        <div class="support-card__header">
-          <p class="support-card__eyebrow">Focused support</p>
-          <h3>${escapeHtml(phase.summaryTitle)}</h3>
-          <p class="support-card__summary">${escapeHtml(compactText(phase.whyItMatters, 18))}</p>
-        </div>
-      </section>
-
-      <div class="support-grid">
-        <section class="support-card">
-          <div class="support-card__header">
-            <p class="support-card__eyebrow">Milestones in this phase</p>
-            <h3>${escapeHtml(pluralize(phase.milestones.length, 'milestone'))}</h3>
-            <p class="support-card__summary">Click one to move from the phase view into a more specific schedule moment.</p>
-          </div>
-          ${buildSupportList(
-            visibleMilestones,
-            (milestone) => `
-              <button
-                class="support-item"
-                type="button"
-                data-select-type="milestone"
-                data-select-id="${escapeHtml(milestone.id)}"
-              >
-                <span class="item-meta mono">${escapeHtml(milestone.id)} - ${escapeHtml(milestone.dateLabel)}</span>
-                <strong>${escapeHtml(milestone.shortName)}</strong>
-                <p class="support-item__copy">${escapeHtml(compactText(milestone.whyItMatters, 11))}</p>
-              </button>
-            `,
-          )}
-          ${
-            phase.milestones.length > 4
-              ? `
-                <div class="card-actions">
-                  <button class="trace-button" type="button" data-action="toggle-reveal" data-reveal="phaseMilestones">
-                    ${state.reveal.phaseMilestones ? 'Show fewer milestones' : `Show all ${phase.milestones.length} milestones`}
-                  </button>
-                </div>
-              `
-              : ''
-          }
-        </section>
-
-        <section class="support-card">
-          <div class="support-card__header">
-            <p class="support-card__eyebrow">Representative critical work</p>
-            <h3>${escapeHtml(pluralize(phase.representativeTasks.length, 'task'))}</h3>
-            <p class="support-card__summary">These tasks are the clearest examples of the deeper schedule work inside this phase.</p>
-          </div>
-          ${buildSupportList(
-            phase.representativeTasks,
-            (task) => `
-              <div class="support-item">
-                <span class="item-meta mono">${escapeHtml(task.id)} - ${escapeHtml(task.windowLabel)}</span>
-                <strong>${escapeHtml(task.name)}</strong>
-                <p class="support-item__copy">${escapeHtml(`WBS ${task.wbsId}`)}</p>
-              </div>
-            `,
-          )}
-        </section>
-
-        <section class="support-card">
-          <div class="support-card__header">
-            <p class="support-card__eyebrow">Connected schedule drivers</p>
-            <h3>${escapeHtml(pluralize(relatedDrivers.length, 'driver group'))}</h3>
-            <p class="support-card__summary">These are the timing-pressure branches most associated with this phase.</p>
-          </div>
-          ${buildSupportList(
-            relatedDrivers,
-            (driver) => `
-              <button
-                class="support-item"
-                type="button"
-                data-action="set-driver"
-                data-driver-id="${escapeHtml(driver.id)}"
-              >
-                <span class="item-meta">${escapeHtml(driver.windowLabel)}</span>
-                <strong>${escapeHtml(driver.name)}</strong>
-                <p class="support-item__copy">${escapeHtml(compactText(driver.summary, 12))}</p>
-              </button>
-            `,
-          )}
-          <div class="card-actions">
-            <button class="trace-button" type="button" data-action="open-support" data-support-tab="drivers">
-              Open full driver view
-            </button>
-          </div>
-        </section>
-
-        <section class="support-card">
-          <div class="support-card__header">
-            <p class="support-card__eyebrow">Linked evidence</p>
-            <h3>${escapeHtml(`${pluralize(risks.length, 'risk')}, ${pluralize(documents.length, 'document')}, ${pluralize(sources.length, 'source')}`)}</h3>
-            <p class="support-card__summary">The app keeps these deeper support items grouped here instead of pushing them onto the first two layers.</p>
-          </div>
-          ${buildSupportList(
-            [
-              risks[0] ? { id: `risk-${risks[0].id}`, meta: risks[0].id, title: risks[0].title, copy: `Score ${risks[0].score}, ${risks[0].status}` } : null,
-              documents[0] ? { id: `doc-${documents[0].id}`, meta: documents[0].id, title: documents[0].name, copy: `${documents[0].type}, ${documents[0].status}` } : null,
-              sources[0] ? { id: `src-${sources[0].id}`, meta: sources[0].id, title: sources[0].title, copy: sources[0].publisher } : null,
-            ].filter(Boolean),
-            (item) => `
-              <div class="support-item">
-                <span class="item-meta">${escapeHtml(item.meta)}</span>
-                <strong>${escapeHtml(item.title)}</strong>
-                <p class="support-item__copy">${escapeHtml(item.copy)}</p>
-              </div>
-            `,
-          )}
-          <div class="card-actions">
-            <button class="trace-button" type="button" data-action="open-support" data-support-tab="traceability">
-              Open traceability
-            </button>
-            <button class="trace-button" type="button" data-action="open-support" data-support-tab="methodology">
-              Open methodology
-            </button>
-          </div>
-        </section>
-      </div>
-    </div>
-  `;
-}
-
 function buildMilestoneSupport(milestone) {
+  const phase = state.phasesById.get(milestone.phaseId);
+  const driver = getMilestoneDrivers(milestone)[0] || getPhaseDrivers(milestone.phaseId)[0] || null;
+  const methodology = state.data.methodology;
+  const traceability = state.data.traceability;
+  const artifacts = state.reveal.artifacts ? traceability.artifacts : traceability.artifacts.slice(0, 3);
+  const sources = state.reveal.sources ? traceability.sources : traceability.sources.slice(0, 4);
+
   return `
     <div class="support-shell">
-      <section class="support-card">
+      <section class="support-card support-card--hero">
         <div class="support-card__header">
-          <p class="support-card__eyebrow">Focused support</p>
+          <p class="support-card__eyebrow">Selected milestone</p>
           <h3>${escapeHtml(milestone.shortName)}</h3>
-          <p class="support-card__summary">${escapeHtml(compactText(milestone.whyItMatters, 18))}</p>
+          <div class="focus-meta">
+            <span class="mono">${escapeHtml(milestone.dateLabel)}</span>
+            <span>${escapeHtml(phase?.name || milestone.phaseName)}</span>
+          </div>
+          <p class="support-card__summary">${escapeHtml(firstSentence(milestone.whyItMatters))}</p>
+        </div>
+
+        <div class="phase-summary-strip phase-summary-strip--compact" aria-label="Selected milestone summary">
+          <div class="phase-summary-stat">
+            <span class="phase-summary-stat__label">Date</span>
+            <strong class="phase-summary-stat__value mono">${escapeHtml(milestone.dateLabel)}</strong>
+          </div>
+          <div class="phase-summary-stat">
+            <span class="phase-summary-stat__label">Type</span>
+            <strong class="phase-summary-stat__value">${escapeHtml(milestone.typeLabel)}</strong>
+          </div>
+          <div class="phase-summary-stat">
+            <span class="phase-summary-stat__label">Source basis</span>
+            <strong class="phase-summary-stat__value">${escapeHtml(milestone.directnessLabel)}</strong>
+          </div>
+          <div class="phase-summary-stat">
+            <span class="phase-summary-stat__label">Confidence</span>
+            <strong class="phase-summary-stat__value">${escapeHtml(milestone.confidenceLabel)}</strong>
+          </div>
         </div>
       </section>
 
-      <div class="support-grid">
+      <div class="support-grid support-grid--primary">
         <section class="support-card">
           <div class="support-card__header">
-            <p class="support-card__eyebrow">Linked task</p>
+            <p class="support-card__eyebrow">Task behind this milestone</p>
             <h3>${escapeHtml(milestone.task ? milestone.task.name : 'No direct task linked')}</h3>
-            <p class="support-card__summary">This is the clearest task-level schedule evidence directly connected to the selected milestone.</p>
+            <p class="support-card__summary">This is the clearest task-level schedule evidence connected to the selected date.</p>
           </div>
           ${
             milestone.task
@@ -752,15 +554,15 @@ function buildMilestoneSupport(milestone) {
                   </div>
                 </div>
               `
-              : buildEmptyState('No direct task record', 'This milestone is still usable, but the current authority layer does not tie it to a single task line.')
+              : buildEmptyState('No direct task record', 'The current authority layer does not tie this milestone to one specific task line.')
           }
         </section>
 
         <section class="support-card">
           <div class="support-card__header">
-            <p class="support-card__eyebrow">Linked risks</p>
+            <p class="support-card__eyebrow">Risks tied to this milestone</p>
             <h3>${escapeHtml(pluralize(milestone.linkedRisks.length, 'risk'))}</h3>
-            <p class="support-card__summary">These are the clearest schedule-pressure items tied to the selected date.</p>
+            <p class="support-card__summary">These are the clearest schedule-pressure items connected to the selected date.</p>
           </div>
           ${buildSupportList(
             milestone.linkedRisks,
@@ -778,7 +580,7 @@ function buildMilestoneSupport(milestone) {
           <div class="support-card__header">
             <p class="support-card__eyebrow">Supporting documents</p>
             <h3>${escapeHtml(pluralize(milestone.linkedDocuments.length, 'document'))}</h3>
-            <p class="support-card__summary">These artifacts explain or reinforce why this schedule point exists.</p>
+            <p class="support-card__summary">These documents explain or reinforce why this date exists in the schedule story.</p>
           </div>
           ${buildSupportList(
             milestone.linkedDocuments,
@@ -794,9 +596,9 @@ function buildMilestoneSupport(milestone) {
 
         <section class="support-card">
           <div class="support-card__header">
-            <p class="support-card__eyebrow">Source anchors</p>
+            <p class="support-card__eyebrow">Source authority and linkage</p>
             <h3>${escapeHtml(pluralize(milestone.linkedSources.length, 'source'))}</h3>
-            <p class="support-card__summary">The deeper source layer shows what came from direct authority versus linked schedule interpretation.</p>
+            <p class="support-card__summary">These are the named sources most directly linked to this date. Broader authority files appear below.</p>
           </div>
           ${buildSupportList(
             milestone.linkedSources,
@@ -804,407 +606,189 @@ function buildMilestoneSupport(milestone) {
               <div class="support-item">
                 <span class="item-meta">${escapeHtml(`${source.id} - ${source.publisher}`)}</span>
                 <strong>${escapeHtml(source.title)}</strong>
-                <p class="support-item__copy">${escapeHtml(source.href ? 'Linked source available in traceability.' : 'Local authority source.')}</p>
+                <p class="support-item__copy">${escapeHtml(source.href ? 'External or linked authority source.' : 'Local authority source in the schedule corpus.')}</p>
               </div>
             `,
           )}
-          <div class="card-actions">
-            <button class="trace-button" type="button" data-action="open-support" data-support-tab="traceability">
-              Open traceability
-            </button>
+        </section>
+      </div>
+
+      <div class="support-grid support-grid--secondary">
+        <section class="support-card">
+          <div class="support-card__header">
+            <p class="support-card__eyebrow">What drives this date</p>
+            <h3>${escapeHtml(driver ? driver.name : 'No driver group linked')}</h3>
+            <p class="support-card__summary">This is the clearest timing-pressure branch connected to the selected milestone.</p>
+          </div>
+          ${
+            driver
+              ? `
+                <div class="support-list">
+                  <div class="support-item">
+                    <span class="item-meta">${escapeHtml(driver.windowLabel)}</span>
+                    <strong>${escapeHtml(driver.name)}</strong>
+                    <p class="support-item__copy">${escapeHtml(compactText(driver.summary, 20))}</p>
+                  </div>
+                </div>
+                <div class="phase-summary-strip phase-summary-strip--compact" aria-label="Timing pressure summary">
+                  <div class="phase-summary-stat">
+                    <span class="phase-summary-stat__label">Tasks</span>
+                    <strong class="phase-summary-stat__value">${escapeHtml(String(driver.representativeTasks.length))}</strong>
+                  </div>
+                  <div class="phase-summary-stat">
+                    <span class="phase-summary-stat__label">Milestones</span>
+                    <strong class="phase-summary-stat__value">${escapeHtml(String(driver.linkedMilestones.length))}</strong>
+                  </div>
+                  <div class="phase-summary-stat">
+                    <span class="phase-summary-stat__label">Risks</span>
+                    <strong class="phase-summary-stat__value">${escapeHtml(String(driver.linkedRisks.length))}</strong>
+                  </div>
+                </div>
+              `
+              : buildEmptyState('No linked timing driver', 'The current evidence model does not expose a stronger timing-pressure branch for this date.')
+          }
+        </section>
+
+        <section class="support-card">
+          <div class="support-card__header">
+            <p class="support-card__eyebrow">How this schedule was derived</p>
+            <h3>${escapeHtml(methodology.title)}</h3>
+            <p class="support-card__summary">${escapeHtml(compactText(methodology.summary, 24))}</p>
+          </div>
+          <div class="support-list">
+            ${methodology.cards
+              .slice(0, 3)
+              .map(
+                (card) => `
+                  <div class="support-item">
+                    <span class="item-meta">${escapeHtml(card.eyebrow)}</span>
+                    <strong>${escapeHtml(card.title)}</strong>
+                    <p class="support-item__copy">${escapeHtml(compactText(card.body, 18))}</p>
+                  </div>
+                `,
+              )
+              .join('')}
           </div>
         </section>
       </div>
+
+      <section class="support-card support-card--span">
+        <div class="support-card__header">
+          <p class="support-card__eyebrow">Authority files behind this schedule view</p>
+          <h3>Files and sources supporting the schedule lens</h3>
+          <p class="support-card__summary">${escapeHtml(compactText(traceability.summary, 24))}</p>
+        </div>
+
+        <div class="artifact-list">
+          ${artifacts
+            .map(
+              (artifact) => `
+                <section class="artifact-card">
+                  <div class="artifact-card__row">
+                    <span class="item-meta">${escapeHtml(artifact.meta)}</span>
+                    <span class="${tagClass(artifact.tone)}">${escapeHtml(artifact.fileType)}</span>
+                  </div>
+                  <h3>${escapeHtml(artifact.title)}</h3>
+                  <p>${escapeHtml(compactText(artifact.description, 14))}</p>
+                  <div class="card-actions">
+                    <a class="artifact-card__link" href="${escapeHtml(artifact.href)}" target="_blank" rel="noreferrer">
+                      ${escapeHtml(artifact.linkLabel)}
+                    </a>
+                  </div>
+                </section>
+              `,
+            )
+            .join('')}
+        </div>
+
+        ${
+          traceability.artifacts.length > 3
+            ? `
+              <div class="card-actions">
+                <button class="trace-button" type="button" data-action="toggle-reveal" data-reveal="artifacts">
+                  ${state.reveal.artifacts ? 'Show fewer authority files' : `Show all ${traceability.artifacts.length} authority files`}
+                </button>
+              </div>
+            `
+            : ''
+        }
+
+        <div class="source-list">
+          ${sources
+            .map(
+              (source) => `
+                <section class="source-card">
+                  <div class="source-card__row">
+                    <span class="item-meta">${escapeHtml(`${source.id} - ${source.publisher}`)}</span>
+                    <span class="${tagClass(source.tone)}">${escapeHtml(source.authorityTierLabel)}</span>
+                  </div>
+                  <h3>${escapeHtml(source.title)}</h3>
+                  <p>${escapeHtml(compactText(source.relevance, 14))}</p>
+                  <p>${escapeHtml(source.usageLabel)}</p>
+                  ${
+                    source.href
+                      ? `
+                        <div class="card-actions">
+                          <a class="source-card__link" href="${escapeHtml(source.href)}" target="_blank" rel="noreferrer">
+                            ${escapeHtml(source.linkLabel)}
+                          </a>
+                        </div>
+                      `
+                      : ''
+                  }
+                </section>
+              `,
+            )
+            .join('')}
+        </div>
+
+        ${
+          traceability.sources.length > 4
+            ? `
+              <div class="card-actions">
+                <button class="trace-button" type="button" data-action="toggle-reveal" data-reveal="sources">
+                  ${state.reveal.sources ? 'Show fewer sources' : `Show all ${traceability.sources.length} sources`}
+                </button>
+              </div>
+            `
+            : ''
+        }
+      </section>
     </div>
   `;
 }
 
 function buildSupportTabContent() {
   const milestone = getSelectedMilestone();
-  const phase = getSelectedPhase();
+
+  supportHeading.textContent = 'Evidence behind the selected milestone';
+
+  if (milestone) {
+    supportSubtitle.textContent =
+      `${milestone.shortName} is selected. This view explains why the date matters and what evidence supports it.`;
+    return buildMilestoneSupport(milestone);
+  }
 
   supportSubtitle.textContent =
-    'The deeper schedule support is grouped into simple blocks so the app can stay credible without becoming a data dump.';
+    'Choose a milestone first so the evidence view can stay specific and easy to follow.';
 
-  if (phase) return buildPhaseSupport(phase);
-  if (milestone) return buildMilestoneSupport(milestone);
-
-  return buildEmptyState('Choose a phase or milestone first', 'The focused layer needs a selected schedule item before the detailed support view can stay specific.');
-}
-
-function buildDriversTabContent() {
-  const driver = getActiveDriver();
-
-  supportSubtitle.textContent =
-    'This deeper lens isolates the few branches that create the most timing pressure instead of exposing the whole schedule network at once.';
-
-  return `
-    <div class="driver-shell">
-      <section class="support-card">
-        <div class="support-card__header">
-          <p class="support-card__eyebrow">Schedule drivers</p>
-          <h3>Where timing pressure concentrates</h3>
-          <p class="support-card__summary">${escapeHtml(compactText(state.data.driverLensSummary, 22))}</p>
-        </div>
-      </section>
-
-      <div class="driver-grid">
-        ${state.data.drivers
-          .map(
-            (item) => `
-              <button
-                class="driver-card${driver?.id === item.id ? ' driver-card--active' : ''}"
-                type="button"
-                data-action="set-driver"
-                data-driver-id="${escapeHtml(item.id)}"
-                aria-pressed="${String(driver?.id === item.id)}"
-              >
-                <p class="driver-card__meta">${escapeHtml(item.name)}</p>
-                <strong>${escapeHtml(item.windowLabel)}</strong>
-                <p>${escapeHtml(compactText(item.summary, 14))}</p>
-              </button>
-            `,
-          )
-          .join('')}
-      </div>
-
-      ${
-        driver
-          ? `
-            <section class="driver-detail">
-              <div class="driver-detail__header">
-                <div>
-                  <p class="section-kicker">Selected driver</p>
-                  <h3>${escapeHtml(driver.name)}</h3>
-                </div>
-                <span class="${tagClass(driver.tone)}">${escapeHtml(driver.windowLabel)}</span>
-              </div>
-
-              <p>${escapeHtml(firstSentence(driver.summary))}</p>
-
-              <div class="driver-detail__metrics">
-                <div class="driver-detail__metric">
-                  <span class="fact-card__label">Tasks</span>
-                  <strong>${escapeHtml(String(driver.representativeTasks.length))}</strong>
-                  <p class="fact-card__copy">Representative critical work in this branch.</p>
-                </div>
-                <div class="driver-detail__metric">
-                  <span class="fact-card__label">Milestones</span>
-                  <strong>${escapeHtml(String(driver.linkedMilestones.length))}</strong>
-                  <p class="fact-card__copy">Named schedule moments tied to this branch.</p>
-                </div>
-                <div class="driver-detail__metric">
-                  <span class="fact-card__label">Risks</span>
-                  <strong>${escapeHtml(String(driver.linkedRisks.length))}</strong>
-                  <p class="fact-card__copy">Risk pressure connected to the timing chain.</p>
-                </div>
-              </div>
-
-              <div class="support-grid">
-                <section class="support-card">
-                  <div class="support-card__header">
-                    <p class="support-card__eyebrow">Representative tasks</p>
-                    <h3>${escapeHtml(pluralize(driver.representativeTasks.length, 'task'))}</h3>
-                  </div>
-                  ${buildSupportList(
-                    driver.representativeTasks.slice(0, 3),
-                    (task) => `
-                      <div class="support-item">
-                        <span class="item-meta mono">${escapeHtml(task.id)} - ${escapeHtml(task.windowLabel)}</span>
-                        <strong>${escapeHtml(task.name)}</strong>
-                        <p class="support-item__copy">${escapeHtml(`WBS ${task.wbsId}`)}</p>
-                      </div>
-                    `,
-                  )}
-                </section>
-
-                <section class="support-card">
-                  <div class="support-card__header">
-                    <p class="support-card__eyebrow">Linked milestones</p>
-                    <h3>${escapeHtml(pluralize(driver.linkedMilestones.length, 'milestone'))}</h3>
-                  </div>
-                  ${buildSupportList(
-                    driver.linkedMilestones.slice(0, 4),
-                    (milestone) => `
-                      <button
-                        class="support-item"
-                        type="button"
-                        data-select-type="milestone"
-                        data-select-id="${escapeHtml(milestone.id)}"
-                      >
-                        <span class="item-meta mono">${escapeHtml(milestone.id)} - ${escapeHtml(milestone.dateLabel)}</span>
-                        <strong>${escapeHtml(milestone.shortName)}</strong>
-                        <p class="support-item__copy">${escapeHtml(compactText(milestone.whyItMatters, 11))}</p>
-                      </button>
-                    `,
-                  )}
-                </section>
-
-                <section class="support-card">
-                  <div class="support-card__header">
-                    <p class="support-card__eyebrow">Linked risks</p>
-                    <h3>${escapeHtml(pluralize(driver.linkedRisks.length, 'risk'))}</h3>
-                  </div>
-                  ${buildSupportList(
-                    driver.linkedRisks.slice(0, 3),
-                    (risk) => `
-                      <div class="support-item">
-                        <span class="item-meta">${escapeHtml(`${risk.id} - ${risk.status}`)}</span>
-                        <strong>${escapeHtml(risk.title)}</strong>
-                        <p class="support-item__copy">${escapeHtml(`Risk score ${risk.score}`)}</p>
-                      </div>
-                    `,
-                  )}
-                </section>
-
-                <section class="support-card">
-                  <div class="support-card__header">
-                    <p class="support-card__eyebrow">Linked documents</p>
-                    <h3>${escapeHtml(pluralize(driver.linkedDocuments.length, 'document'))}</h3>
-                  </div>
-                  ${buildSupportList(
-                    driver.linkedDocuments.slice(0, 3),
-                    (document) => `
-                      <div class="support-item">
-                        <span class="item-meta">${escapeHtml(`${document.id} - ${document.type}`)}</span>
-                        <strong>${escapeHtml(document.name)}</strong>
-                        <p class="support-item__copy">${escapeHtml(`${document.status} - ${document.evidenceRole}`)}</p>
-                      </div>
-                    `,
-                  )}
-                </section>
-              </div>
-            </section>
-          `
-          : buildEmptyState('Select a driver', 'The schedule pressure branch will appear here.')
-      }
-    </div>
-  `;
-}
-
-function buildMethodologyTabContent() {
-  const methodology = state.data.methodology;
-
-  supportSubtitle.textContent =
-    'This deeper layer makes the interpretation boundaries visible without forcing that caveat text onto the first two layers.';
-
-  return `
-    <div class="method-stack">
-      <section class="support-card">
-        <div class="support-card__header">
-          <p class="support-card__eyebrow">Methodology</p>
-          <h3>${escapeHtml(methodology.title)}</h3>
-          <p class="support-card__summary">${escapeHtml(compactText(methodology.summary, 26))}</p>
-        </div>
-      </section>
-
-      <section class="support-card">
-        <div class="support-card__header">
-          <p class="support-card__eyebrow">Authority guide</p>
-          <h3>Why the deeper schedule view stays credible</h3>
-          <p class="support-card__summary">${escapeHtml(compactText(methodology.authorityGuideSummary, 30))}</p>
-        </div>
-      </section>
-
-      ${methodology.cards
-        .map(
-          (card) => `
-            <details class="method-card">
-              <summary class="method-card__summary">
-                <span class="method-card__eyebrow">${escapeHtml(card.eyebrow)}</span>
-                <h3>${escapeHtml(card.title)}</h3>
-              </summary>
-              <div class="method-card__body">
-                <p>${escapeHtml(compactText(card.body, 24))}</p>
-                <ul>
-                  ${card.items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}
-                </ul>
-              </div>
-            </details>
-          `,
-        )
-        .join('')}
-    </div>
-  `;
-}
-
-function buildTraceabilityTabContent() {
-  const traceability = state.data.traceability;
-  const artifacts = state.reveal.artifacts ? traceability.artifacts : traceability.artifacts.slice(0, 3);
-  const sources = state.reveal.sources ? traceability.sources : traceability.sources.slice(0, 4);
-
-  supportSubtitle.textContent =
-    'This deeper layer shows where the schedule came from, what is linked authority, and where the app adds interpretation.';
-
-  return `
-    <div class="traceability-shell">
-      <section class="support-card">
-        <div class="support-card__header">
-          <p class="support-card__eyebrow">Traceability</p>
-          <h3>${escapeHtml(traceability.title)}</h3>
-          <p class="support-card__summary">${escapeHtml(compactText(traceability.summary, 24))}</p>
-        </div>
-      </section>
-
-      <div class="evidence-grid">
-        ${traceability.evidenceModel
-          .map(
-            (item) => `
-              <section class="evidence-card">
-                <span class="evidence-card__meta">${escapeHtml(item.label)}</span>
-                <h3>${escapeHtml(item.value)}</h3>
-                <p>${escapeHtml(compactText(item.description, 12))}</p>
-              </section>
-            `,
-          )
-          .join('')}
-      </div>
-
-      <div class="support-grid">
-        <section class="support-card">
-          <div class="support-card__header">
-            <p class="support-card__eyebrow">Authority artifacts</p>
-            <h3>Files underpinning the schedule lens</h3>
-            <p class="support-card__summary">The app is a presentation layer above these source artifacts, not a replacement for them.</p>
-          </div>
-
-          <div class="artifact-list">
-            ${artifacts
-              .map(
-                (artifact) => `
-                  <section class="artifact-card">
-                    <div class="artifact-card__row">
-                      <span class="item-meta">${escapeHtml(artifact.meta)}</span>
-                      <span class="${tagClass(artifact.tone)}">${escapeHtml(artifact.fileType)}</span>
-                    </div>
-                    <h3>${escapeHtml(artifact.title)}</h3>
-                    <p>${escapeHtml(compactText(artifact.description, 16))}</p>
-                    <div class="card-actions">
-                      <a class="artifact-card__link" href="${escapeHtml(artifact.href)}" target="_blank" rel="noreferrer">
-                        ${escapeHtml(artifact.linkLabel)}
-                      </a>
-                    </div>
-                  </section>
-                `,
-              )
-              .join('')}
-          </div>
-
-          ${
-            traceability.artifacts.length > 3
-              ? `
-                <div class="card-actions">
-                  <button class="trace-button" type="button" data-action="toggle-reveal" data-reveal="artifacts">
-                    ${state.reveal.artifacts ? 'Show fewer artifacts' : `Show all ${traceability.artifacts.length} artifacts`}
-                  </button>
-                </div>
-              `
-              : ''
-          }
-        </section>
-
-        <section class="support-card">
-          <div class="support-card__header">
-            <p class="support-card__eyebrow">Source register</p>
-            <h3>Direct anchors, linked authority, and support sources</h3>
-            <p class="support-card__summary">These sources explain what came from public or formal authority and what is linked support inside the lens.</p>
-          </div>
-
-          <div class="source-list">
-            ${sources
-              .map(
-                (source) => `
-                  <section class="source-card">
-                    <div class="source-card__row">
-                      <span class="item-meta">${escapeHtml(`${source.id} - ${source.publisher}`)}</span>
-                      <span class="${tagClass(source.tone)}">${escapeHtml(source.authorityTierLabel)}</span>
-                    </div>
-                    <h3>${escapeHtml(source.title)}</h3>
-                    <p>${escapeHtml(compactText(source.relevance, 15))}</p>
-                    <p>${escapeHtml(source.usageLabel)}</p>
-                    ${
-                      source.href
-                        ? `
-                          <div class="card-actions">
-                            <a class="source-card__link" href="${escapeHtml(source.href)}" target="_blank" rel="noreferrer">
-                              ${escapeHtml(source.linkLabel)}
-                            </a>
-                          </div>
-                        `
-                        : ''
-                    }
-                  </section>
-                `,
-              )
-              .join('')}
-          </div>
-
-          ${
-            traceability.sources.length > 4
-              ? `
-                <div class="card-actions">
-                  <button class="trace-button" type="button" data-action="toggle-reveal" data-reveal="sources">
-                    ${state.reveal.sources ? 'Show fewer sources' : `Show all ${traceability.sources.length} sources`}
-                  </button>
-                </div>
-              `
-              : ''
-          }
-        </section>
-      </div>
-    </div>
-  `;
-}
-
-function renderSupportTabs() {
-  const tabs = [
-    { id: 'support', label: 'Focused support' },
-    { id: 'drivers', label: 'Schedule drivers' },
-    { id: 'methodology', label: 'Methodology' },
-    { id: 'traceability', label: 'Traceability' },
-  ];
-
-  supportTabs.innerHTML = tabs
-    .map(
-      (tab) => `
-        <button
-          class="support-tab${state.support.tab === tab.id ? ' support-tab--active' : ''}"
-          type="button"
-          role="tab"
-          aria-selected="${String(state.support.tab === tab.id)}"
-          data-action="set-support-tab"
-          data-support-tab="${escapeHtml(tab.id)}"
-        >
-          ${escapeHtml(tab.label)}
-        </button>
-      `,
-    )
-    .join('');
+  return buildEmptyState('Choose a milestone first', 'Select one milestone in Layer 2 to open the evidence behind that date.');
 }
 
 function renderSupport() {
-  if (!state.support.open) {
+  const milestone = getSelectedMilestone();
+
+  if (!state.support.open || !milestone) {
     supportLayer.hidden = true;
+    supportTabs.hidden = true;
+    supportTabs.innerHTML = '';
     return;
   }
 
   supportLayer.hidden = false;
-  renderSupportTabs();
-
-  switch (state.support.tab) {
-    case 'drivers':
-      supportContent.innerHTML = buildDriversTabContent();
-      break;
-    case 'methodology':
-      supportContent.innerHTML = buildMethodologyTabContent();
-      break;
-    case 'traceability':
-      supportContent.innerHTML = buildTraceabilityTabContent();
-      break;
-    default:
-      supportContent.innerHTML = buildSupportTabContent();
-      break;
-  }
+  supportTabs.hidden = true;
+  supportTabs.innerHTML = '';
+  supportContent.innerHTML = buildSupportTabContent();
 }
 
 function renderApp() {
@@ -1220,13 +804,6 @@ function renderApp() {
   renderSupport();
 }
 
-function openSupport(tab) {
-  state.support.open = true;
-  state.support.tab = tab;
-  renderApp();
-  scrollToId('supportLayer');
-}
-
 function handleAction(target) {
   const action = target.dataset.action;
   if (!action) return;
@@ -1240,36 +817,10 @@ function handleAction(target) {
     return;
   }
 
-  if (action === 'open-support') {
-    openSupport(target.dataset.supportTab || 'support');
-    return;
-  }
-
   if (action === 'close-support') {
     state.support.open = false;
     renderApp();
     scrollToId('focusLayer');
-    return;
-  }
-
-  if (action === 'set-support-tab') {
-    state.support.tab = target.dataset.supportTab;
-    renderSupport();
-    return;
-  }
-
-  if (action === 'set-driver') {
-    state.activeDriverId = target.dataset.driverId;
-    if (!state.support.open) {
-      state.support.open = true;
-      state.support.tab = 'drivers';
-      renderApp();
-      scrollToId('supportLayer');
-      return;
-    }
-
-    if (state.support.tab !== 'drivers') state.support.tab = 'drivers';
-    renderSupport();
     return;
   }
 

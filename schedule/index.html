@@ -83,9 +83,9 @@
         <div class="section-heading">
           <div>
             <p class="section-kicker">Layer 2</p>
-            <h2 id="focusHeading">Focused schedule view</h2>
+            <h2 id="focusHeading">Selected phase</h2>
             <p id="focusSubtitle" class="section-lead">
-              Select a phase or milestone to understand what it is, when it happens, and why it matters.
+              Choose one key milestone in this phase to open the evidence behind that date.
             </p>
           </div>
           <button class="text-action" type="button" data-action="clear-focus">
@@ -95,7 +95,7 @@
 
         <div id="focusContent" class="focus-content">
           <section class="loading-state loading-state--compact">
-            <h3>Preparing focused view</h3>
+            <h3>Preparing the selected view</h3>
             <p>The selected phase or milestone will appear here after you click the big-picture layer.</p>
           </section>
         </div>
@@ -105,22 +105,22 @@
         <div class="section-heading">
           <div>
             <p class="section-kicker">Layer 3</p>
-            <h2 id="supportHeading">Detailed support view</h2>
+            <h2 id="supportHeading">Evidence behind the selected milestone</h2>
             <p id="supportSubtitle" class="section-lead">
-              The deeper schedule support stays grouped into simple, readable lenses.
+              This layer explains one selected date and the evidence behind it.
             </p>
           </div>
           <button class="text-action" type="button" data-action="close-support">
-            Back to focused view
+            Back to phase milestones
           </button>
         </div>
 
-        <div id="supportTabs" class="support-tabs" role="tablist" aria-label="Detailed schedule views"></div>
+        <div id="supportTabs" class="support-tabs" role="tablist" aria-label="Evidence views for the selected schedule item" hidden></div>
 
         <div id="supportContent" class="support-content">
           <section class="loading-state loading-state--compact">
-            <h3>Preparing support view</h3>
-            <p>Detailed schedule support will appear here after you deliberately open it.</p>
+            <h3>Preparing the evidence view</h3>
+            <p>The deeper schedule evidence will appear here after you deliberately open it.</p>
           </section>
         </div>
       </section>
