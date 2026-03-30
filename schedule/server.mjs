@@ -7,6 +7,8 @@ const currentDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(currentDir, '..');
 const host = '127.0.0.1';
 const port = Number(process.env.PORT || 4373);
+const isDirectRun =
+  Boolean(process.argv[1]) && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 
 const dataFiles = {
   milestones: 'Contract_Cost_Schedule Documents/data/gateway_milestones.csv',
@@ -701,7 +703,7 @@ async function buildScheduleData() {
   };
 }
 
-async function buildSchedulePayload() {
+export async function buildSchedulePayload() {
   const {
     startDate,
     endDate,
@@ -986,6 +988,8 @@ const server = http.createServer(async (request, response) => {
   }
 });
 
-server.listen(port, host, () => {
-  console.log(`Gateway Schedule Explorer available at http://${host}:${port}/schedule/`);
-});
+if (isDirectRun) {
+  server.listen(port, host, () => {
+    console.log(`Gateway Schedule Explorer available at http://${host}:${port}/schedule/`);
+  });
+}

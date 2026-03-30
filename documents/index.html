@@ -32,13 +32,13 @@
   <body>
     <div class="app-shell">
       <nav class="suite-nav" aria-label="Gateway suite navigation">
-        <a class="suite-nav__home" href="/index.html">Simulation Home</a>
+        <a class="suite-nav__home" href="/" data-suite-route="simulation">Simulation</a>
         <div class="suite-nav__links">
-          <a class="suite-nav__link suite-nav__link--active" href="#" data-suite-app="documents" aria-current="page">Documents</a>
-          <a class="suite-nav__link" href="#" data-suite-app="wbs">WBS</a>
-          <a class="suite-nav__link" href="#" data-suite-app="schedule">Schedule</a>
-          <a class="suite-nav__link" href="#" data-suite-app="cost">Cost</a>
-          <a class="suite-nav__link" href="#" data-suite-app="risk">Risk</a>
+          <a class="suite-nav__link suite-nav__link--active" href="/documents/" data-suite-route="documents" aria-current="page">Documents</a>
+          <a class="suite-nav__link" href="/wbs/" data-suite-route="wbs">WBS</a>
+          <a class="suite-nav__link" href="/schedule/" data-suite-route="schedule">Schedule</a>
+          <a class="suite-nav__link" href="/cost/" data-suite-route="cost">Cost</a>
+          <a class="suite-nav__link" href="/risk/" data-suite-route="risk">Risk</a>
         </div>
       </nav>
 
@@ -135,11 +135,28 @@
     <script>
       (function () {
         const suitePorts = { documents: 4473, wbs: 4173, schedule: 4373, cost: 4273, risk: 4573 };
+        const suiteRoutes = {
+          simulation: '/',
+          documents: '/documents/',
+          wbs: '/wbs/',
+          schedule: '/schedule/',
+          cost: '/cost/',
+          risk: '/risk/',
+        };
         const suiteHost = window.location.hostname || '127.0.0.1';
-        document.querySelectorAll('[data-suite-app]').forEach((link) => {
-          const app = link.getAttribute('data-suite-app');
-          if (!suitePorts[app]) return;
-          link.href = `http://${suiteHost}:${suitePorts[app]}/${app}/`;
+        const standalonePorts = new Set(Object.values(suitePorts).map(String));
+        const runningStandalone = standalonePorts.has(String(window.location.port || ''));
+        document.querySelectorAll('[data-suite-route]').forEach((link) => {
+          const route = link.getAttribute('data-suite-route');
+          if (!suiteRoutes[route]) return;
+          if (runningStandalone) {
+            link.href =
+              route === 'simulation'
+                ? '/index.html'
+                : `http://${suiteHost}:${suitePorts[route]}/${route}/`;
+            return;
+          }
+          link.href = suiteRoutes[route];
         });
       })();
     </script>

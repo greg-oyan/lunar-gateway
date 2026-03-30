@@ -185,6 +185,12 @@
       border-color: #4a8dbb;
       color: #d2efff;
     }
+    #launch .launch-suite-link--active {
+      background: linear-gradient(135deg, rgba(18, 46, 80, 0.96), rgba(11, 31, 56, 0.96));
+      border-color: #5b93b8;
+      color: #e5f5ff;
+      box-shadow: inset 0 0 0 1px rgba(150, 210, 245, 0.12);
+    }
     @media (max-width: 760px) {
       #launch .launch-grid { grid-template-columns: 1fr; }
       #launch .launch-actions { flex-direction: column; }
@@ -258,6 +264,12 @@
       background: rgba(11, 29, 53, 0.94);
       border-color: #4a8dbb;
       color: #d2efff;
+    }
+    #suite-dock .suite-dock__link--active {
+      background: linear-gradient(135deg, rgba(18, 46, 80, 0.96), rgba(11, 31, 56, 0.96));
+      border-color: #5b93b8;
+      color: #e5f5ff;
+      box-shadow: inset 0 0 0 1px rgba(150, 210, 245, 0.12);
     }
     @media (max-width: 1100px) {
       #suite-dock { width: min(520px, calc(100vw - 40px)); }
@@ -560,15 +572,16 @@
       <section class="launch-suite" aria-labelledby="launch-suite-heading">
         <div class="launch-label" id="launch-suite-heading">Gateway Ecosystem</div>
         <div class="launch-suite-copy">
-          Keep the simulation as the home layer, then open the supporting modules as dedicated lenses
-          for source documents, structure, schedule, cost, and risk.
+          Move through the full Gateway application ecosystem from one tab, with the simulation as
+          the home layer and the explorers as supporting mission lenses.
         </div>
         <div class="launch-suite-links">
-          <a class="launch-suite-link" href="#" data-suite-app="documents" target="_blank" rel="noreferrer">Documents</a>
-          <a class="launch-suite-link" href="#" data-suite-app="wbs" target="_blank" rel="noreferrer">WBS</a>
-          <a class="launch-suite-link" href="#" data-suite-app="schedule" target="_blank" rel="noreferrer">Schedule</a>
-          <a class="launch-suite-link" href="#" data-suite-app="cost" target="_blank" rel="noreferrer">Cost</a>
-          <a class="launch-suite-link" href="#" data-suite-app="risk" target="_blank" rel="noreferrer">Risk</a>
+          <a class="launch-suite-link launch-suite-link--active" href="/" data-suite-route="simulation" aria-current="page">Simulation</a>
+          <a class="launch-suite-link" href="/documents/" data-suite-route="documents">Documents</a>
+          <a class="launch-suite-link" href="/wbs/" data-suite-route="wbs">WBS</a>
+          <a class="launch-suite-link" href="/schedule/" data-suite-route="schedule">Schedule</a>
+          <a class="launch-suite-link" href="/cost/" data-suite-route="cost">Cost</a>
+          <a class="launch-suite-link" href="/risk/" data-suite-route="risk">Risk</a>
         </div>
       </section>
 
@@ -668,14 +681,16 @@
     <summary>Gateway Suite</summary>
     <div class="suite-dock__panel">
       <div class="suite-dock__copy">
-        Open the supporting modules without leaving the simulation behind.
+        Stay inside one Gateway application, with the simulation as home and the explorers as
+        companion views.
       </div>
       <div class="suite-dock__links">
-        <a class="suite-dock__link" href="#" data-suite-app="documents" target="_blank" rel="noreferrer">Documents</a>
-        <a class="suite-dock__link" href="#" data-suite-app="wbs" target="_blank" rel="noreferrer">WBS</a>
-        <a class="suite-dock__link" href="#" data-suite-app="schedule" target="_blank" rel="noreferrer">Schedule</a>
-        <a class="suite-dock__link" href="#" data-suite-app="cost" target="_blank" rel="noreferrer">Cost</a>
-        <a class="suite-dock__link" href="#" data-suite-app="risk" target="_blank" rel="noreferrer">Risk</a>
+        <a class="suite-dock__link suite-dock__link--active" href="/" data-suite-route="simulation" aria-current="page">Simulation</a>
+        <a class="suite-dock__link" href="/documents/" data-suite-route="documents">Documents</a>
+        <a class="suite-dock__link" href="/wbs/" data-suite-route="wbs">WBS</a>
+        <a class="suite-dock__link" href="/schedule/" data-suite-route="schedule">Schedule</a>
+        <a class="suite-dock__link" href="/cost/" data-suite-route="cost">Cost</a>
+        <a class="suite-dock__link" href="/risk/" data-suite-route="risk">Risk</a>
       </div>
     </div>
   </details>
@@ -693,11 +708,27 @@
   <script>
   (function(){
     var suitePorts = { documents:4473, wbs:4173, schedule:4373, cost:4273, risk:4573 };
+    var suiteRoutes = {
+      simulation: '/',
+      documents: '/documents/',
+      wbs: '/wbs/',
+      schedule: '/schedule/',
+      cost: '/cost/',
+      risk: '/risk/'
+    };
     var suiteHost = window.location.hostname || '127.0.0.1';
-    document.querySelectorAll('[data-suite-app]').forEach(function(link){
-      var app = link.getAttribute('data-suite-app');
-      if(!suitePorts[app]) return;
-      link.href = 'http://' + suiteHost + ':' + suitePorts[app] + '/' + app + '/';
+    var standalonePorts = Object.values(suitePorts).map(String);
+    var runningStandalone = standalonePorts.indexOf(String(window.location.port || '')) !== -1;
+    document.querySelectorAll('[data-suite-route]').forEach(function(link){
+      var route = link.getAttribute('data-suite-route');
+      if(!suiteRoutes[route]) return;
+      if(runningStandalone){
+        link.href = route === 'simulation'
+          ? '/index.html'
+          : 'http://' + suiteHost + ':' + suitePorts[route] + '/' + route + '/';
+        return;
+      }
+      link.href = suiteRoutes[route];
     });
 
     function showErr(m){

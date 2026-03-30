@@ -7,6 +7,8 @@ const currentDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(currentDir, '..');
 const host = '127.0.0.1';
 const port = Number(process.env.PORT || 4273);
+const isDirectRun =
+  Boolean(process.argv[1]) && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 
 const dataFiles = {
   estimate: 'Contract_Cost_Schedule Documents/data/gateway_cost_estimate.csv',
@@ -857,7 +859,7 @@ function buildDataset({
 let cachedDataset = null;
 let cachedGeneratedAt = 0;
 
-async function getDataset() {
+export async function getDataset() {
   const now = Date.now();
   if (cachedDataset && now - cachedGeneratedAt < 1000) return cachedDataset;
 
@@ -966,6 +968,8 @@ const server = http.createServer(async (request, response) => {
   }
 });
 
-server.listen(port, host, () => {
-  console.log(`Gateway Cost Explorer running at http://${host}:${port}/cost/`);
-});
+if (isDirectRun) {
+  server.listen(port, host, () => {
+    console.log(`Gateway Cost Explorer running at http://${host}:${port}/cost/`);
+  });
+}
