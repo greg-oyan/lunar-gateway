@@ -8,8 +8,8 @@
       "filename": "gateway_CARD.rtf",
       "relativePath": "Contract_Cost_Schedule Documents/docs/gateway_CARD.rtf",
       "fileType": "RTF",
-      "category": "Authority Narrative",
-      "tags": ["cost", "requirements", "authority", "program basis"],
+      "category": "Program Reference",
+      "tags": ["cost", "requirements", "program basis", "estimating"],
       "shortDescription": "Program-level cost analysis requirements description used to frame scope, assumptions, and estimating discipline."
     },
     {
@@ -18,19 +18,19 @@
       "filename": "gateway_wbs_dictionary.rtf",
       "relativePath": "Contract_Cost_Schedule Documents/docs/gateway_wbs_dictionary.rtf",
       "fileType": "RTF",
-      "category": "Authority Narrative",
-      "tags": ["wbs", "definitions", "structure", "authority"],
+      "category": "Program Reference",
+      "tags": ["wbs", "definitions", "structure", "program map"],
       "shortDescription": "Controlled definition of the Gateway WBS hierarchy and the intended meaning of each major element."
     },
     {
       "id": "doc-authority-guide",
-      "title": "Gateway Data Authority Guide",
+      "title": "Gateway Data Guide",
       "filename": "gateway_data_authority_guide.rtf",
       "relativePath": "Contract_Cost_Schedule Documents/docs/gateway_data_authority_guide.rtf",
       "fileType": "RTF",
-      "category": "Authority Narrative",
-      "tags": ["authority", "traceability", "sources", "methodology"],
-      "shortDescription": "Companion guidance explaining how source-document rigor, authority tiers, and app-level interpretation are separated."
+      "category": "Program Reference",
+      "tags": ["data guide", "traceability", "sources", "methodology"],
+      "shortDescription": "Guide to source IDs, traceability rules, and interpretation boundaries across the Gateway source library."
     },
     {
       "id": "doc-cost-basis",
@@ -38,7 +38,7 @@
       "filename": "gateway_cost_basis_of_estimate.rtf",
       "relativePath": "Contract_Cost_Schedule Documents/docs/gateway_cost_basis_of_estimate.rtf",
       "fileType": "RTF",
-      "category": "Authority Narrative",
+      "category": "Program Reference",
       "tags": ["cost", "methodology", "assumptions", "reserve"],
       "shortDescription": "Narrative basis-of-estimate document covering scope, reserve treatment, annual phasing logic, and remaining judgment."
     },
@@ -109,7 +109,7 @@
       "relativePath": "Contract_Cost_Schedule Documents/data/gateway_milestones.csv",
       "fileType": "CSV",
       "category": "Schedule Dataset",
-      "tags": ["schedule", "milestones", "dates", "authority"],
+      "tags": ["schedule", "milestones", "dates", "source basis"],
       "shortDescription": "Named program milestones with date basis, source IDs, confidence annotations, and related task links."
     },
     {
@@ -129,8 +129,8 @@
       "relativePath": "Contract_Cost_Schedule Documents/data/gateway_contract_documents_tracker.csv",
       "fileType": "CSV",
       "category": "Document Control Dataset",
-      "tags": ["documents", "tracker", "authority tier", "evidence role"],
-      "shortDescription": "Tracker linking controlled documents to WBS elements, milestones, authority tiers, and evidence roles."
+      "tags": ["documents", "tracker", "source role", "evidence role"],
+      "shortDescription": "Tracker linking controlled documents to WBS elements, milestones, source roles, and evidence roles."
     },
     {
       "id": "doc-source-register",
@@ -140,7 +140,7 @@
       "fileType": "CSV",
       "category": "Reference Dataset",
       "tags": ["sources", "references", "public", "traceability"],
-      "shortDescription": "Register of public and internal references used to anchor the rebuilt Gateway authority layer."
+      "shortDescription": "Register of public and internal references used across the Gateway source library."
     },
     {
       "id": "doc-glossary",
@@ -150,7 +150,7 @@
       "fileType": "CSV",
       "category": "Reference Dataset",
       "tags": ["glossary", "definitions", "terms", "reference"],
-      "shortDescription": "Reference glossary of terms used across the Gateway corpus to keep terminology consistent across artifacts."
+      "shortDescription": "Reference glossary of terms used across the Gateway source library to keep terminology consistent across artifacts."
     }
   ]
 }

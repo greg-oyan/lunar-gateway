@@ -22,6 +22,8 @@ const dataFiles = {
   pricing: 'Contract_Cost_Schedule Documents/data/gateway_section_b_pricing.csv',
 };
 
+const staticDatasetPath = path.join(currentDir, 'data', 'gateway-wbs.json');
+
 const suiteAssets = {
   'lunar-gateway-favicon.svg': 'suite-assets/lunar-gateway-favicon.svg',
   'lunar-gateway-share-card.svg': 'suite-assets/lunar-gateway-share-card.svg',
@@ -670,14 +672,14 @@ const server = http.createServer(async (request, response) => {
 
   if (pathname === '/wbs/data/gateway-wbs.json') {
     try {
-      const dataset = await buildDataset();
+      const dataset = JSON.parse(await fs.readFile(staticDatasetPath, 'utf8'));
       await sendJson(response, dataset);
     } catch (error) {
       response.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
       response.end(
         JSON.stringify(
           {
-            error: 'Failed to build WBS dataset',
+            error: 'Failed to load WBS dataset',
             details: error.message,
           },
           null,

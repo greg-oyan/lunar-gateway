@@ -1,0 +1,4954 @@
+{
+  "appTitle": "Gateway Schedule Explorer",
+  "appSubtitle": "This is how the Gateway program unfolds over time, what moments matter most, and which schedule branches drive everything else.",
+  "generatedAt": "2026-04-05T22:50:10.023Z",
+  "defaultSelection": {
+    "type": "milestone",
+    "id": "M-024"
+  },
+  "defaultPhaseId": "phase-launch",
+  "defaultDriverId": "driver-launch-transit",
+  "overview": {
+    "spanValue": "2017-2031",
+    "spanLabel": "Oct 2017 to Jun 2031",
+    "story": "Gateway unfolds as a long sequence of baseline, design, fabrication, integration, launch, and on-orbit activation gates rather than a single mission date.",
+    "signals": [
+      {
+        "label": "Overall span",
+        "value": "2017-2031"
+      },
+      {
+        "label": "Named milestones",
+        "value": "37 milestones"
+      },
+      {
+        "label": "Critical work",
+        "value": "85 critical tasks"
+      },
+      {
+        "label": "Direct anchors",
+        "value": "5 anchors"
+      }
+    ],
+    "signatureMoments": [
+      {
+        "label": "PCA baseline",
+        "value": "Jun 1, 2022"
+      },
+      {
+        "label": "PPE-HALO launch",
+        "value": "Apr 30, 2027"
+      },
+      {
+        "label": "First crewed arrival",
+        "value": "Oct 6, 2028"
+      }
+    ],
+    "contextNotes": [
+      {
+        "title": "What the schedule captures",
+        "body": "This lens captures the named Gateway milestone file, the critical portions of the master schedule extract, linked schedule risks, and supporting schedule-relevant documents."
+      },
+      {
+        "title": "What is directly anchored",
+        "body": "Public contract awards, formal program baseline gates, and named milestone entries are presented as direct anchors."
+      },
+      {
+        "title": "Where interpretation enters",
+        "body": "Phase framing, schedule-driver grouping, and plain-English consequence statements are analytic rollups built from the source artifacts rather than direct quotations from one file."
+      }
+    ],
+    "phasePreviewIds": [
+      "phase-formulation",
+      "phase-development",
+      "phase-integration",
+      "phase-launch"
+    ]
+  },
+  "timeline": {
+    "start": "2017-10-01",
+    "end": "2031-06-01",
+    "storyTitle": "Gateway only makes sense when the timeline is read as one connected sequence",
+    "story": "The program begins with baseline and architecture work, narrows through hardware convergence, then widens again into launch, transit, crewed arrival, and partner expansion.",
+    "takeaways": [
+      "Most of the schedule pressure sits in the handoffs between development, integration, and launch.",
+      "Public launch dates are the visible output of a much longer chain of design, mass, interface, and qualification work."
+    ],
+    "hint": "Showing the full program arc from formulation through operations.",
+    "keyMilestoneIds": [
+      "M-001",
+      "M-003",
+      "M-009",
+      "M-017",
+      "M-024",
+      "M-026",
+      "M-029",
+      "M-037"
+    ]
+  },
+  "phaseLensSummary": "The phase view groups dates into large narrative blocks so the schedule reads like a program sequence instead of a flat milestone list.",
+  "driverLensSummary": "The driver view condenses the schedule into a handful of branches that create the most timing pressure, dependency sensitivity, or visible mission consequence.",
+  "milestones": [
+    {
+      "id": "M-001",
+      "name": "Gateway Program Authorization and Formulation",
+      "shortName": "Program start",
+      "date": "2017-11-01",
+      "dateLabel": "Nov 1, 2017",
+      "year": 2017,
+      "phaseId": "phase-formulation",
+      "phaseName": "Formulation",
+      "relatedTaskId": "T-001",
+      "task": {
+        "id": "T-001",
+        "name": "Gateway Program Formulation and Congressional Authorization",
+        "startDate": "2017-10-01",
+        "endDate": "2018-12-31",
+        "windowLabel": "Oct 2017 to Dec 2018",
+        "wbsId": "1.0"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Formulation milestone",
+      "tone": "brand",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This is one of the named points that makes the overall Gateway schedule legible to a first-time audience.",
+      "linkedRisks": [],
+      "linkedDocuments": [
+        {
+          "id": "CD-037",
+          "name": "Gateway Program Environmental Impact Statement (EIS)",
+          "type": "Environmental",
+          "status": "Final",
+          "evidenceRole": "compliance_and_assurance"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-003",
+      "name": "PPE Contract Award - Maxar Technologies $375M FFP",
+      "shortName": "PPE award",
+      "date": "2019-05-23",
+      "dateLabel": "May 23, 2019",
+      "year": 2019,
+      "phaseId": "phase-development",
+      "phaseName": "Development",
+      "relatedTaskId": "T-026",
+      "task": {
+        "id": "T-026",
+        "name": "PPE Contract Award - Maxar Technologies FFP $375M",
+        "startDate": "2019-05-23",
+        "endDate": "2019-05-23",
+        "windowLabel": "May 2019 to May 2019",
+        "wbsId": "1.3"
+      },
+      "directnessLabel": "Direct public anchor",
+      "directnessTone": "brand",
+      "directnessCategory": "direct",
+      "typeLabel": "Contract award",
+      "tone": "copper",
+      "confidenceLabel": "high confidence",
+      "whyItMatters": "This date matters because it turns planned scope into a funded execution branch with real downstream schedule obligations.",
+      "linkedRisks": [
+        {
+          "id": "R-002",
+          "title": "PPE Controllability Inadequacy with Docked Starship HLS",
+          "score": 15,
+          "status": "Open - Under Analysis"
+        },
+        {
+          "id": "R-005",
+          "title": "PPE AEPS Thruster Anomaly During Transit or Demo",
+          "score": 10,
+          "status": "Open"
+        },
+        {
+          "id": "R-014",
+          "title": "Micrometeoroid and Orbital Debris Impact During Uncrewed Dwell",
+          "score": 10,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-002",
+          "name": "PPE System Requirements Specification (SRS)",
+          "type": "Requirements",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-012",
+          "name": "PPE Critical Design Review Package",
+          "type": "Review Package",
+          "status": "Approved",
+          "evidenceRole": "technical_evidence"
+        },
+        {
+          "id": "CD-017",
+          "name": "PPE Failure Modes and Effects Analysis (FMEA)",
+          "type": "Reliability",
+          "status": "Approved",
+          "evidenceRole": "execution_support"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "WEB-001",
+          "title": "NASA Awards Artemis Contract for Lunar Gateway Power",
+          "publisher": "Propulsion",
+          "href": null
+        }
+      ]
+    },
+    {
+      "id": "M-002",
+      "name": "Gateway System Requirements Review (SRR)",
+      "shortName": "Gateway System Requirements Review (SRR)",
+      "date": "2019-06-30",
+      "dateLabel": "Jun 30, 2019",
+      "year": 2019,
+      "phaseId": "phase-formulation",
+      "phaseName": "Formulation",
+      "relatedTaskId": "T-011",
+      "task": {
+        "id": "T-011",
+        "name": "Gateway System Requirements Review (SRR)",
+        "startDate": "2019-03-01",
+        "endDate": "2019-06-30",
+        "windowLabel": "Mar 2019 to Jun 2019",
+        "wbsId": "1.2.1"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Review gate",
+      "tone": "brand",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward.",
+      "linkedRisks": [
+        {
+          "id": "R-001",
+          "title": "PPE-HALO Combined Stack Mass Exceedance",
+          "score": 20,
+          "status": "Open - Active Mitigation"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-001",
+          "name": "Gateway Program Requirements Document (PRD)",
+          "type": "Requirements",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-004",
+          "name": "Gateway Interface Requirements Document (IRD)",
+          "type": "Requirements",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-005",
+          "name": "PPE-HALO Interface Control Document (ICD)",
+          "type": "ICD",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-004",
+      "name": "Gateway System Definition Review (SDR)",
+      "shortName": "Gateway System Definition Review (SDR)",
+      "date": "2019-12-31",
+      "dateLabel": "Dec 31, 2019",
+      "year": 2019,
+      "phaseId": "phase-formulation",
+      "phaseName": "Formulation",
+      "relatedTaskId": "T-012",
+      "task": {
+        "id": "T-012",
+        "name": "Gateway System Definition Review (SDR)",
+        "startDate": "2019-07-01",
+        "endDate": "2019-12-31",
+        "windowLabel": "Jul 2019 to Dec 2019",
+        "wbsId": "1.2.1"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Review gate",
+      "tone": "brand",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward.",
+      "linkedRisks": [
+        {
+          "id": "R-001",
+          "title": "PPE-HALO Combined Stack Mass Exceedance",
+          "score": 20,
+          "status": "Open - Active Mitigation"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-001",
+          "name": "Gateway Program Requirements Document (PRD)",
+          "type": "Requirements",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-004",
+          "name": "Gateway Interface Requirements Document (IRD)",
+          "type": "Requirements",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-005",
+          "name": "PPE-HALO Interface Control Document (ICD)",
+          "type": "ICD",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-005",
+      "name": "HALO Phase A-B Contract Award - Northrop Grumman $187M",
+      "shortName": "HALO design award",
+      "date": "2020-06-05",
+      "dateLabel": "Jun 5, 2020",
+      "year": 2020,
+      "phaseId": "phase-development",
+      "phaseName": "Development",
+      "relatedTaskId": "T-047",
+      "task": {
+        "id": "T-047",
+        "name": "HALO Phase A-B Contract Award - Northrop Grumman $187M",
+        "startDate": "2020-06-05",
+        "endDate": "2020-06-05",
+        "windowLabel": "Jun 2020 to Jun 2020",
+        "wbsId": "1.4"
+      },
+      "directnessLabel": "Direct public anchor",
+      "directnessTone": "brand",
+      "directnessCategory": "direct",
+      "typeLabel": "Contract award",
+      "tone": "copper",
+      "confidenceLabel": "high confidence",
+      "whyItMatters": "This date matters because it turns planned scope into a funded execution branch with real downstream schedule obligations.",
+      "linkedRisks": [
+        {
+          "id": "R-003",
+          "title": "HALO Firm-Fixed-Price Contract Further Cost Overrun",
+          "score": 16,
+          "status": "Open - Monitoring"
+        },
+        {
+          "id": "R-015",
+          "title": "Crew Radiation Exposure Exceeding Career Dose Limits",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-022",
+          "title": "Crew Rescue Capability Gap During Crewed Visit",
+          "score": 10,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-003",
+          "name": "HALO System Requirements Specification (SRS)",
+          "type": "Requirements",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-006",
+          "name": "Gateway-Orion Interface Control Document (ICD)",
+          "type": "ICD",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-013",
+          "name": "HALO Critical Design Review Package",
+          "type": "Review Package",
+          "status": "Approved",
+          "evidenceRole": "technical_evidence"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "WEB-002",
+          "title": "NASA Awards Northrop Grumman Artemis Contract for Gateway Crew Cabin",
+          "publisher": "NASA",
+          "href": "https://www.nasa.gov/news-release/nasa-awards-northrop-grumman-artemis-contract-for-gateway-crew-cabin/"
+        }
+      ]
+    },
+    {
+      "id": "M-006",
+      "name": "SpaceX Falcon Heavy Launch Services Contract Award $331.8M",
+      "shortName": "Falcon Heavy award",
+      "date": "2021-02-09",
+      "dateLabel": "Feb 9, 2021",
+      "year": 2021,
+      "phaseId": "phase-development",
+      "phaseName": "Development",
+      "relatedTaskId": "T-131",
+      "task": {
+        "id": "T-131",
+        "name": "Launch Readiness Review - PPE-HALO Falcon Heavy",
+        "startDate": "2026-11-01",
+        "endDate": "2026-11-30",
+        "windowLabel": "Nov 2026 to Nov 2026",
+        "wbsId": "1.10.1"
+      },
+      "directnessLabel": "Direct public anchor",
+      "directnessTone": "brand",
+      "directnessCategory": "direct",
+      "typeLabel": "Contract award",
+      "tone": "copper",
+      "confidenceLabel": "high confidence",
+      "whyItMatters": "This date matters because it turns planned scope into a funded execution branch with real downstream schedule obligations.",
+      "linkedRisks": [
+        {
+          "id": "R-004",
+          "title": "Falcon Heavy Launch Window Constraint or Manifest Slip",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-013",
+          "title": "SLS Block 1B Unavailability for Artemis IV I-HAB Launch",
+          "score": 10,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-029",
+          "name": "PPE-HALO Launch Campaign Plan",
+          "type": "Launch Plan",
+          "status": "Draft",
+          "evidenceRole": "execution_support"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "WEB-004",
+          "title": "NASA Awards Contract to Launch Initial Elements for Lunar Outpost",
+          "publisher": "NASA",
+          "href": "https://www.nasa.gov/news-release/nasa-awards-contract-to-launch-initial-elements-for-lunar-outpost/"
+        }
+      ]
+    },
+    {
+      "id": "M-007",
+      "name": "HALO Fabrication and Integration Contract Award $935M",
+      "shortName": "HALO fabrication award",
+      "date": "2021-07-09",
+      "dateLabel": "Jul 9, 2021",
+      "year": 2021,
+      "phaseId": "phase-development",
+      "phaseName": "Development",
+      "relatedTaskId": "T-049",
+      "task": {
+        "id": "T-049",
+        "name": "HALO Fabrication and Integration Contract Award $935M",
+        "startDate": "2021-07-09",
+        "endDate": "2021-07-09",
+        "windowLabel": "Jul 2021 to Jul 2021",
+        "wbsId": "1.4"
+      },
+      "directnessLabel": "Direct public anchor",
+      "directnessTone": "brand",
+      "directnessCategory": "direct",
+      "typeLabel": "Contract award",
+      "tone": "copper",
+      "confidenceLabel": "high confidence",
+      "whyItMatters": "This date matters because it turns planned scope into a funded execution branch with real downstream schedule obligations.",
+      "linkedRisks": [
+        {
+          "id": "R-003",
+          "title": "HALO Firm-Fixed-Price Contract Further Cost Overrun",
+          "score": 16,
+          "status": "Open - Monitoring"
+        },
+        {
+          "id": "R-015",
+          "title": "Crew Radiation Exposure Exceeding Career Dose Limits",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-022",
+          "title": "Crew Rescue Capability Gap During Crewed Visit",
+          "score": 10,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-003",
+          "name": "HALO System Requirements Specification (SRS)",
+          "type": "Requirements",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-006",
+          "name": "Gateway-Orion Interface Control Document (ICD)",
+          "type": "ICD",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-013",
+          "name": "HALO Critical Design Review Package",
+          "type": "Review Package",
+          "status": "Approved",
+          "evidenceRole": "technical_evidence"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "WEB-003",
+          "title": "NASA",
+          "publisher": "Northrop Grumman Finalize Moon Outpost Living Quarters Contract",
+          "href": null
+        }
+      ]
+    },
+    {
+      "id": "M-008",
+      "name": "Non-Advocate Review (NAR) Pre-PCA Complete",
+      "shortName": "Non-Advocate Review (NAR) Pre-PCA Complete",
+      "date": "2022-05-31",
+      "dateLabel": "May 31, 2022",
+      "year": 2022,
+      "phaseId": "phase-development",
+      "phaseName": "Development",
+      "relatedTaskId": "T-008",
+      "task": {
+        "id": "T-008",
+        "name": "Non-Advocate Review (NAR) Pre-PCA",
+        "startDate": "2022-03-01",
+        "endDate": "2022-05-31",
+        "windowLabel": "Mar 2022 to May 2022",
+        "wbsId": "1.1.1"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Review gate",
+      "tone": "copper",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward.",
+      "linkedRisks": [
+        {
+          "id": "R-021",
+          "title": "Lunar Gateway Program Cancellation or Major Restructuring",
+          "score": 15,
+          "status": "Open - Strategic Risk"
+        },
+        {
+          "id": "R-010",
+          "title": "International Partner Budget Instability",
+          "score": 12,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-015",
+          "name": "Gateway Safety Requirements Document (SRD)",
+          "type": "Safety",
+          "status": "Approved",
+          "evidenceRole": "compliance_and_assurance"
+        },
+        {
+          "id": "CD-025",
+          "name": "Gateway Integrated Master Schedule (IMS)",
+          "type": "Schedule",
+          "status": "Active",
+          "evidenceRole": "schedule_authority"
+        },
+        {
+          "id": "CD-026",
+          "name": "Gateway Integrated Financial Plan (IFP)",
+          "type": "Cost",
+          "status": "Active",
+          "evidenceRole": "cost_basis_and_review"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-009",
+      "name": "Program Commitment Agreement (PCA) Baseline Approval",
+      "shortName": "PCA baseline",
+      "date": "2022-06-01",
+      "dateLabel": "Jun 1, 2022",
+      "year": 2022,
+      "phaseId": "phase-development",
+      "phaseName": "Development",
+      "relatedTaskId": "T-004",
+      "task": {
+        "id": "T-004",
+        "name": "Program Commitment Agreement Baseline Approval",
+        "startDate": "2022-06-01",
+        "endDate": "2022-06-01",
+        "windowLabel": "Jun 2022 to Jun 2022",
+        "wbsId": "1.1.1"
+      },
+      "directnessLabel": "Formal baseline anchor",
+      "directnessTone": "forest",
+      "directnessCategory": "direct",
+      "typeLabel": "Baseline gate",
+      "tone": "copper",
+      "confidenceLabel": "high confidence",
+      "whyItMatters": "This is the point where Gateway becomes a formally committed program baseline rather than a set of planning assumptions.",
+      "linkedRisks": [
+        {
+          "id": "R-021",
+          "title": "Lunar Gateway Program Cancellation or Major Restructuring",
+          "score": 15,
+          "status": "Open - Strategic Risk"
+        },
+        {
+          "id": "R-010",
+          "title": "International Partner Budget Instability",
+          "score": 12,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-001",
+          "name": "Gateway Program Requirements Document (PRD)",
+          "type": "Requirements",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-004",
+          "name": "Gateway Interface Requirements Document (IRD)",
+          "type": "Requirements",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-011",
+          "name": "Gateway Mass Properties Report (Quarterly)",
+          "type": "Engineering Report",
+          "status": "Open - Concern",
+          "evidenceRole": "technical_evidence"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-001",
+          "title": "Gateway Cost Analysis Requirements Description (CARD)",
+          "publisher": "NASA JSC",
+          "href": null
+        }
+      ]
+    },
+    {
+      "id": "M-010",
+      "name": "PPE Critical Design Review (CDR) Complete",
+      "shortName": "PPE CDR",
+      "date": "2022-09-15",
+      "dateLabel": "Sep 15, 2022",
+      "year": 2022,
+      "phaseId": "phase-development",
+      "phaseName": "Development",
+      "relatedTaskId": "T-029",
+      "task": {
+        "id": "T-029",
+        "name": "PPE Critical Design Review",
+        "startDate": "2022-06-01",
+        "endDate": "2022-09-15",
+        "windowLabel": "Jun 2022 to Sep 2022",
+        "wbsId": "1.3.1"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Review gate",
+      "tone": "copper",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward.",
+      "linkedRisks": [
+        {
+          "id": "R-002",
+          "title": "PPE Controllability Inadequacy with Docked Starship HLS",
+          "score": 15,
+          "status": "Open - Under Analysis"
+        },
+        {
+          "id": "R-005",
+          "title": "PPE AEPS Thruster Anomaly During Transit or Demo",
+          "score": 10,
+          "status": "Open"
+        },
+        {
+          "id": "R-014",
+          "title": "Micrometeoroid and Orbital Debris Impact During Uncrewed Dwell",
+          "score": 10,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-002",
+          "name": "PPE System Requirements Specification (SRS)",
+          "type": "Requirements",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-012",
+          "name": "PPE Critical Design Review Package",
+          "type": "Review Package",
+          "status": "Approved",
+          "evidenceRole": "technical_evidence"
+        },
+        {
+          "id": "CD-017",
+          "name": "PPE Failure Modes and Effects Analysis (FMEA)",
+          "type": "Reliability",
+          "status": "Approved",
+          "evidenceRole": "execution_support"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-011",
+      "name": "HALO Critical Design Review (CDR) Complete",
+      "shortName": "HALO CDR",
+      "date": "2022-11-10",
+      "dateLabel": "Nov 10, 2022",
+      "year": 2022,
+      "phaseId": "phase-development",
+      "phaseName": "Development",
+      "relatedTaskId": "T-050",
+      "task": {
+        "id": "T-050",
+        "name": "HALO Critical Design Review",
+        "startDate": "2022-08-01",
+        "endDate": "2022-11-10",
+        "windowLabel": "Aug 2022 to Nov 2022",
+        "wbsId": "1.4.1"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Review gate",
+      "tone": "copper",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward.",
+      "linkedRisks": [
+        {
+          "id": "R-003",
+          "title": "HALO Firm-Fixed-Price Contract Further Cost Overrun",
+          "score": 16,
+          "status": "Open - Monitoring"
+        },
+        {
+          "id": "R-015",
+          "title": "Crew Radiation Exposure Exceeding Career Dose Limits",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-022",
+          "title": "Crew Rescue Capability Gap During Crewed Visit",
+          "score": 10,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-003",
+          "name": "HALO System Requirements Specification (SRS)",
+          "type": "Requirements",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-006",
+          "name": "Gateway-Orion Interface Control Document (ICD)",
+          "type": "ICD",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-013",
+          "name": "HALO Critical Design Review Package",
+          "type": "Review Package",
+          "status": "Approved",
+          "evidenceRole": "technical_evidence"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-012",
+      "name": "I-HAB Preliminary Design Review (PDR) Complete",
+      "shortName": "I-HAB Preliminary Design Review (PDR) Complete",
+      "date": "2022-12-31",
+      "dateLabel": "Dec 31, 2022",
+      "year": 2022,
+      "phaseId": "phase-development",
+      "phaseName": "Development",
+      "relatedTaskId": "T-077",
+      "task": {
+        "id": "T-077",
+        "name": "I-HAB Preliminary Design Review",
+        "startDate": "2022-09-01",
+        "endDate": "2022-12-31",
+        "windowLabel": "Sep 2022 to Dec 2022",
+        "wbsId": "1.5.1"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Review gate",
+      "tone": "copper",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward.",
+      "linkedRisks": [
+        {
+          "id": "R-006",
+          "title": "I-HAB Schedule Slip Affecting Artemis IV Co-Manifest",
+          "score": 12,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-014",
+          "name": "I-HAB Preliminary Design Review Package",
+          "type": "Review Package",
+          "status": "Approved",
+          "evidenceRole": "technical_evidence"
+        },
+        {
+          "id": "CD-031",
+          "name": "I-HAB Interface Verification Plan",
+          "type": "Verification",
+          "status": "Draft",
+          "evidenceRole": "technical_evidence"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-014",
+      "name": "HALO Pressure Vessel Delivery to NGIS Gilbert AZ",
+      "shortName": "HALO Pressure Vessel Delivery to NGIS Gilbert AZ",
+      "date": "2024-09-30",
+      "dateLabel": "Sep 30, 2024",
+      "year": 2024,
+      "phaseId": "phase-fabrication",
+      "phaseName": "Fabrication",
+      "relatedTaskId": "T-062",
+      "task": {
+        "id": "T-062",
+        "name": "HALO Pressure Vessel Delivery from TAS Turin to NGIS",
+        "startDate": "2024-07-01",
+        "endDate": "2024-09-30",
+        "windowLabel": "Jul 2024 to Sep 2024",
+        "wbsId": "1.4.1"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Fabrication milestone",
+      "tone": "forest",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This date matters because the schedule is moving from design intent to real flight hardware delivery.",
+      "linkedRisks": [
+        {
+          "id": "R-003",
+          "title": "HALO Firm-Fixed-Price Contract Further Cost Overrun",
+          "score": 16,
+          "status": "Open - Monitoring"
+        },
+        {
+          "id": "R-015",
+          "title": "Crew Radiation Exposure Exceeding Career Dose Limits",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-022",
+          "title": "Crew Rescue Capability Gap During Crewed Visit",
+          "score": 10,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-003",
+          "name": "HALO System Requirements Specification (SRS)",
+          "type": "Requirements",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-006",
+          "name": "Gateway-Orion Interface Control Document (ICD)",
+          "type": "ICD",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-013",
+          "name": "HALO Critical Design Review Package",
+          "type": "Review Package",
+          "status": "Approved",
+          "evidenceRole": "technical_evidence"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-013",
+      "name": "PPE Pre-Shipment Review Complete",
+      "shortName": "PPE ready to ship",
+      "date": "2024-12-31",
+      "dateLabel": "Dec 31, 2024",
+      "year": 2024,
+      "phaseId": "phase-fabrication",
+      "phaseName": "Fabrication",
+      "relatedTaskId": "T-044",
+      "task": {
+        "id": "T-044",
+        "name": "PPE Pre-Shipment Review",
+        "startDate": "2024-12-01",
+        "endDate": "2024-12-31",
+        "windowLabel": "Dec 2024 to Dec 2024",
+        "wbsId": "1.3"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Review gate",
+      "tone": "forest",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward.",
+      "linkedRisks": [
+        {
+          "id": "R-002",
+          "title": "PPE Controllability Inadequacy with Docked Starship HLS",
+          "score": 15,
+          "status": "Open - Under Analysis"
+        },
+        {
+          "id": "R-005",
+          "title": "PPE AEPS Thruster Anomaly During Transit or Demo",
+          "score": 10,
+          "status": "Open"
+        },
+        {
+          "id": "R-014",
+          "title": "Micrometeoroid and Orbital Debris Impact During Uncrewed Dwell",
+          "score": 10,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-002",
+          "name": "PPE System Requirements Specification (SRS)",
+          "type": "Requirements",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-012",
+          "name": "PPE Critical Design Review Package",
+          "type": "Review Package",
+          "status": "Approved",
+          "evidenceRole": "technical_evidence"
+        },
+        {
+          "id": "CD-017",
+          "name": "PPE Failure Modes and Effects Analysis (FMEA)",
+          "type": "Reliability",
+          "status": "Approved",
+          "evidenceRole": "execution_support"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-015",
+      "name": "PPE Delivery to NGIS Gilbert AZ",
+      "shortName": "PPE Delivery to NGIS Gilbert AZ",
+      "date": "2025-02-28",
+      "dateLabel": "Feb 28, 2025",
+      "year": 2025,
+      "phaseId": "phase-integration",
+      "phaseName": "Integration",
+      "relatedTaskId": "T-045",
+      "task": {
+        "id": "T-045",
+        "name": "PPE Transport and Delivery to NGIS Gilbert AZ",
+        "startDate": "2025-01-15",
+        "endDate": "2025-02-28",
+        "windowLabel": "Jan 2025 to Feb 2025",
+        "wbsId": "1.3"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Integration milestone",
+      "tone": "plum",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This is one of the named points that makes the overall Gateway schedule legible to a first-time audience.",
+      "linkedRisks": [
+        {
+          "id": "R-001",
+          "title": "PPE-HALO Combined Stack Mass Exceedance",
+          "score": 20,
+          "status": "Open - Active Mitigation"
+        },
+        {
+          "id": "R-003",
+          "title": "HALO Firm-Fixed-Price Contract Further Cost Overrun",
+          "score": 16,
+          "status": "Open - Monitoring"
+        },
+        {
+          "id": "R-002",
+          "title": "PPE Controllability Inadequacy with Docked Starship HLS",
+          "score": 15,
+          "status": "Open - Under Analysis"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-002",
+          "name": "PPE System Requirements Specification (SRS)",
+          "type": "Requirements",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-012",
+          "name": "PPE Critical Design Review Package",
+          "type": "Review Package",
+          "status": "Approved",
+          "evidenceRole": "technical_evidence"
+        },
+        {
+          "id": "CD-017",
+          "name": "PPE Failure Modes and Effects Analysis (FMEA)",
+          "type": "Reliability",
+          "status": "Approved",
+          "evidenceRole": "execution_support"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-016",
+      "name": "I-HAB Critical Design Review (CDR) Complete",
+      "shortName": "I-HAB Critical Design Review (CDR) Complete",
+      "date": "2025-09-30",
+      "dateLabel": "Sep 30, 2025",
+      "year": 2025,
+      "phaseId": "phase-development",
+      "phaseName": "Development",
+      "relatedTaskId": "T-078",
+      "task": {
+        "id": "T-078",
+        "name": "I-HAB Critical Design Review",
+        "startDate": "2025-01-01",
+        "endDate": "2025-09-30",
+        "windowLabel": "Jan 2025 to Sep 2025",
+        "wbsId": "1.5.1"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Review gate",
+      "tone": "copper",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward.",
+      "linkedRisks": [
+        {
+          "id": "R-006",
+          "title": "I-HAB Schedule Slip Affecting Artemis IV Co-Manifest",
+          "score": 12,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-008",
+          "name": "Gateway-I-HAB Interface Control Document (ICD)",
+          "type": "ICD",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-014",
+          "name": "I-HAB Preliminary Design Review Package",
+          "type": "Review Package",
+          "status": "Approved",
+          "evidenceRole": "technical_evidence"
+        },
+        {
+          "id": "CD-031",
+          "name": "I-HAB Interface Verification Plan",
+          "type": "Verification",
+          "status": "Draft",
+          "evidenceRole": "technical_evidence"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-017",
+      "name": "PPE-HALO Mechanical Integration Complete",
+      "shortName": "Mechanical integration",
+      "date": "2025-09-30",
+      "dateLabel": "Sep 30, 2025",
+      "year": 2025,
+      "phaseId": "phase-integration",
+      "phaseName": "Integration",
+      "relatedTaskId": "T-118",
+      "task": {
+        "id": "T-118",
+        "name": "PPE-HALO Mechanical Integration at NGIS Gilbert AZ",
+        "startDate": "2025-05-01",
+        "endDate": "2025-09-30",
+        "windowLabel": "May 2025 to Sep 2025",
+        "wbsId": "1.9.1"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Integration gate",
+      "tone": "plum",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This is where previously separate hardware or interface branches have to work as one schedule path.",
+      "linkedRisks": [
+        {
+          "id": "R-001",
+          "title": "PPE-HALO Combined Stack Mass Exceedance",
+          "score": 20,
+          "status": "Open - Active Mitigation"
+        },
+        {
+          "id": "R-003",
+          "title": "HALO Firm-Fixed-Price Contract Further Cost Overrun",
+          "score": 16,
+          "status": "Open - Monitoring"
+        },
+        {
+          "id": "R-002",
+          "title": "PPE Controllability Inadequacy with Docked Starship HLS",
+          "score": 15,
+          "status": "Open - Under Analysis"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-005",
+          "name": "PPE-HALO Interface Control Document (ICD)",
+          "type": "ICD",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-020",
+          "name": "PPE-HALO Environmental Test Plan",
+          "type": "Test Plan",
+          "status": "Approved",
+          "evidenceRole": "execution_support"
+        },
+        {
+          "id": "CD-021",
+          "name": "PPE-HALO Pre-Launch Processing Plan",
+          "type": "Operations Plan",
+          "status": "Draft",
+          "evidenceRole": "execution_support"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-018",
+      "name": "PPE-HALO Integrated System Test Complete",
+      "shortName": "Integrated test",
+      "date": "2026-01-31",
+      "dateLabel": "Jan 31, 2026",
+      "year": 2026,
+      "phaseId": "phase-integration",
+      "phaseName": "Integration",
+      "relatedTaskId": "T-119",
+      "task": {
+        "id": "T-119",
+        "name": "PPE-HALO Integrated System Test",
+        "startDate": "2025-10-01",
+        "endDate": "2026-01-31",
+        "windowLabel": "Oct 2025 to Jan 2026",
+        "wbsId": "1.9.4"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Qualification gate",
+      "tone": "plum",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This is a hard evidence point before shipment, launch processing, or higher-consequence operations can continue.",
+      "linkedRisks": [
+        {
+          "id": "R-001",
+          "title": "PPE-HALO Combined Stack Mass Exceedance",
+          "score": 20,
+          "status": "Open - Active Mitigation"
+        },
+        {
+          "id": "R-003",
+          "title": "HALO Firm-Fixed-Price Contract Further Cost Overrun",
+          "score": 16,
+          "status": "Open - Monitoring"
+        },
+        {
+          "id": "R-002",
+          "title": "PPE Controllability Inadequacy with Docked Starship HLS",
+          "score": 15,
+          "status": "Open - Under Analysis"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-020",
+          "name": "PPE-HALO Environmental Test Plan",
+          "type": "Test Plan",
+          "status": "Approved",
+          "evidenceRole": "execution_support"
+        },
+        {
+          "id": "CD-021",
+          "name": "PPE-HALO Pre-Launch Processing Plan",
+          "type": "Operations Plan",
+          "status": "Draft",
+          "evidenceRole": "execution_support"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-019",
+      "name": "PPE-HALO Acoustic and Vibration Environmental Test Complete",
+      "shortName": "PPE-HALO Acoustic and Vibration Environmental Test Complete",
+      "date": "2026-05-31",
+      "dateLabel": "May 31, 2026",
+      "year": 2026,
+      "phaseId": "phase-test",
+      "phaseName": "Test",
+      "relatedTaskId": "T-121",
+      "task": {
+        "id": "T-121",
+        "name": "PPE-HALO Acoustic and Vibration Environmental Test",
+        "startDate": "2026-02-01",
+        "endDate": "2026-05-31",
+        "windowLabel": "Feb 2026 to May 2026",
+        "wbsId": "1.9.2"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Qualification gate",
+      "tone": "brand",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This is a hard evidence point before shipment, launch processing, or higher-consequence operations can continue.",
+      "linkedRisks": [
+        {
+          "id": "R-020",
+          "title": "Environmental Test Anomaly Requiring Hardware Rework",
+          "score": 8,
+          "status": "Open"
+        },
+        {
+          "id": "R-019",
+          "title": "Residual Supply Chain Disruption Affecting Long-Lead Electronics",
+          "score": 6,
+          "status": "Monitoring"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-020",
+          "name": "PPE-HALO Environmental Test Plan",
+          "type": "Test Plan",
+          "status": "Approved",
+          "evidenceRole": "execution_support"
+        },
+        {
+          "id": "CD-021",
+          "name": "PPE-HALO Pre-Launch Processing Plan",
+          "type": "Operations Plan",
+          "status": "Draft",
+          "evidenceRole": "execution_support"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-020",
+      "name": "PPE-HALO Thermal Vacuum Environmental Test Complete",
+      "shortName": "PPE-HALO Thermal Vacuum Environmental Test Complete",
+      "date": "2026-09-30",
+      "dateLabel": "Sep 30, 2026",
+      "year": 2026,
+      "phaseId": "phase-test",
+      "phaseName": "Test",
+      "relatedTaskId": "T-122",
+      "task": {
+        "id": "T-122",
+        "name": "PPE-HALO Thermal Vacuum Environmental Test",
+        "startDate": "2026-06-01",
+        "endDate": "2026-09-30",
+        "windowLabel": "Jun 2026 to Sep 2026",
+        "wbsId": "1.9.2"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Qualification gate",
+      "tone": "brand",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This is a hard evidence point before shipment, launch processing, or higher-consequence operations can continue.",
+      "linkedRisks": [
+        {
+          "id": "R-020",
+          "title": "Environmental Test Anomaly Requiring Hardware Rework",
+          "score": 8,
+          "status": "Open"
+        },
+        {
+          "id": "R-019",
+          "title": "Residual Supply Chain Disruption Affecting Long-Lead Electronics",
+          "score": 6,
+          "status": "Monitoring"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-020",
+          "name": "PPE-HALO Environmental Test Plan",
+          "type": "Test Plan",
+          "status": "Approved",
+          "evidenceRole": "execution_support"
+        },
+        {
+          "id": "CD-021",
+          "name": "PPE-HALO Pre-Launch Processing Plan",
+          "type": "Operations Plan",
+          "status": "Draft",
+          "evidenceRole": "execution_support"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-021",
+      "name": "ESPRIT Lunar Link Integration on HALO Complete",
+      "shortName": "ESPRIT Lunar Link Integration on HALO Complete",
+      "date": "2026-11-30",
+      "dateLabel": "Nov 30, 2026",
+      "year": 2026,
+      "phaseId": "phase-integration",
+      "phaseName": "Integration",
+      "relatedTaskId": "T-124",
+      "task": {
+        "id": "T-124",
+        "name": "ESPRIT Lunar Link Final Integration onto HALO Assembly",
+        "startDate": "2026-10-01",
+        "endDate": "2026-11-30",
+        "windowLabel": "Oct 2026 to Nov 2026",
+        "wbsId": "1.9.1"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Integration gate",
+      "tone": "plum",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This is where previously separate hardware or interface branches have to work as one schedule path.",
+      "linkedRisks": [
+        {
+          "id": "R-001",
+          "title": "PPE-HALO Combined Stack Mass Exceedance",
+          "score": 20,
+          "status": "Open - Active Mitigation"
+        },
+        {
+          "id": "R-003",
+          "title": "HALO Firm-Fixed-Price Contract Further Cost Overrun",
+          "score": 16,
+          "status": "Open - Monitoring"
+        },
+        {
+          "id": "R-002",
+          "title": "PPE Controllability Inadequacy with Docked Starship HLS",
+          "score": 15,
+          "status": "Open - Under Analysis"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-020",
+          "name": "PPE-HALO Environmental Test Plan",
+          "type": "Test Plan",
+          "status": "Approved",
+          "evidenceRole": "execution_support"
+        },
+        {
+          "id": "CD-021",
+          "name": "PPE-HALO Pre-Launch Processing Plan",
+          "type": "Operations Plan",
+          "status": "Draft",
+          "evidenceRole": "execution_support"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-023",
+      "name": "Launch Readiness Review - PPE-HALO Falcon Heavy",
+      "shortName": "Launch readiness review",
+      "date": "2026-11-30",
+      "dateLabel": "Nov 30, 2026",
+      "year": 2026,
+      "phaseId": "phase-launch",
+      "phaseName": "Launch",
+      "relatedTaskId": "T-131",
+      "task": {
+        "id": "T-131",
+        "name": "Launch Readiness Review - PPE-HALO Falcon Heavy",
+        "startDate": "2026-11-01",
+        "endDate": "2026-11-30",
+        "windowLabel": "Nov 2026 to Nov 2026",
+        "wbsId": "1.10.1"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Review gate",
+      "tone": "copper",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward.",
+      "linkedRisks": [
+        {
+          "id": "R-004",
+          "title": "Falcon Heavy Launch Window Constraint or Manifest Slip",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-006",
+          "title": "I-HAB Schedule Slip Affecting Artemis IV Co-Manifest",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-012",
+          "title": "UAE Airlock Development Schedule Slip or Descope",
+          "score": 12,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-021",
+          "name": "PPE-HALO Pre-Launch Processing Plan",
+          "type": "Operations Plan",
+          "status": "Draft",
+          "evidenceRole": "execution_support"
+        },
+        {
+          "id": "CD-029",
+          "name": "PPE-HALO Launch Campaign Plan",
+          "type": "Launch Plan",
+          "status": "Draft",
+          "evidenceRole": "execution_support"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-022",
+      "name": "PPE-HALO Pre-Shipment Review Complete",
+      "shortName": "PPE-HALO Pre-Shipment Review Complete",
+      "date": "2026-12-31",
+      "dateLabel": "Dec 31, 2026",
+      "year": 2026,
+      "phaseId": "phase-integration",
+      "phaseName": "Integration",
+      "relatedTaskId": "T-125",
+      "task": {
+        "id": "T-125",
+        "name": "PPE-HALO Pre-Shipment Review",
+        "startDate": "2026-12-01",
+        "endDate": "2026-12-31",
+        "windowLabel": "Dec 2026 to Dec 2026",
+        "wbsId": "1.9"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Review gate",
+      "tone": "plum",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward.",
+      "linkedRisks": [
+        {
+          "id": "R-001",
+          "title": "PPE-HALO Combined Stack Mass Exceedance",
+          "score": 20,
+          "status": "Open - Active Mitigation"
+        },
+        {
+          "id": "R-003",
+          "title": "HALO Firm-Fixed-Price Contract Further Cost Overrun",
+          "score": 16,
+          "status": "Open - Monitoring"
+        },
+        {
+          "id": "R-002",
+          "title": "PPE Controllability Inadequacy with Docked Starship HLS",
+          "score": 15,
+          "status": "Open - Under Analysis"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-020",
+          "name": "PPE-HALO Environmental Test Plan",
+          "type": "Test Plan",
+          "status": "Approved",
+          "evidenceRole": "execution_support"
+        },
+        {
+          "id": "CD-021",
+          "name": "PPE-HALO Pre-Launch Processing Plan",
+          "type": "Operations Plan",
+          "status": "Draft",
+          "evidenceRole": "execution_support"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-024",
+      "name": "PPE-HALO Launch on Falcon Heavy - L-Day",
+      "shortName": "PPE-HALO launch",
+      "date": "2027-04-30",
+      "dateLabel": "Apr 30, 2027",
+      "year": 2027,
+      "phaseId": "phase-launch",
+      "phaseName": "Launch",
+      "relatedTaskId": "T-132",
+      "task": {
+        "id": "T-132",
+        "name": "PPE-HALO Launch on Falcon Heavy - L-Day",
+        "startDate": "2027-04-30",
+        "endDate": "2027-04-30",
+        "windowLabel": "Apr 2027 to Apr 2027",
+        "wbsId": "1.10.1"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Launch event",
+      "tone": "copper",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This date matters because it converts years of earlier schedule work into a visible mission event with limited recovery room.",
+      "linkedRisks": [
+        {
+          "id": "R-004",
+          "title": "Falcon Heavy Launch Window Constraint or Manifest Slip",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-006",
+          "title": "I-HAB Schedule Slip Affecting Artemis IV Co-Manifest",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-012",
+          "title": "UAE Airlock Development Schedule Slip or Descope",
+          "score": 12,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-029",
+          "name": "PPE-HALO Launch Campaign Plan",
+          "type": "Launch Plan",
+          "status": "Draft",
+          "evidenceRole": "execution_support"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-025",
+      "name": "PPE AEPS 12-Month Solo Demonstration Complete",
+      "shortName": "PPE AEPS 12-Month Solo Demonstration Complete",
+      "date": "2027-06-30",
+      "dateLabel": "Jun 30, 2027",
+      "year": 2027,
+      "phaseId": "phase-operations",
+      "phaseName": "Operations",
+      "relatedTaskId": "T-133",
+      "task": {
+        "id": "T-133",
+        "name": "PPE Solo Operations and AEPS 12-Month Demonstration",
+        "startDate": "2027-05-01",
+        "endDate": "2027-06-30",
+        "windowLabel": "May 2027 to Jun 2027",
+        "wbsId": "1.3.8"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Operations milestone",
+      "tone": "forest",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This is one of the named points that makes the overall Gateway schedule legible to a first-time audience.",
+      "linkedRisks": [
+        {
+          "id": "R-002",
+          "title": "PPE Controllability Inadequacy with Docked Starship HLS",
+          "score": 15,
+          "status": "Open - Under Analysis"
+        },
+        {
+          "id": "R-006",
+          "title": "I-HAB Schedule Slip Affecting Artemis IV Co-Manifest",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-007",
+          "title": "DSN Capacity Contention During Crewed Operations",
+          "score": 12,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-002",
+          "name": "PPE System Requirements Specification (SRS)",
+          "type": "Requirements",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-012",
+          "name": "PPE Critical Design Review Package",
+          "type": "Review Package",
+          "status": "Approved",
+          "evidenceRole": "technical_evidence"
+        },
+        {
+          "id": "CD-017",
+          "name": "PPE Failure Modes and Effects Analysis (FMEA)",
+          "type": "Reliability",
+          "status": "Approved",
+          "evidenceRole": "execution_support"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-026",
+      "name": "NRHO Insertion and Orbit Verification Complete",
+      "shortName": "NRHO insertion",
+      "date": "2028-02-28",
+      "dateLabel": "Feb 28, 2028",
+      "year": 2028,
+      "phaseId": "phase-operations",
+      "phaseName": "Operations",
+      "relatedTaskId": "T-135",
+      "task": {
+        "id": "T-135",
+        "name": "NRHO Insertion and Orbit Verification",
+        "startDate": "2028-01-31",
+        "endDate": "2028-02-28",
+        "windowLabel": "Jan 2028 to Feb 2028",
+        "wbsId": "1.2.4"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Operations milestone",
+      "tone": "forest",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This is one of the named points that makes the overall Gateway schedule legible to a first-time audience.",
+      "linkedRisks": [
+        {
+          "id": "R-001",
+          "title": "PPE-HALO Combined Stack Mass Exceedance",
+          "score": 20,
+          "status": "Open - Active Mitigation"
+        },
+        {
+          "id": "R-006",
+          "title": "I-HAB Schedule Slip Affecting Artemis IV Co-Manifest",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-007",
+          "title": "DSN Capacity Contention During Crewed Operations",
+          "score": 12,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-001",
+          "name": "Gateway Program Requirements Document (PRD)",
+          "type": "Requirements",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-004",
+          "name": "Gateway Interface Requirements Document (IRD)",
+          "type": "Requirements",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-005",
+          "name": "PPE-HALO Interface Control Document (ICD)",
+          "type": "ICD",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-027",
+      "name": "Gateway Initial On-Orbit Test Complete - HALO Ready for Crew",
+      "shortName": "Gateway Initial On-Orbit Test Complete - HALO Ready for Crew",
+      "date": "2028-04-30",
+      "dateLabel": "Apr 30, 2028",
+      "year": 2028,
+      "phaseId": "phase-operations",
+      "phaseName": "Operations",
+      "relatedTaskId": "T-137",
+      "task": {
+        "id": "T-137",
+        "name": "HALO Declared Ready for First Crewed Visit",
+        "startDate": "2028-04-30",
+        "endDate": "2028-04-30",
+        "windowLabel": "Apr 2028 to Apr 2028",
+        "wbsId": "1.4"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Qualification gate",
+      "tone": "forest",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This is a hard evidence point before shipment, launch processing, or higher-consequence operations can continue.",
+      "linkedRisks": [
+        {
+          "id": "R-003",
+          "title": "HALO Firm-Fixed-Price Contract Further Cost Overrun",
+          "score": 16,
+          "status": "Open - Monitoring"
+        },
+        {
+          "id": "R-006",
+          "title": "I-HAB Schedule Slip Affecting Artemis IV Co-Manifest",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-007",
+          "title": "DSN Capacity Contention During Crewed Operations",
+          "score": 12,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-003",
+          "name": "HALO System Requirements Specification (SRS)",
+          "type": "Requirements",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-006",
+          "name": "Gateway-Orion Interface Control Document (ICD)",
+          "type": "ICD",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-013",
+          "name": "HALO Critical Design Review Package",
+          "type": "Review Package",
+          "status": "Approved",
+          "evidenceRole": "technical_evidence"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-028",
+      "name": "Artemis IV Launch Readiness Review Complete",
+      "shortName": "Artemis IV Launch Readiness Review Complete",
+      "date": "2028-09-15",
+      "dateLabel": "Sep 15, 2028",
+      "year": 2028,
+      "phaseId": "phase-launch",
+      "phaseName": "Launch",
+      "relatedTaskId": "T-138",
+      "task": {
+        "id": "T-138",
+        "name": "Artemis IV Launch Readiness Review",
+        "startDate": "2028-08-15",
+        "endDate": "2028-09-15",
+        "windowLabel": "Aug 2028 to Sep 2028",
+        "wbsId": "1.10.2"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Review gate",
+      "tone": "copper",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward.",
+      "linkedRisks": [
+        {
+          "id": "R-004",
+          "title": "Falcon Heavy Launch Window Constraint or Manifest Slip",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-006",
+          "title": "I-HAB Schedule Slip Affecting Artemis IV Co-Manifest",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-012",
+          "title": "UAE Airlock Development Schedule Slip or Descope",
+          "score": 12,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-007",
+          "name": "Gateway-HLS Starship Interface Control Document (ICD)",
+          "type": "ICD",
+          "status": "In Review",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-023",
+          "name": "Flight Operations Plan - Artemis IV (FOP-IV)",
+          "type": "Operations Plan",
+          "status": "In Work",
+          "evidenceRole": "execution_support"
+        },
+        {
+          "id": "CD-029",
+          "name": "PPE-HALO Launch Campaign Plan",
+          "type": "Launch Plan",
+          "status": "Draft",
+          "evidenceRole": "execution_support"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-029",
+      "name": "Artemis IV Launch - SLS Block 1B First Crewed Gateway Visit",
+      "shortName": "Artemis IV launch",
+      "date": "2028-10-01",
+      "dateLabel": "Oct 1, 2028",
+      "year": 2028,
+      "phaseId": "phase-launch",
+      "phaseName": "Launch",
+      "relatedTaskId": "T-139",
+      "task": {
+        "id": "T-139",
+        "name": "Artemis IV Launch - SLS Block 1B with Orion and I-HAB",
+        "startDate": "2028-10-01",
+        "endDate": "2028-10-01",
+        "windowLabel": "Oct 2028 to Oct 2028",
+        "wbsId": "1.10.2"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Launch event",
+      "tone": "copper",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This date matters because it converts years of earlier schedule work into a visible mission event with limited recovery room.",
+      "linkedRisks": [
+        {
+          "id": "R-004",
+          "title": "Falcon Heavy Launch Window Constraint or Manifest Slip",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-006",
+          "title": "I-HAB Schedule Slip Affecting Artemis IV Co-Manifest",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-012",
+          "title": "UAE Airlock Development Schedule Slip or Descope",
+          "score": 12,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-029",
+          "name": "PPE-HALO Launch Campaign Plan",
+          "type": "Launch Plan",
+          "status": "Draft",
+          "evidenceRole": "execution_support"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-030",
+      "name": "Orion First Docking at HALO - Crewed Gateway Arrival",
+      "shortName": "First crewed arrival",
+      "date": "2028-10-06",
+      "dateLabel": "Oct 6, 2028",
+      "year": 2028,
+      "phaseId": "phase-operations",
+      "phaseName": "Operations",
+      "relatedTaskId": "T-140",
+      "task": {
+        "id": "T-140",
+        "name": "Orion First Docking at HALO - First Crewed Gateway Visit",
+        "startDate": "2028-10-06",
+        "endDate": "2028-10-06",
+        "windowLabel": "Oct 2028 to Oct 2028",
+        "wbsId": "1.12.1"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Crewed operations",
+      "tone": "forest",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This marks the transition from launch success into actual crewed use of Gateway on orbit.",
+      "linkedRisks": [
+        {
+          "id": "R-006",
+          "title": "I-HAB Schedule Slip Affecting Artemis IV Co-Manifest",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-007",
+          "title": "DSN Capacity Contention During Crewed Operations",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-010",
+          "title": "International Partner Budget Instability",
+          "score": 12,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-006",
+          "name": "Gateway-Orion Interface Control Document (ICD)",
+          "type": "ICD",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-022",
+          "name": "Gateway Concept of Operations (ConOps)",
+          "type": "Operations Plan",
+          "status": "Approved",
+          "evidenceRole": "execution_support"
+        },
+        {
+          "id": "CD-023",
+          "name": "Flight Operations Plan - Artemis IV (FOP-IV)",
+          "type": "Operations Plan",
+          "status": "In Work",
+          "evidenceRole": "execution_support"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-031",
+      "name": "I-HAB Berthing and Activation Complete",
+      "shortName": "I-HAB activation",
+      "date": "2028-10-10",
+      "dateLabel": "Oct 10, 2028",
+      "year": 2028,
+      "phaseId": "phase-operations",
+      "phaseName": "Operations",
+      "relatedTaskId": "T-159",
+      "task": {
+        "id": "T-159",
+        "name": "I-HAB Separation and Crew-Assisted Berthing at Gateway",
+        "startDate": "2028-10-07",
+        "endDate": "2028-10-10",
+        "windowLabel": "Oct 2028 to Oct 2028",
+        "wbsId": "1.5.7"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Operations milestone",
+      "tone": "forest",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This is one of the named points that makes the overall Gateway schedule legible to a first-time audience.",
+      "linkedRisks": [
+        {
+          "id": "R-006",
+          "title": "I-HAB Schedule Slip Affecting Artemis IV Co-Manifest",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-007",
+          "title": "DSN Capacity Contention During Crewed Operations",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-010",
+          "title": "International Partner Budget Instability",
+          "score": 12,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-014",
+          "name": "I-HAB Preliminary Design Review Package",
+          "type": "Review Package",
+          "status": "Approved",
+          "evidenceRole": "technical_evidence"
+        },
+        {
+          "id": "CD-031",
+          "name": "I-HAB Interface Verification Plan",
+          "type": "Verification",
+          "status": "Draft",
+          "evidenceRole": "technical_evidence"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-032",
+      "name": "ESPRIT Lunar View Launch",
+      "shortName": "ESPRIT Lunar View Launch",
+      "date": "2029-07-01",
+      "dateLabel": "Jul 1, 2029",
+      "year": 2029,
+      "phaseId": "phase-launch",
+      "phaseName": "Launch",
+      "relatedTaskId": "T-096",
+      "task": {
+        "id": "T-096",
+        "name": "ESPRIT Lunar View Launch",
+        "startDate": "2029-07-01",
+        "endDate": "2029-07-01",
+        "windowLabel": "Jul 2029 to Jul 2029",
+        "wbsId": "1.10.3"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Launch event",
+      "tone": "copper",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This date matters because it converts years of earlier schedule work into a visible mission event with limited recovery room.",
+      "linkedRisks": [
+        {
+          "id": "R-004",
+          "title": "Falcon Heavy Launch Window Constraint or Manifest Slip",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-006",
+          "title": "I-HAB Schedule Slip Affecting Artemis IV Co-Manifest",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-012",
+          "title": "UAE Airlock Development Schedule Slip or Descope",
+          "score": 12,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-009",
+          "name": "Gateway-ESPRIT Interface Control Document (ICD)",
+          "type": "ICD",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-029",
+          "name": "PPE-HALO Launch Campaign Plan",
+          "type": "Launch Plan",
+          "status": "Draft",
+          "evidenceRole": "execution_support"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-033",
+      "name": "ESPRIT Xenon Propellant Transfer Demonstration Complete",
+      "shortName": "ESPRIT Xenon Propellant Transfer Demonstration Complete",
+      "date": "2029-10-31",
+      "dateLabel": "Oct 31, 2029",
+      "year": 2029,
+      "phaseId": "phase-operations",
+      "phaseName": "Operations",
+      "relatedTaskId": "T-162",
+      "task": {
+        "id": "T-162",
+        "name": "ESPRIT Xenon Propellant Transfer Demonstration to PPE",
+        "startDate": "2029-08-16",
+        "endDate": "2029-10-31",
+        "windowLabel": "Aug 2029 to Oct 2029",
+        "wbsId": "1.6.3"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Operations milestone",
+      "tone": "forest",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This is one of the named points that makes the overall Gateway schedule legible to a first-time audience.",
+      "linkedRisks": [
+        {
+          "id": "R-006",
+          "title": "I-HAB Schedule Slip Affecting Artemis IV Co-Manifest",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-007",
+          "title": "DSN Capacity Contention During Crewed Operations",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-010",
+          "title": "International Partner Budget Instability",
+          "score": 12,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-032",
+          "name": "ESPRIT Xenon Transfer Interface Analysis",
+          "type": "Engineering Report",
+          "status": "Draft",
+          "evidenceRole": "technical_evidence"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-034",
+      "name": "Canadarm3 Delivery and Launch on Artemis V",
+      "shortName": "Canadarm3 Delivery and Launch on Artemis V",
+      "date": "2030-03-01",
+      "dateLabel": "Mar 1, 2030",
+      "year": 2030,
+      "phaseId": "phase-launch",
+      "phaseName": "Launch",
+      "relatedTaskId": "T-116",
+      "task": {
+        "id": "T-116",
+        "name": "Canadarm3 Delivery and Launch on SLS Artemis V",
+        "startDate": "2030-03-01",
+        "endDate": "2030-03-01",
+        "windowLabel": "Mar 2030 to Mar 2030",
+        "wbsId": "1.8.6"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Launch event",
+      "tone": "copper",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This date matters because it converts years of earlier schedule work into a visible mission event with limited recovery room.",
+      "linkedRisks": [
+        {
+          "id": "R-004",
+          "title": "Falcon Heavy Launch Window Constraint or Manifest Slip",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-006",
+          "title": "I-HAB Schedule Slip Affecting Artemis IV Co-Manifest",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-012",
+          "title": "UAE Airlock Development Schedule Slip or Descope",
+          "score": 12,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-010",
+          "name": "Gateway-Canadarm3 Interface Control Document (ICD)",
+          "type": "ICD",
+          "status": "In Review",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-033",
+          "name": "Canadarm3 Autonomous Operations Verification Plan",
+          "type": "Verification",
+          "status": "Draft",
+          "evidenceRole": "technical_evidence"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-035",
+      "name": "Canadarm3 On-Orbit Commissioning Complete",
+      "shortName": "Canadarm3 On-Orbit Commissioning Complete",
+      "date": "2030-05-31",
+      "dateLabel": "May 31, 2030",
+      "year": 2030,
+      "phaseId": "phase-operations",
+      "phaseName": "Operations",
+      "relatedTaskId": "T-117",
+      "task": {
+        "id": "T-117",
+        "name": "Canadarm3 On-Orbit Commissioning and First Light",
+        "startDate": "2030-03-15",
+        "endDate": "2030-05-31",
+        "windowLabel": "Mar 2030 to May 2030",
+        "wbsId": "1.8"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Capability gate",
+      "tone": "forest",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This is a roll-up milestone showing whether Gateway has become a functioning platform, not just a launched stack.",
+      "linkedRisks": [
+        {
+          "id": "R-006",
+          "title": "I-HAB Schedule Slip Affecting Artemis IV Co-Manifest",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-007",
+          "title": "DSN Capacity Contention During Crewed Operations",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-010",
+          "title": "International Partner Budget Instability",
+          "score": 12,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-033",
+          "name": "Canadarm3 Autonomous Operations Verification Plan",
+          "type": "Verification",
+          "status": "Draft",
+          "evidenceRole": "technical_evidence"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-036",
+      "name": "UAE Airlock Launch",
+      "shortName": "UAE Airlock Launch",
+      "date": "2030-10-01",
+      "dateLabel": "Oct 1, 2030",
+      "year": 2030,
+      "phaseId": "phase-launch",
+      "phaseName": "Launch",
+      "relatedTaskId": "T-106",
+      "task": {
+        "id": "T-106",
+        "name": "UAE Airlock Launch",
+        "startDate": "2030-10-01",
+        "endDate": "2030-10-01",
+        "windowLabel": "Oct 2030 to Oct 2030",
+        "wbsId": "1.10.4"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Launch event",
+      "tone": "copper",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This date matters because it converts years of earlier schedule work into a visible mission event with limited recovery room.",
+      "linkedRisks": [
+        {
+          "id": "R-004",
+          "title": "Falcon Heavy Launch Window Constraint or Manifest Slip",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-006",
+          "title": "I-HAB Schedule Slip Affecting Artemis IV Co-Manifest",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-012",
+          "title": "UAE Airlock Development Schedule Slip or Descope",
+          "score": 12,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-029",
+          "name": "PPE-HALO Launch Campaign Plan",
+          "type": "Launch Plan",
+          "status": "Draft",
+          "evidenceRole": "execution_support"
+        },
+        {
+          "id": "CD-034",
+          "name": "UAE Airlock Safety Assessment",
+          "type": "Safety",
+          "status": "In Work",
+          "evidenceRole": "compliance_and_assurance"
+        }
+      ],
+      "linkedSources": [
+        {
+          "id": "WEB-005",
+          "title": "NASA",
+          "publisher": "United Arab Emirates Announce Artemis Lunar Gateway Airlock",
+          "href": null
+        },
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    },
+    {
+      "id": "M-037",
+      "name": "Gateway Full Initial Operational Capability Declaration",
+      "shortName": "Initial operational capability",
+      "date": "2031-06-01",
+      "dateLabel": "Jun 1, 2031",
+      "year": 2031,
+      "phaseId": "phase-operations",
+      "phaseName": "Operations",
+      "relatedTaskId": "T-165",
+      "task": {
+        "id": "T-165",
+        "name": "Gateway Full Initial Operational Capability Declaration",
+        "startDate": "2031-06-01",
+        "endDate": "2031-06-01",
+        "windowLabel": "Jun 2031 to Jun 2031",
+        "wbsId": "1.0"
+      },
+      "directnessLabel": "IMS NET milestone",
+      "directnessTone": "plum",
+      "directnessCategory": "ims",
+      "typeLabel": "Capability gate",
+      "tone": "forest",
+      "confidenceLabel": "medium confidence",
+      "whyItMatters": "This is a roll-up milestone showing whether Gateway has become a functioning platform, not just a launched stack.",
+      "linkedRisks": [
+        {
+          "id": "R-006",
+          "title": "I-HAB Schedule Slip Affecting Artemis IV Co-Manifest",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-007",
+          "title": "DSN Capacity Contention During Crewed Operations",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-010",
+          "title": "International Partner Budget Instability",
+          "score": 12,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [],
+      "linkedSources": [
+        {
+          "id": "INT-003",
+          "title": "Gateway Integrated Master Schedule Extract",
+          "publisher": "NASA JSC",
+          "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
+        }
+      ]
+    }
+  ],
+  "phases": [
+    {
+      "id": "phase-formulation",
+      "name": "Formulation",
+      "tone": "brand",
+      "summaryTitle": "Architecture and baseline definition",
+      "summary": "Gateway moves from congressional direction into requirements, architecture studies, and the system definition that later hardware branches inherit.",
+      "whyItMatters": "This phase defines the mission logic and technical backbone that every later contract, integration date, and launch commitment depends on.",
+      "takeaways": [
+        "Requirements and system definition create the baseline that later reviews and contracts must satisfy.",
+        "Without this phase, later schedule commitments would read like isolated dates instead of a coherent program."
+      ],
+      "start": "2017-11-01",
+      "end": "2019-12-31",
+      "rangeLabel": "Nov 2017 to Dec 2019",
+      "milestoneCount": 3,
+      "criticalTaskCount": 6,
+      "keyMilestoneIds": [
+        "M-001",
+        "M-002",
+        "M-004"
+      ],
+      "representativeTasks": [
+        {
+          "id": "T-001",
+          "name": "Gateway Program Formulation and Congressional Authorization",
+          "startDate": "2017-10-01",
+          "endDate": "2018-12-31",
+          "windowLabel": "Oct 2017 to Dec 2018",
+          "wbsId": "1.0"
+        },
+        {
+          "id": "T-002",
+          "name": "Gateway Architecture Studies and Concept Development",
+          "startDate": "2018-01-01",
+          "endDate": "2019-03-31",
+          "windowLabel": "Jan 2018 to Mar 2019",
+          "wbsId": "1.2.4"
+        },
+        {
+          "id": "T-011",
+          "name": "Gateway System Requirements Review (SRR)",
+          "startDate": "2019-03-01",
+          "endDate": "2019-06-30",
+          "windowLabel": "Mar 2019 to Jun 2019",
+          "wbsId": "1.2.1"
+        },
+        {
+          "id": "T-012",
+          "name": "Gateway System Definition Review (SDR)",
+          "startDate": "2019-07-01",
+          "endDate": "2019-12-31",
+          "windowLabel": "Jul 2019 to Dec 2019",
+          "wbsId": "1.2.1"
+        }
+      ],
+      "milestones": [
+        {
+          "id": "M-001",
+          "name": "Gateway Program Authorization and Formulation",
+          "shortName": "Program start",
+          "date": "2017-11-01",
+          "dateLabel": "Nov 1, 2017",
+          "phaseId": "phase-formulation",
+          "phaseName": "Formulation",
+          "whyItMatters": "This is one of the named points that makes the overall Gateway schedule legible to a first-time audience."
+        },
+        {
+          "id": "M-002",
+          "name": "Gateway System Requirements Review (SRR)",
+          "shortName": "Gateway System Requirements Review (SRR)",
+          "date": "2019-06-30",
+          "dateLabel": "Jun 30, 2019",
+          "phaseId": "phase-formulation",
+          "phaseName": "Formulation",
+          "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward."
+        },
+        {
+          "id": "M-004",
+          "name": "Gateway System Definition Review (SDR)",
+          "shortName": "Gateway System Definition Review (SDR)",
+          "date": "2019-12-31",
+          "dateLabel": "Dec 31, 2019",
+          "phaseId": "phase-formulation",
+          "phaseName": "Formulation",
+          "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward."
+        }
+      ]
+    },
+    {
+      "id": "phase-development",
+      "name": "Development",
+      "tone": "copper",
+      "summaryTitle": "Contracts, design gates, and partner commitments",
+      "summary": "Major hardware awards, preliminary design, critical design, and program-baseline approval turn Gateway from concept into committed execution.",
+      "whyItMatters": "This is where the schedule becomes programmatic: contracts are placed, designs mature, and the formal PCA baseline locks the program timeline.",
+      "takeaways": [
+        "The development phase carries most of the schedule-defining design gates and partner commitments.",
+        "Later integration pressure usually traces back to whether this phase closed requirements, mass, and interface logic cleanly."
+      ],
+      "start": "2019-05-23",
+      "end": "2025-09-30",
+      "rangeLabel": "May 2019 to Sep 2025",
+      "milestoneCount": 10,
+      "criticalTaskCount": 50,
+      "keyMilestoneIds": [
+        "M-003",
+        "M-005",
+        "M-006"
+      ],
+      "representativeTasks": [
+        {
+          "id": "T-003",
+          "name": "Independent Cost Estimate Execution and PCA Development",
+          "startDate": "2021-10-01",
+          "endDate": "2022-05-31",
+          "windowLabel": "Oct 2021 to May 2022",
+          "wbsId": "1.1.1"
+        },
+        {
+          "id": "T-004",
+          "name": "Program Commitment Agreement Baseline Approval",
+          "startDate": "2022-06-01",
+          "endDate": "2022-06-01",
+          "windowLabel": "Jun 2022 to Jun 2022",
+          "wbsId": "1.1.1"
+        },
+        {
+          "id": "T-008",
+          "name": "Non-Advocate Review (NAR) Pre-PCA",
+          "startDate": "2022-03-01",
+          "endDate": "2022-05-31",
+          "windowLabel": "Mar 2022 to May 2022",
+          "wbsId": "1.1.1"
+        },
+        {
+          "id": "T-009",
+          "name": "Mass Reduction Tiger Team - GAO-24-106878 Response",
+          "startDate": "2024-07-31",
+          "endDate": "2025-09-30",
+          "windowLabel": "Jul 2024 to Sep 2025",
+          "wbsId": "1.2.3"
+        }
+      ],
+      "milestones": [
+        {
+          "id": "M-003",
+          "name": "PPE Contract Award - Maxar Technologies $375M FFP",
+          "shortName": "PPE award",
+          "date": "2019-05-23",
+          "dateLabel": "May 23, 2019",
+          "phaseId": "phase-development",
+          "phaseName": "Development",
+          "whyItMatters": "This date matters because it turns planned scope into a funded execution branch with real downstream schedule obligations."
+        },
+        {
+          "id": "M-005",
+          "name": "HALO Phase A-B Contract Award - Northrop Grumman $187M",
+          "shortName": "HALO design award",
+          "date": "2020-06-05",
+          "dateLabel": "Jun 5, 2020",
+          "phaseId": "phase-development",
+          "phaseName": "Development",
+          "whyItMatters": "This date matters because it turns planned scope into a funded execution branch with real downstream schedule obligations."
+        },
+        {
+          "id": "M-006",
+          "name": "SpaceX Falcon Heavy Launch Services Contract Award $331.8M",
+          "shortName": "Falcon Heavy award",
+          "date": "2021-02-09",
+          "dateLabel": "Feb 9, 2021",
+          "phaseId": "phase-development",
+          "phaseName": "Development",
+          "whyItMatters": "This date matters because it turns planned scope into a funded execution branch with real downstream schedule obligations."
+        },
+        {
+          "id": "M-007",
+          "name": "HALO Fabrication and Integration Contract Award $935M",
+          "shortName": "HALO fabrication award",
+          "date": "2021-07-09",
+          "dateLabel": "Jul 9, 2021",
+          "phaseId": "phase-development",
+          "phaseName": "Development",
+          "whyItMatters": "This date matters because it turns planned scope into a funded execution branch with real downstream schedule obligations."
+        },
+        {
+          "id": "M-008",
+          "name": "Non-Advocate Review (NAR) Pre-PCA Complete",
+          "shortName": "Non-Advocate Review (NAR) Pre-PCA Complete",
+          "date": "2022-05-31",
+          "dateLabel": "May 31, 2022",
+          "phaseId": "phase-development",
+          "phaseName": "Development",
+          "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward."
+        },
+        {
+          "id": "M-009",
+          "name": "Program Commitment Agreement (PCA) Baseline Approval",
+          "shortName": "PCA baseline",
+          "date": "2022-06-01",
+          "dateLabel": "Jun 1, 2022",
+          "phaseId": "phase-development",
+          "phaseName": "Development",
+          "whyItMatters": "This is the point where Gateway becomes a formally committed program baseline rather than a set of planning assumptions."
+        },
+        {
+          "id": "M-010",
+          "name": "PPE Critical Design Review (CDR) Complete",
+          "shortName": "PPE CDR",
+          "date": "2022-09-15",
+          "dateLabel": "Sep 15, 2022",
+          "phaseId": "phase-development",
+          "phaseName": "Development",
+          "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward."
+        },
+        {
+          "id": "M-011",
+          "name": "HALO Critical Design Review (CDR) Complete",
+          "shortName": "HALO CDR",
+          "date": "2022-11-10",
+          "dateLabel": "Nov 10, 2022",
+          "phaseId": "phase-development",
+          "phaseName": "Development",
+          "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward."
+        },
+        {
+          "id": "M-012",
+          "name": "I-HAB Preliminary Design Review (PDR) Complete",
+          "shortName": "I-HAB Preliminary Design Review (PDR) Complete",
+          "date": "2022-12-31",
+          "dateLabel": "Dec 31, 2022",
+          "phaseId": "phase-development",
+          "phaseName": "Development",
+          "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward."
+        },
+        {
+          "id": "M-016",
+          "name": "I-HAB Critical Design Review (CDR) Complete",
+          "shortName": "I-HAB Critical Design Review (CDR) Complete",
+          "date": "2025-09-30",
+          "dateLabel": "Sep 30, 2025",
+          "phaseId": "phase-development",
+          "phaseName": "Development",
+          "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward."
+        }
+      ]
+    },
+    {
+      "id": "phase-fabrication",
+      "name": "Fabrication",
+      "tone": "forest",
+      "summaryTitle": "Hardware becomes flight articles",
+      "summary": "The schedule shifts from design intent to real hardware delivery, with the first flight articles moving toward integrated assembly.",
+      "whyItMatters": "Fabrication converts paper maturity into physical readiness. Once hardware is late here, the whole integration branch starts to compress.",
+      "takeaways": [
+        "Flight article delivery dates are the handoff from isolated module work into integrated schedule pressure.",
+        "This phase is where design maturity has to prove itself in hardware form."
+      ],
+      "start": "2024-09-30",
+      "end": "2024-12-31",
+      "rangeLabel": "Sep 2024 to Dec 2024",
+      "milestoneCount": 2,
+      "criticalTaskCount": 14,
+      "keyMilestoneIds": [
+        "M-014",
+        "M-013"
+      ],
+      "representativeTasks": [
+        {
+          "id": "T-009",
+          "name": "Mass Reduction Tiger Team - GAO-24-106878 Response",
+          "startDate": "2024-07-31",
+          "endDate": "2025-09-30",
+          "windowLabel": "Jul 2024 to Sep 2025",
+          "wbsId": "1.2.3"
+        },
+        {
+          "id": "T-015",
+          "name": "Gateway-HLS Interface Control Document Revision",
+          "startDate": "2024-01-01",
+          "endDate": "2025-06-30",
+          "windowLabel": "Jan 2024 to Jun 2025",
+          "wbsId": "1.2.2"
+        },
+        {
+          "id": "T-018",
+          "name": "Mass Properties Quarterly Status Reports FY2024",
+          "startDate": "2024-01-01",
+          "endDate": "2024-12-31",
+          "windowLabel": "Jan 2024 to Dec 2024",
+          "wbsId": "1.2.3"
+        },
+        {
+          "id": "T-019",
+          "name": "PPE Controllability Analysis for Starship HLS Docking",
+          "startDate": "2024-01-01",
+          "endDate": "2025-06-30",
+          "windowLabel": "Jan 2024 to Jun 2025",
+          "wbsId": "1.2.4"
+        }
+      ],
+      "milestones": [
+        {
+          "id": "M-014",
+          "name": "HALO Pressure Vessel Delivery to NGIS Gilbert AZ",
+          "shortName": "HALO Pressure Vessel Delivery to NGIS Gilbert AZ",
+          "date": "2024-09-30",
+          "dateLabel": "Sep 30, 2024",
+          "phaseId": "phase-fabrication",
+          "phaseName": "Fabrication",
+          "whyItMatters": "This date matters because the schedule is moving from design intent to real flight hardware delivery."
+        },
+        {
+          "id": "M-013",
+          "name": "PPE Pre-Shipment Review Complete",
+          "shortName": "PPE ready to ship",
+          "date": "2024-12-31",
+          "dateLabel": "Dec 31, 2024",
+          "phaseId": "phase-fabrication",
+          "phaseName": "Fabrication",
+          "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward."
+        }
+      ]
+    },
+    {
+      "id": "phase-integration",
+      "name": "Integration",
+      "tone": "plum",
+      "summaryTitle": "Separate hardware branches converge",
+      "summary": "PPE, HALO, and linked partner hardware come together through mechanical mate, integrated test, and pre-shipment closeout.",
+      "whyItMatters": "Integration is the first moment where separate branches must succeed together. Delays here immediately threaten launch readiness.",
+      "takeaways": [
+        "Integrated test exposes schedule coupling that is easy to miss when looking only at separate module plans.",
+        "Mass, interfaces, and late partner deliveries all become visible here at once."
+      ],
+      "start": "2025-02-28",
+      "end": "2026-12-31",
+      "rangeLabel": "Feb 2025 to Dec 2026",
+      "milestoneCount": 5,
+      "criticalTaskCount": 31,
+      "keyMilestoneIds": [
+        "M-015",
+        "M-017",
+        "M-018"
+      ],
+      "representativeTasks": [
+        {
+          "id": "T-009",
+          "name": "Mass Reduction Tiger Team - GAO-24-106878 Response",
+          "startDate": "2024-07-31",
+          "endDate": "2025-09-30",
+          "windowLabel": "Jul 2024 to Sep 2025",
+          "wbsId": "1.2.3"
+        },
+        {
+          "id": "T-015",
+          "name": "Gateway-HLS Interface Control Document Revision",
+          "startDate": "2024-01-01",
+          "endDate": "2025-06-30",
+          "windowLabel": "Jan 2024 to Jun 2025",
+          "wbsId": "1.2.2"
+        },
+        {
+          "id": "T-019",
+          "name": "PPE Controllability Analysis for Starship HLS Docking",
+          "startDate": "2024-01-01",
+          "endDate": "2025-06-30",
+          "windowLabel": "Jan 2024 to Jun 2025",
+          "wbsId": "1.2.4"
+        },
+        {
+          "id": "T-025",
+          "name": "Systems Engineering Support to Integration Assembly and Test",
+          "startDate": "2025-01-01",
+          "endDate": "2027-04-30",
+          "windowLabel": "Jan 2025 to Apr 2027",
+          "wbsId": "1.2.1"
+        }
+      ],
+      "milestones": [
+        {
+          "id": "M-015",
+          "name": "PPE Delivery to NGIS Gilbert AZ",
+          "shortName": "PPE Delivery to NGIS Gilbert AZ",
+          "date": "2025-02-28",
+          "dateLabel": "Feb 28, 2025",
+          "phaseId": "phase-integration",
+          "phaseName": "Integration",
+          "whyItMatters": "This is one of the named points that makes the overall Gateway schedule legible to a first-time audience."
+        },
+        {
+          "id": "M-017",
+          "name": "PPE-HALO Mechanical Integration Complete",
+          "shortName": "Mechanical integration",
+          "date": "2025-09-30",
+          "dateLabel": "Sep 30, 2025",
+          "phaseId": "phase-integration",
+          "phaseName": "Integration",
+          "whyItMatters": "This is where previously separate hardware or interface branches have to work as one schedule path."
+        },
+        {
+          "id": "M-018",
+          "name": "PPE-HALO Integrated System Test Complete",
+          "shortName": "Integrated test",
+          "date": "2026-01-31",
+          "dateLabel": "Jan 31, 2026",
+          "phaseId": "phase-integration",
+          "phaseName": "Integration",
+          "whyItMatters": "This is a hard evidence point before shipment, launch processing, or higher-consequence operations can continue."
+        },
+        {
+          "id": "M-021",
+          "name": "ESPRIT Lunar Link Integration on HALO Complete",
+          "shortName": "ESPRIT Lunar Link Integration on HALO Complete",
+          "date": "2026-11-30",
+          "dateLabel": "Nov 30, 2026",
+          "phaseId": "phase-integration",
+          "phaseName": "Integration",
+          "whyItMatters": "This is where previously separate hardware or interface branches have to work as one schedule path."
+        },
+        {
+          "id": "M-022",
+          "name": "PPE-HALO Pre-Shipment Review Complete",
+          "shortName": "PPE-HALO Pre-Shipment Review Complete",
+          "date": "2026-12-31",
+          "dateLabel": "Dec 31, 2026",
+          "phaseId": "phase-integration",
+          "phaseName": "Integration",
+          "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward."
+        }
+      ]
+    },
+    {
+      "id": "phase-test",
+      "name": "Test",
+      "tone": "brand",
+      "summaryTitle": "Environmental qualification before launch",
+      "summary": "Environmental campaigns and final verification close the evidence chain needed to ship the launch stack.",
+      "whyItMatters": "These tests are not background activity. They are the hard proof gates before shipment, launch processing, and formal readiness review.",
+      "takeaways": [
+        "Test completion dates are evidence-based gates, not just schedule decorations.",
+        "A slip here propagates quickly because later launch processing windows are already tight."
+      ],
+      "start": "2026-05-31",
+      "end": "2026-09-30",
+      "rangeLabel": "May 2026 to Sep 2026",
+      "milestoneCount": 2,
+      "criticalTaskCount": 7,
+      "keyMilestoneIds": [
+        "M-019",
+        "M-020"
+      ],
+      "representativeTasks": [
+        {
+          "id": "T-025",
+          "name": "Systems Engineering Support to Integration Assembly and Test",
+          "startDate": "2025-01-01",
+          "endDate": "2027-04-30",
+          "windowLabel": "Jan 2025 to Apr 2027",
+          "wbsId": "1.2.1"
+        },
+        {
+          "id": "T-121",
+          "name": "PPE-HALO Acoustic and Vibration Environmental Test",
+          "startDate": "2026-02-01",
+          "endDate": "2026-05-31",
+          "windowLabel": "Feb 2026 to May 2026",
+          "wbsId": "1.9.2"
+        },
+        {
+          "id": "T-122",
+          "name": "PPE-HALO Thermal Vacuum Environmental Test",
+          "startDate": "2026-06-01",
+          "endDate": "2026-09-30",
+          "windowLabel": "Jun 2026 to Sep 2026",
+          "wbsId": "1.9.2"
+        },
+        {
+          "id": "T-141",
+          "name": "MCC-H Gateway Flight Control Room Development",
+          "startDate": "2022-01-01",
+          "endDate": "2027-12-31",
+          "windowLabel": "Jan 2022 to Dec 2027",
+          "wbsId": "1.11.1"
+        }
+      ],
+      "milestones": [
+        {
+          "id": "M-019",
+          "name": "PPE-HALO Acoustic and Vibration Environmental Test Complete",
+          "shortName": "PPE-HALO Acoustic and Vibration Environmental Test Complete",
+          "date": "2026-05-31",
+          "dateLabel": "May 31, 2026",
+          "phaseId": "phase-test",
+          "phaseName": "Test",
+          "whyItMatters": "This is a hard evidence point before shipment, launch processing, or higher-consequence operations can continue."
+        },
+        {
+          "id": "M-020",
+          "name": "PPE-HALO Thermal Vacuum Environmental Test Complete",
+          "shortName": "PPE-HALO Thermal Vacuum Environmental Test Complete",
+          "date": "2026-09-30",
+          "dateLabel": "Sep 30, 2026",
+          "phaseId": "phase-test",
+          "phaseName": "Test",
+          "whyItMatters": "This is a hard evidence point before shipment, launch processing, or higher-consequence operations can continue."
+        }
+      ]
+    },
+    {
+      "id": "phase-launch",
+      "name": "Launch",
+      "tone": "copper",
+      "summaryTitle": "Ground campaign and first crewed mission gates",
+      "summary": "Launch operations cover the Falcon Heavy stack, the later Artemis IV crewed visit, and the expansion launches that grow Gateway on orbit.",
+      "whyItMatters": "This is where years of prior work convert into visible mission events. Every upstream slip tends to surface here.",
+      "takeaways": [
+        "Launch milestones are public-facing, but their dates are only credible when the upstream integration chain is healthy.",
+        "Crewed mission timing is especially sensitive to partner readiness and launch-window constraints."
+      ],
+      "start": "2026-11-30",
+      "end": "2030-10-01",
+      "rangeLabel": "Nov 2026 to Oct 2030",
+      "milestoneCount": 7,
+      "criticalTaskCount": 28,
+      "keyMilestoneIds": [
+        "M-023",
+        "M-024",
+        "M-028"
+      ],
+      "representativeTasks": [
+        {
+          "id": "T-025",
+          "name": "Systems Engineering Support to Integration Assembly and Test",
+          "startDate": "2025-01-01",
+          "endDate": "2027-04-30",
+          "windowLabel": "Jan 2025 to Apr 2027",
+          "wbsId": "1.2.1"
+        },
+        {
+          "id": "T-086",
+          "name": "I-HAB SLS Co-Manifest Integration at KSC",
+          "startDate": "2028-06-01",
+          "endDate": "2028-08-15",
+          "windowLabel": "Jun 2028 to Aug 2028",
+          "wbsId": "1.5.7"
+        },
+        {
+          "id": "T-123",
+          "name": "PPE-HALO Electromagnetic Compatibility RF Testing",
+          "startDate": "2026-10-01",
+          "endDate": "2026-11-30",
+          "windowLabel": "Oct 2026 to Nov 2026",
+          "wbsId": "1.9.4"
+        },
+        {
+          "id": "T-124",
+          "name": "ESPRIT Lunar Link Final Integration onto HALO Assembly",
+          "startDate": "2026-10-01",
+          "endDate": "2026-11-30",
+          "windowLabel": "Oct 2026 to Nov 2026",
+          "wbsId": "1.9.1"
+        }
+      ],
+      "milestones": [
+        {
+          "id": "M-023",
+          "name": "Launch Readiness Review - PPE-HALO Falcon Heavy",
+          "shortName": "Launch readiness review",
+          "date": "2026-11-30",
+          "dateLabel": "Nov 30, 2026",
+          "phaseId": "phase-launch",
+          "phaseName": "Launch",
+          "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward."
+        },
+        {
+          "id": "M-024",
+          "name": "PPE-HALO Launch on Falcon Heavy - L-Day",
+          "shortName": "PPE-HALO launch",
+          "date": "2027-04-30",
+          "dateLabel": "Apr 30, 2027",
+          "phaseId": "phase-launch",
+          "phaseName": "Launch",
+          "whyItMatters": "This date matters because it converts years of earlier schedule work into a visible mission event with limited recovery room."
+        },
+        {
+          "id": "M-028",
+          "name": "Artemis IV Launch Readiness Review Complete",
+          "shortName": "Artemis IV Launch Readiness Review Complete",
+          "date": "2028-09-15",
+          "dateLabel": "Sep 15, 2028",
+          "phaseId": "phase-launch",
+          "phaseName": "Launch",
+          "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward."
+        },
+        {
+          "id": "M-029",
+          "name": "Artemis IV Launch - SLS Block 1B First Crewed Gateway Visit",
+          "shortName": "Artemis IV launch",
+          "date": "2028-10-01",
+          "dateLabel": "Oct 1, 2028",
+          "phaseId": "phase-launch",
+          "phaseName": "Launch",
+          "whyItMatters": "This date matters because it converts years of earlier schedule work into a visible mission event with limited recovery room."
+        },
+        {
+          "id": "M-032",
+          "name": "ESPRIT Lunar View Launch",
+          "shortName": "ESPRIT Lunar View Launch",
+          "date": "2029-07-01",
+          "dateLabel": "Jul 1, 2029",
+          "phaseId": "phase-launch",
+          "phaseName": "Launch",
+          "whyItMatters": "This date matters because it converts years of earlier schedule work into a visible mission event with limited recovery room."
+        },
+        {
+          "id": "M-034",
+          "name": "Canadarm3 Delivery and Launch on Artemis V",
+          "shortName": "Canadarm3 Delivery and Launch on Artemis V",
+          "date": "2030-03-01",
+          "dateLabel": "Mar 1, 2030",
+          "phaseId": "phase-launch",
+          "phaseName": "Launch",
+          "whyItMatters": "This date matters because it converts years of earlier schedule work into a visible mission event with limited recovery room."
+        },
+        {
+          "id": "M-036",
+          "name": "UAE Airlock Launch",
+          "shortName": "UAE Airlock Launch",
+          "date": "2030-10-01",
+          "dateLabel": "Oct 1, 2030",
+          "phaseId": "phase-launch",
+          "phaseName": "Launch",
+          "whyItMatters": "This date matters because it converts years of earlier schedule work into a visible mission event with limited recovery room."
+        }
+      ]
+    },
+    {
+      "id": "phase-operations",
+      "name": "Operations",
+      "tone": "forest",
+      "summaryTitle": "Transit, arrival, and expansion to initial capability",
+      "summary": "Gateway transitions from launch to NRHO transit, first crewed operations, and on-orbit expansion toward initial operational capability.",
+      "whyItMatters": "Operations show whether Gateway becomes a usable lunar-orbit platform rather than just a successful launch campaign.",
+      "takeaways": [
+        "The operational schedule includes both transit risk and the staged activation of later partner contributions.",
+        "Initial operational capability is a roll-up outcome, not a single isolated date."
+      ],
+      "start": "2027-06-30",
+      "end": "2031-06-01",
+      "rangeLabel": "Jun 2027 to Jun 2031",
+      "milestoneCount": 8,
+      "criticalTaskCount": 16,
+      "keyMilestoneIds": [
+        "M-025",
+        "M-026",
+        "M-027"
+      ],
+      "representativeTasks": [
+        {
+          "id": "T-086",
+          "name": "I-HAB SLS Co-Manifest Integration at KSC",
+          "startDate": "2028-06-01",
+          "endDate": "2028-08-15",
+          "windowLabel": "Jun 2028 to Aug 2028",
+          "wbsId": "1.5.7"
+        },
+        {
+          "id": "T-133",
+          "name": "PPE Solo Operations and AEPS 12-Month Demonstration",
+          "startDate": "2027-05-01",
+          "endDate": "2027-06-30",
+          "windowLabel": "May 2027 to Jun 2027",
+          "wbsId": "1.3.8"
+        },
+        {
+          "id": "T-134",
+          "name": "PPE-HALO Low-Thrust NRHO Lunar Transit",
+          "startDate": "2027-07-01",
+          "endDate": "2028-01-31",
+          "windowLabel": "Jul 2027 to Jan 2028",
+          "wbsId": "1.3.3"
+        },
+        {
+          "id": "T-135",
+          "name": "NRHO Insertion and Orbit Verification",
+          "startDate": "2028-01-31",
+          "endDate": "2028-02-28",
+          "windowLabel": "Jan 2028 to Feb 2028",
+          "wbsId": "1.2.4"
+        }
+      ],
+      "milestones": [
+        {
+          "id": "M-025",
+          "name": "PPE AEPS 12-Month Solo Demonstration Complete",
+          "shortName": "PPE AEPS 12-Month Solo Demonstration Complete",
+          "date": "2027-06-30",
+          "dateLabel": "Jun 30, 2027",
+          "phaseId": "phase-operations",
+          "phaseName": "Operations",
+          "whyItMatters": "This is one of the named points that makes the overall Gateway schedule legible to a first-time audience."
+        },
+        {
+          "id": "M-026",
+          "name": "NRHO Insertion and Orbit Verification Complete",
+          "shortName": "NRHO insertion",
+          "date": "2028-02-28",
+          "dateLabel": "Feb 28, 2028",
+          "phaseId": "phase-operations",
+          "phaseName": "Operations",
+          "whyItMatters": "This is one of the named points that makes the overall Gateway schedule legible to a first-time audience."
+        },
+        {
+          "id": "M-027",
+          "name": "Gateway Initial On-Orbit Test Complete - HALO Ready for Crew",
+          "shortName": "Gateway Initial On-Orbit Test Complete - HALO Ready for Crew",
+          "date": "2028-04-30",
+          "dateLabel": "Apr 30, 2028",
+          "phaseId": "phase-operations",
+          "phaseName": "Operations",
+          "whyItMatters": "This is a hard evidence point before shipment, launch processing, or higher-consequence operations can continue."
+        },
+        {
+          "id": "M-030",
+          "name": "Orion First Docking at HALO - Crewed Gateway Arrival",
+          "shortName": "First crewed arrival",
+          "date": "2028-10-06",
+          "dateLabel": "Oct 6, 2028",
+          "phaseId": "phase-operations",
+          "phaseName": "Operations",
+          "whyItMatters": "This marks the transition from launch success into actual crewed use of Gateway on orbit."
+        },
+        {
+          "id": "M-031",
+          "name": "I-HAB Berthing and Activation Complete",
+          "shortName": "I-HAB activation",
+          "date": "2028-10-10",
+          "dateLabel": "Oct 10, 2028",
+          "phaseId": "phase-operations",
+          "phaseName": "Operations",
+          "whyItMatters": "This is one of the named points that makes the overall Gateway schedule legible to a first-time audience."
+        },
+        {
+          "id": "M-033",
+          "name": "ESPRIT Xenon Propellant Transfer Demonstration Complete",
+          "shortName": "ESPRIT Xenon Propellant Transfer Demonstration Complete",
+          "date": "2029-10-31",
+          "dateLabel": "Oct 31, 2029",
+          "phaseId": "phase-operations",
+          "phaseName": "Operations",
+          "whyItMatters": "This is one of the named points that makes the overall Gateway schedule legible to a first-time audience."
+        },
+        {
+          "id": "M-035",
+          "name": "Canadarm3 On-Orbit Commissioning Complete",
+          "shortName": "Canadarm3 On-Orbit Commissioning Complete",
+          "date": "2030-05-31",
+          "dateLabel": "May 31, 2030",
+          "phaseId": "phase-operations",
+          "phaseName": "Operations",
+          "whyItMatters": "This is a roll-up milestone showing whether Gateway has become a functioning platform, not just a launched stack."
+        },
+        {
+          "id": "M-037",
+          "name": "Gateway Full Initial Operational Capability Declaration",
+          "shortName": "Initial operational capability",
+          "date": "2031-06-01",
+          "dateLabel": "Jun 1, 2031",
+          "phaseId": "phase-operations",
+          "phaseName": "Operations",
+          "whyItMatters": "This is a roll-up milestone showing whether Gateway has become a functioning platform, not just a launched stack."
+        }
+      ]
+    }
+  ],
+  "years": [
+    {
+      "year": 2017,
+      "label": "2017",
+      "start": "2017-01-01",
+      "end": "2017-12-31",
+      "milestoneCount": 1,
+      "criticalTaskCount": 1,
+      "phaseIds": [
+        "phase-formulation"
+      ],
+      "highlightMilestoneIds": [
+        "M-001"
+      ],
+      "summary": "Program start and 0 other milestones make this part of the schedule visible."
+    },
+    {
+      "year": 2018,
+      "label": "2018",
+      "start": "2018-01-01",
+      "end": "2018-12-31",
+      "milestoneCount": 0,
+      "criticalTaskCount": 2,
+      "phaseIds": [
+        "phase-formulation"
+      ],
+      "highlightMilestoneIds": [],
+      "summary": "This year mostly carries background task work rather than a public milestone moment."
+    },
+    {
+      "year": 2019,
+      "label": "2019",
+      "start": "2019-01-01",
+      "end": "2019-12-31",
+      "milestoneCount": 3,
+      "criticalTaskCount": 5,
+      "phaseIds": [
+        "phase-formulation",
+        "phase-development"
+      ],
+      "highlightMilestoneIds": [
+        "M-003",
+        "M-002",
+        "M-004"
+      ],
+      "summary": "PPE award and 2 other milestones make this part of the schedule visible."
+    },
+    {
+      "year": 2020,
+      "label": "2020",
+      "start": "2020-01-01",
+      "end": "2020-12-31",
+      "milestoneCount": 1,
+      "criticalTaskCount": 4,
+      "phaseIds": [
+        "phase-development"
+      ],
+      "highlightMilestoneIds": [
+        "M-005"
+      ],
+      "summary": "HALO design award and 0 other milestones make this part of the schedule visible."
+    },
+    {
+      "year": 2021,
+      "label": "2021",
+      "start": "2021-01-01",
+      "end": "2021-12-31",
+      "milestoneCount": 2,
+      "criticalTaskCount": 9,
+      "phaseIds": [
+        "phase-development"
+      ],
+      "highlightMilestoneIds": [
+        "M-006",
+        "M-007"
+      ],
+      "summary": "Falcon Heavy award and 1 other milestone make this part of the schedule visible."
+    },
+    {
+      "year": 2022,
+      "label": "2022",
+      "start": "2022-01-01",
+      "end": "2022-12-31",
+      "milestoneCount": 5,
+      "criticalTaskCount": 18,
+      "phaseIds": [
+        "phase-development"
+      ],
+      "highlightMilestoneIds": [
+        "M-008",
+        "M-009",
+        "M-010"
+      ],
+      "summary": "Non-Advocate Review (NAR) Pre-PCA Complete and 4 other milestones make this part of the schedule visible."
+    },
+    {
+      "year": 2023,
+      "label": "2023",
+      "start": "2023-01-01",
+      "end": "2023-12-31",
+      "milestoneCount": 0,
+      "criticalTaskCount": 13,
+      "phaseIds": [
+        "phase-development"
+      ],
+      "highlightMilestoneIds": [],
+      "summary": "This year mostly carries background task work rather than a public milestone moment."
+    },
+    {
+      "year": 2024,
+      "label": "2024",
+      "start": "2024-01-01",
+      "end": "2024-12-31",
+      "milestoneCount": 2,
+      "criticalTaskCount": 21,
+      "phaseIds": [
+        "phase-development",
+        "phase-fabrication"
+      ],
+      "highlightMilestoneIds": [
+        "M-014",
+        "M-013"
+      ],
+      "summary": "HALO Pressure Vessel Delivery to NGIS Gilbert AZ and 1 other milestone make this part of the schedule visible."
+    },
+    {
+      "year": 2025,
+      "label": "2025",
+      "start": "2025-01-01",
+      "end": "2025-12-31",
+      "milestoneCount": 3,
+      "criticalTaskCount": 23,
+      "phaseIds": [
+        "phase-development",
+        "phase-integration"
+      ],
+      "highlightMilestoneIds": [
+        "M-015",
+        "M-016",
+        "M-017"
+      ],
+      "summary": "PPE Delivery to NGIS Gilbert AZ and 2 other milestones make this part of the schedule visible."
+    },
+    {
+      "year": 2026,
+      "label": "2026",
+      "start": "2026-01-01",
+      "end": "2026-12-31",
+      "milestoneCount": 6,
+      "criticalTaskCount": 17,
+      "phaseIds": [
+        "phase-integration",
+        "phase-test",
+        "phase-launch"
+      ],
+      "highlightMilestoneIds": [
+        "M-018",
+        "M-019",
+        "M-020"
+      ],
+      "summary": "Integrated test and 5 other milestones make this part of the schedule visible."
+    },
+    {
+      "year": 2027,
+      "label": "2027",
+      "start": "2027-01-01",
+      "end": "2027-12-31",
+      "milestoneCount": 2,
+      "criticalTaskCount": 16,
+      "phaseIds": [
+        "phase-launch",
+        "phase-operations"
+      ],
+      "highlightMilestoneIds": [
+        "M-024",
+        "M-025"
+      ],
+      "summary": "PPE-HALO launch and 1 other milestone make this part of the schedule visible."
+    },
+    {
+      "year": 2028,
+      "label": "2028",
+      "start": "2028-01-01",
+      "end": "2028-12-31",
+      "milestoneCount": 6,
+      "criticalTaskCount": 11,
+      "phaseIds": [
+        "phase-launch",
+        "phase-operations"
+      ],
+      "highlightMilestoneIds": [
+        "M-026",
+        "M-027",
+        "M-028"
+      ],
+      "summary": "NRHO insertion and 5 other milestones make this part of the schedule visible."
+    },
+    {
+      "year": 2029,
+      "label": "2029",
+      "start": "2029-01-01",
+      "end": "2029-12-31",
+      "milestoneCount": 2,
+      "criticalTaskCount": 0,
+      "phaseIds": [
+        "phase-launch",
+        "phase-operations"
+      ],
+      "highlightMilestoneIds": [
+        "M-032",
+        "M-033"
+      ],
+      "summary": "ESPRIT Lunar View Launch and 1 other milestone make this part of the schedule visible."
+    },
+    {
+      "year": 2030,
+      "label": "2030",
+      "start": "2030-01-01",
+      "end": "2030-12-31",
+      "milestoneCount": 3,
+      "criticalTaskCount": 0,
+      "phaseIds": [
+        "phase-launch",
+        "phase-operations"
+      ],
+      "highlightMilestoneIds": [
+        "M-034",
+        "M-035",
+        "M-036"
+      ],
+      "summary": "Canadarm3 Delivery and Launch on Artemis V and 2 other milestones make this part of the schedule visible."
+    },
+    {
+      "year": 2031,
+      "label": "2031",
+      "start": "2031-01-01",
+      "end": "2031-12-31",
+      "milestoneCount": 1,
+      "criticalTaskCount": 1,
+      "phaseIds": [
+        "phase-operations"
+      ],
+      "highlightMilestoneIds": [
+        "M-037"
+      ],
+      "summary": "Initial operational capability and 0 other milestones make this part of the schedule visible."
+    }
+  ],
+  "drivers": [
+    {
+      "id": "driver-baseline",
+      "name": "Baseline closure and program commitment",
+      "tone": "brand",
+      "primaryPhaseId": "phase-development",
+      "windowLabel": "2019 to 2022",
+      "summary": "Requirements closure, system definition, the pre-PCA review, and the PCA baseline are the schedule story that turns Gateway into a committed program.",
+      "takeaways": [
+        "The program only becomes analytically defensible after SRR, SDR, NAR, and PCA align into one baseline story.",
+        "This driver is where requirements, cost, and schedule reasoning first lock together."
+      ],
+      "taskIds": [
+        "T-011",
+        "T-012",
+        "T-003",
+        "T-004",
+        "T-008"
+      ],
+      "milestoneIds": [
+        "M-002",
+        "M-004",
+        "M-008",
+        "M-009"
+      ],
+      "riskIds": [],
+      "documentIds": [
+        "CD-001",
+        "CD-004",
+        "CD-015",
+        "CD-025"
+      ],
+      "representativeTasks": [
+        {
+          "id": "T-011",
+          "name": "Gateway System Requirements Review (SRR)",
+          "startDate": "2019-03-01",
+          "endDate": "2019-06-30",
+          "windowLabel": "Mar 2019 to Jun 2019",
+          "wbsId": "1.2.1"
+        },
+        {
+          "id": "T-012",
+          "name": "Gateway System Definition Review (SDR)",
+          "startDate": "2019-07-01",
+          "endDate": "2019-12-31",
+          "windowLabel": "Jul 2019 to Dec 2019",
+          "wbsId": "1.2.1"
+        },
+        {
+          "id": "T-003",
+          "name": "Independent Cost Estimate Execution and PCA Development",
+          "startDate": "2021-10-01",
+          "endDate": "2022-05-31",
+          "windowLabel": "Oct 2021 to May 2022",
+          "wbsId": "1.1.1"
+        },
+        {
+          "id": "T-004",
+          "name": "Program Commitment Agreement Baseline Approval",
+          "startDate": "2022-06-01",
+          "endDate": "2022-06-01",
+          "windowLabel": "Jun 2022 to Jun 2022",
+          "wbsId": "1.1.1"
+        },
+        {
+          "id": "T-008",
+          "name": "Non-Advocate Review (NAR) Pre-PCA",
+          "startDate": "2022-03-01",
+          "endDate": "2022-05-31",
+          "windowLabel": "Mar 2022 to May 2022",
+          "wbsId": "1.1.1"
+        }
+      ],
+      "linkedMilestones": [
+        {
+          "id": "M-002",
+          "name": "Gateway System Requirements Review (SRR)",
+          "shortName": "Gateway System Requirements Review (SRR)",
+          "date": "2019-06-30",
+          "dateLabel": "Jun 30, 2019",
+          "phaseId": "phase-formulation",
+          "phaseName": "Formulation",
+          "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward."
+        },
+        {
+          "id": "M-004",
+          "name": "Gateway System Definition Review (SDR)",
+          "shortName": "Gateway System Definition Review (SDR)",
+          "date": "2019-12-31",
+          "dateLabel": "Dec 31, 2019",
+          "phaseId": "phase-formulation",
+          "phaseName": "Formulation",
+          "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward."
+        },
+        {
+          "id": "M-008",
+          "name": "Non-Advocate Review (NAR) Pre-PCA Complete",
+          "shortName": "Non-Advocate Review (NAR) Pre-PCA Complete",
+          "date": "2022-05-31",
+          "dateLabel": "May 31, 2022",
+          "phaseId": "phase-development",
+          "phaseName": "Development",
+          "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward."
+        },
+        {
+          "id": "M-009",
+          "name": "Program Commitment Agreement (PCA) Baseline Approval",
+          "shortName": "PCA baseline",
+          "date": "2022-06-01",
+          "dateLabel": "Jun 1, 2022",
+          "phaseId": "phase-development",
+          "phaseName": "Development",
+          "whyItMatters": "This is the point where Gateway becomes a formally committed program baseline rather than a set of planning assumptions."
+        }
+      ],
+      "linkedRisks": [],
+      "linkedDocuments": [
+        {
+          "id": "CD-001",
+          "name": "Gateway Program Requirements Document (PRD)",
+          "type": "Requirements",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-004",
+          "name": "Gateway Interface Requirements Document (IRD)",
+          "type": "Requirements",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-015",
+          "name": "Gateway Safety Requirements Document (SRD)",
+          "type": "Safety",
+          "status": "Approved",
+          "evidenceRole": "compliance_and_assurance"
+        },
+        {
+          "id": "CD-025",
+          "name": "Gateway Integrated Master Schedule (IMS)",
+          "type": "Schedule",
+          "status": "Active",
+          "evidenceRole": "schedule_authority"
+        }
+      ]
+    },
+    {
+      "id": "driver-mass-interface",
+      "name": "Mass closure and interface control",
+      "tone": "danger",
+      "primaryPhaseId": "phase-integration",
+      "windowLabel": "2024 to 2026",
+      "summary": "Mass reduction, HLS interface revision, and late integration compatibility work are the pressure points most likely to compress the launch-ready stack.",
+      "takeaways": [
+        "This driver connects the GAO-highlighted mass problem to real schedule windows in integration and launch preparation.",
+        "The work is partly technical and partly interface-governance, which is why it shows up across multiple artifacts."
+      ],
+      "taskIds": [
+        "T-009",
+        "T-015",
+        "T-018",
+        "T-019",
+        "T-118",
+        "T-119"
+      ],
+      "milestoneIds": [
+        "M-014",
+        "M-015",
+        "M-017",
+        "M-018"
+      ],
+      "riskIds": [
+        "R-001",
+        "R-002",
+        "R-004",
+        "R-006"
+      ],
+      "documentIds": [
+        "CD-004",
+        "CD-005",
+        "CD-007",
+        "CD-011",
+        "CD-028"
+      ],
+      "representativeTasks": [
+        {
+          "id": "T-009",
+          "name": "Mass Reduction Tiger Team - GAO-24-106878 Response",
+          "startDate": "2024-07-31",
+          "endDate": "2025-09-30",
+          "windowLabel": "Jul 2024 to Sep 2025",
+          "wbsId": "1.2.3"
+        },
+        {
+          "id": "T-015",
+          "name": "Gateway-HLS Interface Control Document Revision",
+          "startDate": "2024-01-01",
+          "endDate": "2025-06-30",
+          "windowLabel": "Jan 2024 to Jun 2025",
+          "wbsId": "1.2.2"
+        },
+        {
+          "id": "T-018",
+          "name": "Mass Properties Quarterly Status Reports FY2024",
+          "startDate": "2024-01-01",
+          "endDate": "2024-12-31",
+          "windowLabel": "Jan 2024 to Dec 2024",
+          "wbsId": "1.2.3"
+        },
+        {
+          "id": "T-019",
+          "name": "PPE Controllability Analysis for Starship HLS Docking",
+          "startDate": "2024-01-01",
+          "endDate": "2025-06-30",
+          "windowLabel": "Jan 2024 to Jun 2025",
+          "wbsId": "1.2.4"
+        },
+        {
+          "id": "T-118",
+          "name": "PPE-HALO Mechanical Integration at NGIS Gilbert AZ",
+          "startDate": "2025-05-01",
+          "endDate": "2025-09-30",
+          "windowLabel": "May 2025 to Sep 2025",
+          "wbsId": "1.9.1"
+        },
+        {
+          "id": "T-119",
+          "name": "PPE-HALO Integrated System Test",
+          "startDate": "2025-10-01",
+          "endDate": "2026-01-31",
+          "windowLabel": "Oct 2025 to Jan 2026",
+          "wbsId": "1.9.4"
+        }
+      ],
+      "linkedMilestones": [
+        {
+          "id": "M-014",
+          "name": "HALO Pressure Vessel Delivery to NGIS Gilbert AZ",
+          "shortName": "HALO Pressure Vessel Delivery to NGIS Gilbert AZ",
+          "date": "2024-09-30",
+          "dateLabel": "Sep 30, 2024",
+          "phaseId": "phase-fabrication",
+          "phaseName": "Fabrication",
+          "whyItMatters": "This date matters because the schedule is moving from design intent to real flight hardware delivery."
+        },
+        {
+          "id": "M-015",
+          "name": "PPE Delivery to NGIS Gilbert AZ",
+          "shortName": "PPE Delivery to NGIS Gilbert AZ",
+          "date": "2025-02-28",
+          "dateLabel": "Feb 28, 2025",
+          "phaseId": "phase-integration",
+          "phaseName": "Integration",
+          "whyItMatters": "This is one of the named points that makes the overall Gateway schedule legible to a first-time audience."
+        },
+        {
+          "id": "M-017",
+          "name": "PPE-HALO Mechanical Integration Complete",
+          "shortName": "Mechanical integration",
+          "date": "2025-09-30",
+          "dateLabel": "Sep 30, 2025",
+          "phaseId": "phase-integration",
+          "phaseName": "Integration",
+          "whyItMatters": "This is where previously separate hardware or interface branches have to work as one schedule path."
+        },
+        {
+          "id": "M-018",
+          "name": "PPE-HALO Integrated System Test Complete",
+          "shortName": "Integrated test",
+          "date": "2026-01-31",
+          "dateLabel": "Jan 31, 2026",
+          "phaseId": "phase-integration",
+          "phaseName": "Integration",
+          "whyItMatters": "This is a hard evidence point before shipment, launch processing, or higher-consequence operations can continue."
+        }
+      ],
+      "linkedRisks": [
+        {
+          "id": "R-001",
+          "title": "PPE-HALO Combined Stack Mass Exceedance",
+          "score": 20,
+          "status": "Open - Active Mitigation"
+        },
+        {
+          "id": "R-002",
+          "title": "PPE Controllability Inadequacy with Docked Starship HLS",
+          "score": 15,
+          "status": "Open - Under Analysis"
+        },
+        {
+          "id": "R-004",
+          "title": "Falcon Heavy Launch Window Constraint or Manifest Slip",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-006",
+          "title": "I-HAB Schedule Slip Affecting Artemis IV Co-Manifest",
+          "score": 12,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-004",
+          "name": "Gateway Interface Requirements Document (IRD)",
+          "type": "Requirements",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-005",
+          "name": "PPE-HALO Interface Control Document (ICD)",
+          "type": "ICD",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-007",
+          "name": "Gateway-HLS Starship Interface Control Document (ICD)",
+          "type": "ICD",
+          "status": "In Review",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-011",
+          "name": "Gateway Mass Properties Report (Quarterly)",
+          "type": "Engineering Report",
+          "status": "Open - Concern",
+          "evidenceRole": "technical_evidence"
+        },
+        {
+          "id": "CD-028",
+          "name": "GAO Response Action Plan - Mass Risk (GAO-24-106878)",
+          "type": "Corrective Action Plan",
+          "status": "In Work",
+          "evidenceRole": "execution_support"
+        }
+      ]
+    },
+    {
+      "id": "driver-flight-stack",
+      "name": "Flight-stack assembly and qualification",
+      "tone": "plum",
+      "primaryPhaseId": "phase-test",
+      "windowLabel": "2025 to 2027",
+      "summary": "PPE and HALO have to converge into one tested launch stack before any launch date is meaningful.",
+      "takeaways": [
+        "This is the part of the schedule where separate module plans stop being separate and start behaving like one vehicle.",
+        "Environmental campaigns and final shipment are the hard gates that feed launch readiness."
+      ],
+      "taskIds": [
+        "T-063",
+        "T-068",
+        "T-072",
+        "T-118",
+        "T-121",
+        "T-122",
+        "T-124",
+        "T-125"
+      ],
+      "milestoneIds": [
+        "M-017",
+        "M-018",
+        "M-019",
+        "M-020",
+        "M-021",
+        "M-022"
+      ],
+      "riskIds": [
+        "R-003",
+        "R-009"
+      ],
+      "documentIds": [
+        "CD-005",
+        "CD-011",
+        "CD-021",
+        "CD-029"
+      ],
+      "representativeTasks": [
+        {
+          "id": "T-063",
+          "name": "HALO Module System Integration at NGIS Gilbert AZ",
+          "startDate": "2024-10-01",
+          "endDate": "2025-06-30",
+          "windowLabel": "Oct 2024 to Jun 2025",
+          "wbsId": "1.4.1"
+        },
+        {
+          "id": "T-068",
+          "name": "HALO ECLSS Installation and Checkout at NGIS",
+          "startDate": "2025-04-01",
+          "endDate": "2025-12-31",
+          "windowLabel": "Apr 2025 to Dec 2025",
+          "wbsId": "1.4.2"
+        },
+        {
+          "id": "T-072",
+          "name": "ESPRIT Lunar Link Integration onto HALO at NGIS",
+          "startDate": "2025-11-01",
+          "endDate": "2026-01-31",
+          "windowLabel": "Nov 2025 to Jan 2026",
+          "wbsId": "1.6.1"
+        },
+        {
+          "id": "T-118",
+          "name": "PPE-HALO Mechanical Integration at NGIS Gilbert AZ",
+          "startDate": "2025-05-01",
+          "endDate": "2025-09-30",
+          "windowLabel": "May 2025 to Sep 2025",
+          "wbsId": "1.9.1"
+        },
+        {
+          "id": "T-121",
+          "name": "PPE-HALO Acoustic and Vibration Environmental Test",
+          "startDate": "2026-02-01",
+          "endDate": "2026-05-31",
+          "windowLabel": "Feb 2026 to May 2026",
+          "wbsId": "1.9.2"
+        },
+        {
+          "id": "T-122",
+          "name": "PPE-HALO Thermal Vacuum Environmental Test",
+          "startDate": "2026-06-01",
+          "endDate": "2026-09-30",
+          "windowLabel": "Jun 2026 to Sep 2026",
+          "wbsId": "1.9.2"
+        },
+        {
+          "id": "T-124",
+          "name": "ESPRIT Lunar Link Final Integration onto HALO Assembly",
+          "startDate": "2026-10-01",
+          "endDate": "2026-11-30",
+          "windowLabel": "Oct 2026 to Nov 2026",
+          "wbsId": "1.9.1"
+        },
+        {
+          "id": "T-125",
+          "name": "PPE-HALO Pre-Shipment Review",
+          "startDate": "2026-12-01",
+          "endDate": "2026-12-31",
+          "windowLabel": "Dec 2026 to Dec 2026",
+          "wbsId": "1.9"
+        }
+      ],
+      "linkedMilestones": [
+        {
+          "id": "M-017",
+          "name": "PPE-HALO Mechanical Integration Complete",
+          "shortName": "Mechanical integration",
+          "date": "2025-09-30",
+          "dateLabel": "Sep 30, 2025",
+          "phaseId": "phase-integration",
+          "phaseName": "Integration",
+          "whyItMatters": "This is where previously separate hardware or interface branches have to work as one schedule path."
+        },
+        {
+          "id": "M-018",
+          "name": "PPE-HALO Integrated System Test Complete",
+          "shortName": "Integrated test",
+          "date": "2026-01-31",
+          "dateLabel": "Jan 31, 2026",
+          "phaseId": "phase-integration",
+          "phaseName": "Integration",
+          "whyItMatters": "This is a hard evidence point before shipment, launch processing, or higher-consequence operations can continue."
+        },
+        {
+          "id": "M-019",
+          "name": "PPE-HALO Acoustic and Vibration Environmental Test Complete",
+          "shortName": "PPE-HALO Acoustic and Vibration Environmental Test Complete",
+          "date": "2026-05-31",
+          "dateLabel": "May 31, 2026",
+          "phaseId": "phase-test",
+          "phaseName": "Test",
+          "whyItMatters": "This is a hard evidence point before shipment, launch processing, or higher-consequence operations can continue."
+        },
+        {
+          "id": "M-020",
+          "name": "PPE-HALO Thermal Vacuum Environmental Test Complete",
+          "shortName": "PPE-HALO Thermal Vacuum Environmental Test Complete",
+          "date": "2026-09-30",
+          "dateLabel": "Sep 30, 2026",
+          "phaseId": "phase-test",
+          "phaseName": "Test",
+          "whyItMatters": "This is a hard evidence point before shipment, launch processing, or higher-consequence operations can continue."
+        },
+        {
+          "id": "M-021",
+          "name": "ESPRIT Lunar Link Integration on HALO Complete",
+          "shortName": "ESPRIT Lunar Link Integration on HALO Complete",
+          "date": "2026-11-30",
+          "dateLabel": "Nov 30, 2026",
+          "phaseId": "phase-integration",
+          "phaseName": "Integration",
+          "whyItMatters": "This is where previously separate hardware or interface branches have to work as one schedule path."
+        },
+        {
+          "id": "M-022",
+          "name": "PPE-HALO Pre-Shipment Review Complete",
+          "shortName": "PPE-HALO Pre-Shipment Review Complete",
+          "date": "2026-12-31",
+          "dateLabel": "Dec 31, 2026",
+          "phaseId": "phase-integration",
+          "phaseName": "Integration",
+          "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward."
+        }
+      ],
+      "linkedRisks": [
+        {
+          "id": "R-003",
+          "title": "HALO Firm-Fixed-Price Contract Further Cost Overrun",
+          "score": 16,
+          "status": "Open - Monitoring"
+        },
+        {
+          "id": "R-009",
+          "title": "HALO ECLSS Performance Shortfall Requiring Rework",
+          "score": 9,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-005",
+          "name": "PPE-HALO Interface Control Document (ICD)",
+          "type": "ICD",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-011",
+          "name": "Gateway Mass Properties Report (Quarterly)",
+          "type": "Engineering Report",
+          "status": "Open - Concern",
+          "evidenceRole": "technical_evidence"
+        },
+        {
+          "id": "CD-021",
+          "name": "PPE-HALO Pre-Launch Processing Plan",
+          "type": "Operations Plan",
+          "status": "Draft",
+          "evidenceRole": "execution_support"
+        },
+        {
+          "id": "CD-029",
+          "name": "PPE-HALO Launch Campaign Plan",
+          "type": "Launch Plan",
+          "status": "Draft",
+          "evidenceRole": "execution_support"
+        }
+      ]
+    },
+    {
+      "id": "driver-launch-transit",
+      "name": "Launch, transit, and first crewed arrival",
+      "tone": "copper",
+      "primaryPhaseId": "phase-launch",
+      "windowLabel": "2026 to 2028",
+      "summary": "Launch windows, Falcon Heavy readiness, low-thrust transit, and crewed Artemis IV timing are the public schedule hinges of the whole program.",
+      "takeaways": [
+        "This driver is where integration outcomes become visible mission events.",
+        "Transit and crewed arrival add another layer of schedule logic after launch itself."
+      ],
+      "taskIds": [
+        "T-131",
+        "T-132",
+        "T-134",
+        "T-135",
+        "T-136",
+        "T-138",
+        "T-139",
+        "T-140"
+      ],
+      "milestoneIds": [
+        "M-023",
+        "M-024",
+        "M-026",
+        "M-027",
+        "M-028",
+        "M-029",
+        "M-030"
+      ],
+      "riskIds": [
+        "R-004",
+        "R-005",
+        "R-007"
+      ],
+      "documentIds": [
+        "CD-006",
+        "CD-007",
+        "CD-021",
+        "CD-023",
+        "CD-029"
+      ],
+      "representativeTasks": [
+        {
+          "id": "T-131",
+          "name": "Launch Readiness Review - PPE-HALO Falcon Heavy",
+          "startDate": "2026-11-01",
+          "endDate": "2026-11-30",
+          "windowLabel": "Nov 2026 to Nov 2026",
+          "wbsId": "1.10.1"
+        },
+        {
+          "id": "T-132",
+          "name": "PPE-HALO Launch on Falcon Heavy - L-Day",
+          "startDate": "2027-04-30",
+          "endDate": "2027-04-30",
+          "windowLabel": "Apr 2027 to Apr 2027",
+          "wbsId": "1.10.1"
+        },
+        {
+          "id": "T-134",
+          "name": "PPE-HALO Low-Thrust NRHO Lunar Transit",
+          "startDate": "2027-07-01",
+          "endDate": "2028-01-31",
+          "windowLabel": "Jul 2027 to Jan 2028",
+          "wbsId": "1.3.3"
+        },
+        {
+          "id": "T-135",
+          "name": "NRHO Insertion and Orbit Verification",
+          "startDate": "2028-01-31",
+          "endDate": "2028-02-28",
+          "windowLabel": "Jan 2028 to Feb 2028",
+          "wbsId": "1.2.4"
+        },
+        {
+          "id": "T-136",
+          "name": "PPE-HALO Initial On-Orbit Test",
+          "startDate": "2028-02-01",
+          "endDate": "2028-04-30",
+          "windowLabel": "Feb 2028 to Apr 2028",
+          "wbsId": "1.9.4"
+        },
+        {
+          "id": "T-138",
+          "name": "Artemis IV Launch Readiness Review",
+          "startDate": "2028-08-15",
+          "endDate": "2028-09-15",
+          "windowLabel": "Aug 2028 to Sep 2028",
+          "wbsId": "1.10.2"
+        },
+        {
+          "id": "T-139",
+          "name": "Artemis IV Launch - SLS Block 1B with Orion and I-HAB",
+          "startDate": "2028-10-01",
+          "endDate": "2028-10-01",
+          "windowLabel": "Oct 2028 to Oct 2028",
+          "wbsId": "1.10.2"
+        },
+        {
+          "id": "T-140",
+          "name": "Orion First Docking at HALO - First Crewed Gateway Visit",
+          "startDate": "2028-10-06",
+          "endDate": "2028-10-06",
+          "windowLabel": "Oct 2028 to Oct 2028",
+          "wbsId": "1.12.1"
+        }
+      ],
+      "linkedMilestones": [
+        {
+          "id": "M-023",
+          "name": "Launch Readiness Review - PPE-HALO Falcon Heavy",
+          "shortName": "Launch readiness review",
+          "date": "2026-11-30",
+          "dateLabel": "Nov 30, 2026",
+          "phaseId": "phase-launch",
+          "phaseName": "Launch",
+          "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward."
+        },
+        {
+          "id": "M-024",
+          "name": "PPE-HALO Launch on Falcon Heavy - L-Day",
+          "shortName": "PPE-HALO launch",
+          "date": "2027-04-30",
+          "dateLabel": "Apr 30, 2027",
+          "phaseId": "phase-launch",
+          "phaseName": "Launch",
+          "whyItMatters": "This date matters because it converts years of earlier schedule work into a visible mission event with limited recovery room."
+        },
+        {
+          "id": "M-026",
+          "name": "NRHO Insertion and Orbit Verification Complete",
+          "shortName": "NRHO insertion",
+          "date": "2028-02-28",
+          "dateLabel": "Feb 28, 2028",
+          "phaseId": "phase-operations",
+          "phaseName": "Operations",
+          "whyItMatters": "This is one of the named points that makes the overall Gateway schedule legible to a first-time audience."
+        },
+        {
+          "id": "M-027",
+          "name": "Gateway Initial On-Orbit Test Complete - HALO Ready for Crew",
+          "shortName": "Gateway Initial On-Orbit Test Complete - HALO Ready for Crew",
+          "date": "2028-04-30",
+          "dateLabel": "Apr 30, 2028",
+          "phaseId": "phase-operations",
+          "phaseName": "Operations",
+          "whyItMatters": "This is a hard evidence point before shipment, launch processing, or higher-consequence operations can continue."
+        },
+        {
+          "id": "M-028",
+          "name": "Artemis IV Launch Readiness Review Complete",
+          "shortName": "Artemis IV Launch Readiness Review Complete",
+          "date": "2028-09-15",
+          "dateLabel": "Sep 15, 2028",
+          "phaseId": "phase-launch",
+          "phaseName": "Launch",
+          "whyItMatters": "This review matters because it shows enough design or program maturity to move the next branch of work forward."
+        },
+        {
+          "id": "M-029",
+          "name": "Artemis IV Launch - SLS Block 1B First Crewed Gateway Visit",
+          "shortName": "Artemis IV launch",
+          "date": "2028-10-01",
+          "dateLabel": "Oct 1, 2028",
+          "phaseId": "phase-launch",
+          "phaseName": "Launch",
+          "whyItMatters": "This date matters because it converts years of earlier schedule work into a visible mission event with limited recovery room."
+        },
+        {
+          "id": "M-030",
+          "name": "Orion First Docking at HALO - Crewed Gateway Arrival",
+          "shortName": "First crewed arrival",
+          "date": "2028-10-06",
+          "dateLabel": "Oct 6, 2028",
+          "phaseId": "phase-operations",
+          "phaseName": "Operations",
+          "whyItMatters": "This marks the transition from launch success into actual crewed use of Gateway on orbit."
+        }
+      ],
+      "linkedRisks": [
+        {
+          "id": "R-004",
+          "title": "Falcon Heavy Launch Window Constraint or Manifest Slip",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-005",
+          "title": "PPE AEPS Thruster Anomaly During Transit or Demo",
+          "score": 10,
+          "status": "Open"
+        },
+        {
+          "id": "R-007",
+          "title": "DSN Capacity Contention During Crewed Operations",
+          "score": 12,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-006",
+          "name": "Gateway-Orion Interface Control Document (ICD)",
+          "type": "ICD",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-007",
+          "name": "Gateway-HLS Starship Interface Control Document (ICD)",
+          "type": "ICD",
+          "status": "In Review",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-021",
+          "name": "PPE-HALO Pre-Launch Processing Plan",
+          "type": "Operations Plan",
+          "status": "Draft",
+          "evidenceRole": "execution_support"
+        },
+        {
+          "id": "CD-023",
+          "name": "Flight Operations Plan - Artemis IV (FOP-IV)",
+          "type": "Operations Plan",
+          "status": "In Work",
+          "evidenceRole": "execution_support"
+        },
+        {
+          "id": "CD-029",
+          "name": "PPE-HALO Launch Campaign Plan",
+          "type": "Launch Plan",
+          "status": "Draft",
+          "evidenceRole": "execution_support"
+        }
+      ]
+    },
+    {
+      "id": "driver-expansion",
+      "name": "Partner expansion to initial capability",
+      "tone": "forest",
+      "primaryPhaseId": "phase-operations",
+      "windowLabel": "2028 to 2031",
+      "summary": "Gateway does not reach initial operational capability from PPE and HALO alone. It depends on the later cadence of I-HAB, ESPRIT, Canadarm3, and the UAE airlock.",
+      "takeaways": [
+        "This is the long-tail schedule logic that connects partner hardware readiness to full program capability.",
+        "The dates are real milestones, but the roll-up meaning is interpretive across several partner branches."
+      ],
+      "taskIds": [
+        "T-086",
+        "T-090",
+        "T-110",
+        "T-113",
+        "T-163",
+        "T-164",
+        "T-165"
+      ],
+      "milestoneIds": [
+        "M-031",
+        "M-032",
+        "M-033",
+        "M-034",
+        "M-035",
+        "M-036",
+        "M-037"
+      ],
+      "riskIds": [
+        "R-006",
+        "R-010",
+        "R-011"
+      ],
+      "documentIds": [
+        "CD-008",
+        "CD-009",
+        "CD-010"
+      ],
+      "representativeTasks": [
+        {
+          "id": "T-086",
+          "name": "I-HAB SLS Co-Manifest Integration at KSC",
+          "startDate": "2028-06-01",
+          "endDate": "2028-08-15",
+          "windowLabel": "Jun 2028 to Aug 2028",
+          "wbsId": "1.5.7"
+        },
+        {
+          "id": "T-090",
+          "name": "ESPRIT Xenon Tank and Propellant Transfer System Design and Build",
+          "startDate": "2022-01-01",
+          "endDate": "2027-09-30",
+          "windowLabel": "Jan 2022 to Sep 2027",
+          "wbsId": "1.6.3"
+        },
+        {
+          "id": "T-110",
+          "name": "Canadarm3 AI and Autonomous Operations Software Development",
+          "startDate": "2022-01-01",
+          "endDate": "2029-09-30",
+          "windowLabel": "Jan 2022 to Sep 2029",
+          "wbsId": "1.8.5"
+        },
+        {
+          "id": "T-113",
+          "name": "Canadarm3 End-to-End Integration and Verification",
+          "startDate": "2029-01-01",
+          "endDate": "2029-10-31",
+          "windowLabel": "Jan 2029 to Oct 2029",
+          "wbsId": "1.8.6"
+        },
+        {
+          "id": "T-163",
+          "name": "Canadarm3 First Operational Tasking and Commissioning Complete",
+          "startDate": "2030-03-15",
+          "endDate": "2030-05-31",
+          "windowLabel": "Mar 2030 to May 2030",
+          "wbsId": "1.8.6"
+        },
+        {
+          "id": "T-164",
+          "name": "UAE Airlock Crew-Assisted Docking and Commissioning",
+          "startDate": "2030-10-15",
+          "endDate": "2030-11-30",
+          "windowLabel": "Oct 2030 to Nov 2030",
+          "wbsId": "1.7"
+        },
+        {
+          "id": "T-165",
+          "name": "Gateway Full Initial Operational Capability Declaration",
+          "startDate": "2031-06-01",
+          "endDate": "2031-06-01",
+          "windowLabel": "Jun 2031 to Jun 2031",
+          "wbsId": "1.0"
+        }
+      ],
+      "linkedMilestones": [
+        {
+          "id": "M-031",
+          "name": "I-HAB Berthing and Activation Complete",
+          "shortName": "I-HAB activation",
+          "date": "2028-10-10",
+          "dateLabel": "Oct 10, 2028",
+          "phaseId": "phase-operations",
+          "phaseName": "Operations",
+          "whyItMatters": "This is one of the named points that makes the overall Gateway schedule legible to a first-time audience."
+        },
+        {
+          "id": "M-032",
+          "name": "ESPRIT Lunar View Launch",
+          "shortName": "ESPRIT Lunar View Launch",
+          "date": "2029-07-01",
+          "dateLabel": "Jul 1, 2029",
+          "phaseId": "phase-launch",
+          "phaseName": "Launch",
+          "whyItMatters": "This date matters because it converts years of earlier schedule work into a visible mission event with limited recovery room."
+        },
+        {
+          "id": "M-033",
+          "name": "ESPRIT Xenon Propellant Transfer Demonstration Complete",
+          "shortName": "ESPRIT Xenon Propellant Transfer Demonstration Complete",
+          "date": "2029-10-31",
+          "dateLabel": "Oct 31, 2029",
+          "phaseId": "phase-operations",
+          "phaseName": "Operations",
+          "whyItMatters": "This is one of the named points that makes the overall Gateway schedule legible to a first-time audience."
+        },
+        {
+          "id": "M-034",
+          "name": "Canadarm3 Delivery and Launch on Artemis V",
+          "shortName": "Canadarm3 Delivery and Launch on Artemis V",
+          "date": "2030-03-01",
+          "dateLabel": "Mar 1, 2030",
+          "phaseId": "phase-launch",
+          "phaseName": "Launch",
+          "whyItMatters": "This date matters because it converts years of earlier schedule work into a visible mission event with limited recovery room."
+        },
+        {
+          "id": "M-035",
+          "name": "Canadarm3 On-Orbit Commissioning Complete",
+          "shortName": "Canadarm3 On-Orbit Commissioning Complete",
+          "date": "2030-05-31",
+          "dateLabel": "May 31, 2030",
+          "phaseId": "phase-operations",
+          "phaseName": "Operations",
+          "whyItMatters": "This is a roll-up milestone showing whether Gateway has become a functioning platform, not just a launched stack."
+        },
+        {
+          "id": "M-036",
+          "name": "UAE Airlock Launch",
+          "shortName": "UAE Airlock Launch",
+          "date": "2030-10-01",
+          "dateLabel": "Oct 1, 2030",
+          "phaseId": "phase-launch",
+          "phaseName": "Launch",
+          "whyItMatters": "This date matters because it converts years of earlier schedule work into a visible mission event with limited recovery room."
+        },
+        {
+          "id": "M-037",
+          "name": "Gateway Full Initial Operational Capability Declaration",
+          "shortName": "Initial operational capability",
+          "date": "2031-06-01",
+          "dateLabel": "Jun 1, 2031",
+          "phaseId": "phase-operations",
+          "phaseName": "Operations",
+          "whyItMatters": "This is a roll-up milestone showing whether Gateway has become a functioning platform, not just a launched stack."
+        }
+      ],
+      "linkedRisks": [
+        {
+          "id": "R-006",
+          "title": "I-HAB Schedule Slip Affecting Artemis IV Co-Manifest",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-010",
+          "title": "International Partner Budget Instability",
+          "score": 12,
+          "status": "Open"
+        },
+        {
+          "id": "R-011",
+          "title": "Canadarm3 AI Autonomy Software Maturity Below Required TRL",
+          "score": 9,
+          "status": "Open"
+        }
+      ],
+      "linkedDocuments": [
+        {
+          "id": "CD-008",
+          "name": "Gateway-I-HAB Interface Control Document (ICD)",
+          "type": "ICD",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-009",
+          "name": "Gateway-ESPRIT Interface Control Document (ICD)",
+          "type": "ICD",
+          "status": "Approved",
+          "evidenceRole": "baseline_definition"
+        },
+        {
+          "id": "CD-010",
+          "name": "Gateway-Canadarm3 Interface Control Document (ICD)",
+          "type": "ICD",
+          "status": "In Review",
+          "evidenceRole": "baseline_definition"
+        }
+      ]
+    }
+  ],
+  "methodology": {
+    "title": "What is directly sourced, and what is interpretive",
+    "preview": "Open the sourcing notes, caveats, and interpretation boundaries.",
+    "summary": "The milestone file and master schedule extract anchor this view. Public announcements and formal baselines pin some dates directly, while broader schedule meaning comes from linking those dates to critical tasks, risks, and supporting documents.",
+    "authorityGuideSummary": "Times New Roman; Arial; ;;;; Normal; Heading 1; Heading 2; GATEWAY DATA AUTHORITY GUIDE Version 1.0 Updated: March 17, 2026 1. Purpose This guide explains how the non-cost support files were strengthened so they function as authority-side source artifacts rather than thin app feeder tables.",
+    "cards": [
+      {
+        "eyebrow": "Direct anchors",
+        "title": "Dates anchored directly in source material",
+        "body": "Some schedule moments are directly anchored in public announcements or formal baseline decisions, and they are treated differently from purely interpretive rollups.",
+        "items": [
+          "5 milestones are currently treated as direct public or formal baseline anchors.",
+          "These include contract awards, baseline approval, and named mission events that carry clear external or formal references."
+        ]
+      },
+      {
+        "eyebrow": "Schedule file",
+        "title": "Dates drawn from the schedule files",
+        "body": "Many Gateway milestones are NET points from the integrated schedule. They remain useful anchors, but they should be read as controlled forecast dates rather than fixed historical facts.",
+        "items": [
+          "32 milestones are labeled as IMS NET schedule points.",
+          "These dates are useful and explicit, but they are not identical to public event history."
+        ]
+      },
+      {
+        "eyebrow": "Interpretation",
+        "title": "Where the app adds meaning on top of the documents",
+        "body": "Phase stories and schedule-driver groups are analytic structures added by the app so a first-time audience can understand why the dates matter.",
+        "items": [
+          "Driver groupings connect tasks, milestones, risks, and documents into a few consequential branches.",
+          "Plain-English explanations are derived from the linked source material, not copied from one single file."
+        ]
+      },
+      {
+        "eyebrow": "Limits",
+        "title": "What this view does not show",
+        "body": "The available source files support timeline review and traceability, but they are not a live project-management tool.",
+        "items": [
+          "The app does not claim to show full network logic, float, or real-time replanning.",
+          "When implications are inferred across branches, the app labels that as interpretation instead of direct schedule fact."
+        ]
+      }
+    ]
+  },
+  "traceability": {
+    "title": "Where the timeline comes from, and where interpretation begins",
+    "preview": "Open the supporting files, source register, and evidence model behind the schedule.",
+    "summary": "The schedule view starts with named milestone and schedule files, then links out to risk, document, and source records so the reader can see what is direct, what is linked, and where interpretation begins.",
+    "evidenceModel": [
+      {
+        "label": "Direct public or formal anchors",
+        "value": "5 milestones",
+        "description": "Publicly announced awards, formal baseline gates, and other explicitly anchored moments."
+      },
+      {
+        "label": "IMS schedule points",
+        "value": "32 milestones",
+        "description": "Named NET milestones drawn directly from the schedule files."
+      },
+      {
+        "label": "Interpretive rollups",
+        "value": "5 driver groups",
+        "description": "Plain-English phase and driver framing built from linked tasks, risks, and supporting documents."
+      }
+    ],
+    "artifacts": [
+      {
+        "title": "Gateway milestone extract",
+        "meta": "Primary milestone file",
+        "fileType": "CSV",
+        "description": "Named milestones with date basis, source IDs, confidence, and traceability notes.",
+        "href": "../Contract_Cost_Schedule%20Documents/data/gateway_milestones.csv",
+        "linkLabel": "Open milestone CSV",
+        "tone": "brand"
+      },
+      {
+        "title": "Gateway master schedule extract",
+        "meta": "Critical task backbone",
+        "fileType": "CSV",
+        "description": "Task-level dates, predecessors, milestone flags, and criticality indicators used to frame schedule-driving work.",
+        "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv",
+        "linkLabel": "Open schedule CSV",
+        "tone": "plum"
+      },
+      {
+        "title": "Gateway risk register",
+        "meta": "Schedule-linked pressure",
+        "fileType": "CSV",
+        "description": "Risk statements, categories, mitigation notes, and source IDs that explain timing pressure on the schedule.",
+        "href": "../Contract_Cost_Schedule%20Documents/data/gateway_risk_register.csv",
+        "linkLabel": "Open risk CSV",
+        "tone": "danger"
+      },
+      {
+        "title": "Gateway contract document tracker",
+        "meta": "Supporting document map",
+        "fileType": "CSV",
+        "description": "Controlled documents linked to milestones, WBS branches, and schedule evidence roles.",
+        "href": "../Contract_Cost_Schedule%20Documents/data/gateway_contract_documents_tracker.csv",
+        "linkLabel": "Open document tracker CSV",
+        "tone": "forest"
+      },
+      {
+        "title": "Gateway source reference register",
+        "meta": "Source register",
+        "fileType": "CSV",
+        "description": "Public and internal references used to anchor the schedule artifacts and supporting analysis.",
+        "href": "../Contract_Cost_Schedule%20Documents/data/gateway_source_reference_register.csv",
+        "linkLabel": "Open source register CSV",
+        "tone": "brand"
+      },
+      {
+        "title": "Gateway data guide",
+        "meta": "Reading guide",
+        "fileType": "RTF",
+        "description": "Companion guidance describing how source-document rigor is separated from app-level interpretation.",
+        "href": "../Contract_Cost_Schedule%20Documents/docs/gateway_data_authority_guide.rtf",
+        "linkLabel": "Open data guide",
+        "tone": "forest"
+      }
+    ],
+    "sources": [
+      {
+        "id": "INT-001",
+        "title": "Gateway Cost Analysis Requirements Description (CARD)",
+        "publisher": "NASA JSC",
+        "sourceTypeLabel": "Controlled internal source",
+        "relevance": "Primary internal scope, assumptions, and cost-method baseline",
+        "usageLabel": "14 schedule references in the current lens",
+        "href": null,
+        "linkLabel": "Open local artifact",
+        "tone": "forest"
+      },
+      {
+        "id": "INT-003",
+        "title": "Gateway Integrated Master Schedule Extract",
+        "publisher": "NASA JSC",
+        "sourceTypeLabel": "Working internal source",
+        "relevance": "Schedule-driven phasing, milestone NET dates, and integration logic",
+        "usageLabel": "52 schedule references in the current lens",
+        "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv",
+        "linkLabel": "Open local artifact",
+        "tone": "plum"
+      },
+      {
+        "id": "WEB-001",
+        "title": "NASA Awards Artemis Contract for Lunar Gateway Power",
+        "publisher": "Propulsion",
+        "sourceTypeLabel": "Linked source",
+        "relevance": "https://www.nasa.gov/news-release/nasa-awards-artemis-contract-for-lunar-gateway-power-propulsion/",
+        "usageLabel": "1 schedule references in the current lens",
+        "href": null,
+        "linkLabel": "Open local artifact",
+        "tone": "brand"
+      },
+      {
+        "id": "WEB-002",
+        "title": "NASA Awards Northrop Grumman Artemis Contract for Gateway Crew Cabin",
+        "publisher": "NASA",
+        "sourceTypeLabel": "Public source",
+        "relevance": "HALO preliminary design contract value and scope",
+        "usageLabel": "1 schedule references in the current lens",
+        "href": "https://www.nasa.gov/news-release/nasa-awards-northrop-grumman-artemis-contract-for-gateway-crew-cabin/",
+        "linkLabel": "Open source",
+        "tone": "brand"
+      },
+      {
+        "id": "WEB-003",
+        "title": "NASA",
+        "publisher": "Northrop Grumman Finalize Moon Outpost Living Quarters Contract",
+        "sourceTypeLabel": "Linked source",
+        "relevance": "https://www.nasa.gov/news-release/nasa-northrop-grumman-finalize-moon-outpost-living-quarters-contract/",
+        "usageLabel": "2 schedule references in the current lens",
+        "href": null,
+        "linkLabel": "Open local artifact",
+        "tone": "brand"
+      },
+      {
+        "id": "WEB-004",
+        "title": "NASA Awards Contract to Launch Initial Elements for Lunar Outpost",
+        "publisher": "NASA",
+        "sourceTypeLabel": "Public source",
+        "relevance": "Falcon Heavy launch services contract value",
+        "usageLabel": "2 schedule references in the current lens",
+        "href": "https://www.nasa.gov/news-release/nasa-awards-contract-to-launch-initial-elements-for-lunar-outpost/",
+        "linkLabel": "Open source",
+        "tone": "brand"
+      },
+      {
+        "id": "WEB-005",
+        "title": "NASA",
+        "publisher": "United Arab Emirates Announce Artemis Lunar Gateway Airlock",
+        "sourceTypeLabel": "Linked source",
+        "relevance": "https://www.nasa.gov/news-release/nasa-united-arab-emirates-announce-artemis-lunar-gateway-airlock/",
+        "usageLabel": "2 schedule references in the current lens",
+        "href": null,
+        "linkLabel": "Open local artifact",
+        "tone": "brand"
+      },
+      {
+        "id": "WEB-006",
+        "title": "Artemis Programs: NASA Should Document and Communicate Plans to Address Gateway's Mass Risk",
+        "publisher": "GAO",
+        "sourceTypeLabel": "Public source",
+        "relevance": "Mass-risk posture, Gateway initial capability baseline, and schedule pressure",
+        "usageLabel": "3 schedule references in the current lens",
+        "href": "https://www.gao.gov/products/gao-24-106878",
+        "linkLabel": "Open source",
+        "tone": "brand"
+      },
+      {
+        "id": "WEB-008",
+        "title": "2019-20 Departmental Results Report",
+        "publisher": "Canadian Space Agency",
+        "sourceTypeLabel": "Public source",
+        "relevance": "Canadian commitment level for Lunar Gateway and Canadarm3",
+        "usageLabel": "1 schedule references in the current lens",
+        "href": "https://www.asc-csa.gc.ca/eng/publications/drr-2019-2020.asp",
+        "linkLabel": "Open source",
+        "tone": "brand"
+      },
+      {
+        "id": "WEB-009",
+        "title": "The Canadian Space Agency begins design of Canadarm3",
+        "publisher": "Canadian Space Agency",
+        "sourceTypeLabel": "Public source",
+        "relevance": "Canadarm3 preliminary design award and near-term spending anchor",
+        "usageLabel": "1 schedule references in the current lens",
+        "href": "https://www.asc-csa.gc.ca/eng/news/articles/2022/20220310-canadian-space-agency-begins-design-canadarm3.asp",
+        "linkLabel": "Open source",
+        "tone": "brand"
+      },
+      {
+        "id": "WEB-010",
+        "title": "Thales Alenia Space on its way to reach the Moon",
+        "publisher": "Thales Alenia Space",
+        "sourceTypeLabel": "Partner source",
+        "relevance": "I-HAB contract total and ESA module scope",
+        "usageLabel": "1 schedule references in the current lens",
+        "href": "https://www.thalesaleniaspace.com/en/press-releases/thales-alenia-space-its-way-reach-moon",
+        "linkLabel": "Open source",
+        "tone": "copper"
+      },
+      {
+        "id": "WEB-011",
+        "title": "Thales Alenia Space: at the heart of lunar industrial challenges",
+        "publisher": "Thales Alenia Space",
+        "sourceTypeLabel": "Partner source",
+        "relevance": "Initial ESPRIT contract value",
+        "usageLabel": "1 schedule references in the current lens",
+        "href": "https://www.thalesaleniaspace.com/en/news/thales-alenia-space-heart-lunar-industrial-challenges",
+        "linkLabel": "Open source",
+        "tone": "copper"
+      }
+    ]
+  }
+}

@@ -6,7 +6,7 @@
   <title>WBS Explorer | Lunar Gateway</title>
   <meta
     name="description"
-    content="A work breakdown structure explorer within the Lunar Gateway application ecosystem."
+    content="A work breakdown structure explorer for Lunar Gateway."
   />
   <meta name="theme-color" content="#0b1624" />
   <meta property="og:type" content="website" />
@@ -14,31 +14,31 @@
   <meta property="og:title" content="WBS Explorer | Lunar Gateway" />
   <meta
     property="og:description"
-    content="A work breakdown structure explorer within the Lunar Gateway application ecosystem."
+    content="A work breakdown structure explorer for Lunar Gateway."
   />
-  <meta property="og:url" content="/wbs/" />
-  <meta property="og:image" content="/suite-assets/lunar-gateway-share-card.svg" />
-  <meta property="og:image:alt" content="Lunar Gateway Application Ecosystem preview" />
+  <meta property="og:url" content="./" />
+  <meta property="og:image" content="../suite-assets/lunar-gateway-share-card.svg" />
+  <meta property="og:image:alt" content="Lunar Gateway WBS Explorer" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="WBS Explorer | Lunar Gateway" />
   <meta
     name="twitter:description"
-    content="A work breakdown structure explorer within the Lunar Gateway application ecosystem."
+    content="A work breakdown structure explorer for Lunar Gateway."
   />
-  <meta name="twitter:image" content="/suite-assets/lunar-gateway-share-card.svg" />
-  <link rel="icon" type="image/svg+xml" href="/suite-assets/lunar-gateway-favicon.svg" />
+  <meta name="twitter:image" content="../suite-assets/lunar-gateway-share-card.svg" />
+  <link rel="icon" type="image/svg+xml" href="../suite-assets/lunar-gateway-favicon.svg" />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <div class="app-shell">
     <nav class="suite-nav" aria-label="Gateway suite navigation">
-      <a class="suite-nav__home" href="/" data-suite-route="simulation">Simulation</a>
+      <a class="suite-nav__home" href="../" data-suite-route="simulation">Simulation</a>
       <div class="suite-nav__links">
-        <a class="suite-nav__link" href="/documents/" data-suite-route="documents">Documents</a>
-        <a class="suite-nav__link suite-nav__link--active" href="/wbs/" data-suite-route="wbs" aria-current="page">WBS</a>
-        <a class="suite-nav__link" href="/schedule/" data-suite-route="schedule">Schedule</a>
-        <a class="suite-nav__link" href="/cost/" data-suite-route="cost">Cost</a>
-        <a class="suite-nav__link" href="/risk/" data-suite-route="risk">Risk</a>
+        <a class="suite-nav__link" href="../documents/" data-suite-route="documents">Documents</a>
+        <a class="suite-nav__link suite-nav__link--active" href="./" data-suite-route="wbs" aria-current="page">WBS</a>
+        <a class="suite-nav__link" href="../schedule/" data-suite-route="schedule">Schedule</a>
+        <a class="suite-nav__link" href="../cost/" data-suite-route="cost">Cost</a>
+        <a class="suite-nav__link" href="../risk/" data-suite-route="risk">Risk</a>
       </div>
     </nav>
 
@@ -47,17 +47,16 @@
         <p class="eyebrow">Gateway Program Map</p>
         <h1 id="appTitle">Gateway WBS Explorer</h1>
         <p id="appSubtitle" class="intro__subtitle">
-          Use this as the ecosystem map: understand how Gateway is organized, what a selected branch means,
-          and preview the dimensions attached to it without leaving the structural view.
+          See how Gateway is organized, what each branch includes, and how the program rolls up from detailed work to the full mission architecture.
         </p>
       </div>
 
       <div class="intro__guide">
-        <p class="guide__label">Structure first. Meaning second. Evidence third.</p>
+        <p class="guide__label">Program structure at a glance</p>
         <ol class="intro__steps">
           <li>Start with the major parts of the program on the left.</li>
           <li>Use the center panel to understand what a selected branch does and why it matters.</li>
-          <li>Preview Cost, Schedule, Risks, or Documents here, then leave room for future specialist apps.</li>
+          <li>Open cost, schedule, risk, or document detail for the selected branch when you need supporting context.</li>
         </ol>
 
         <div id="appSignals" class="intro__signals" aria-label="Program signals"></div>
@@ -131,7 +130,7 @@
         <div id="overviewContent" class="overview-content">
           <section class="loading-state">
             <h2>Loading program structure</h2>
-            <p>The standalone app is waiting for the local JSON data source.</p>
+            <p>WBS data will appear here once the local dataset is available.</p>
           </section>
         </div>
       </section>
@@ -145,28 +144,18 @@
   <script>
     (function () {
       const suitePorts = { documents: 4473, wbs: 4173, schedule: 4373, cost: 4273, risk: 4573 };
-      const suiteRoutes = {
-        simulation: '/',
-        documents: '/documents/',
-        wbs: '/wbs/',
-        schedule: '/schedule/',
-        cost: '/cost/',
-        risk: '/risk/',
-      };
       const suiteHost = window.location.hostname || '127.0.0.1';
       const standalonePorts = new Set(Object.values(suitePorts).map(String));
       const runningStandalone = standalonePorts.has(String(window.location.port || ''));
+      if (!runningStandalone) return;
       document.querySelectorAll('[data-suite-route]').forEach((link) => {
         const route = link.getAttribute('data-suite-route');
-        if (!suiteRoutes[route]) return;
-        if (runningStandalone) {
-          link.href =
-            route === 'simulation'
-              ? '/index.html'
-              : `http://${suiteHost}:${suitePorts[route]}/${route}/`;
+        if (route === 'simulation') {
+          link.href = '/index.html';
           return;
         }
-        link.href = suiteRoutes[route];
+        if (!suitePorts[route]) return;
+        link.href = `http://${suiteHost}:${suitePorts[route]}/${route}/`;
       });
     })();
   </script>

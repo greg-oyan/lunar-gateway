@@ -19,6 +19,8 @@ const dataFiles = {
   authorityGuide: 'Contract_Cost_Schedule Documents/docs/gateway_data_authority_guide.rtf',
 };
 
+const staticDatasetPath = path.join(currentDir, 'data', 'gateway-schedule.json');
+
 const exposedArtifacts = {
   'gateway_milestones.csv': dataFiles.milestones,
   'gateway_master_schedule.csv': dataFiles.masterSchedule,
@@ -390,7 +392,7 @@ function getWbsBranch(wbsId) {
 }
 
 function resolveArtifactHref(fileName) {
-  return exposedArtifacts[fileName] ? `/schedule/artifacts/${fileName}` : null;
+  return exposedArtifacts[fileName] ? `../${encodeURI(exposedArtifacts[fileName])}` : null;
 }
 
 function sourceTone(authorityTier) {
@@ -408,6 +410,21 @@ function sourceTone(authorityTier) {
   }
 }
 
+function sourceTypeLabel(authorityTier) {
+  switch (authorityTier) {
+    case 'authoritative_public':
+      return 'Public source';
+    case 'internal_controlled':
+      return 'Controlled internal source';
+    case 'internal_working':
+      return 'Working internal source';
+    case 'credible_partner':
+      return 'Partner source';
+    default:
+      return 'Linked source';
+  }
+}
+
 function basisInfo(dateBasis) {
   switch (dateBasis) {
     case 'direct_public_announcement':
@@ -417,7 +434,7 @@ function basisInfo(dateBasis) {
     case 'schedule_plan_net':
       return { label: 'IMS NET milestone', tone: 'plum', category: 'ims' };
     default:
-      return { label: 'Linked schedule authority', tone: 'copper', category: 'linked' };
+      return { label: 'Linked schedule source', tone: 'copper', category: 'linked' };
   }
 }
 
@@ -664,7 +681,7 @@ async function buildScheduleData() {
   const imsCount = milestoneRecords.filter((item) => item.directnessCategory === 'ims').length;
   const authorityGuideSummary =
     summarizeText(sanitizeRtfText(authorityGuideText), 2) ||
-    'The authority guide reinforces that the source documents, not the app, carry the formal burden of definition, traceability, and evidence discipline.';
+    'The data guide explains how schedule dates, supporting files, and interpretation notes are meant to be read.';
 
   const usageCounts = new Map();
   milestoneRows.forEach((row) => splitIds(row.source_id).forEach((id) => usageCounts.set(id, (usageCounts.get(id) || 0) + 1)));
@@ -678,7 +695,7 @@ async function buildScheduleData() {
         id: source.source_id,
         title: source.title,
         publisher: source.publisher,
-        authorityTierLabel: normalizeText(source.authority_tier).replace(/_/g, ' '),
+        sourceTypeLabel: sourceTypeLabel(source.authority_tier),
         relevance: source.relevance,
         usageLabel: `${usageCounts.get(source.source_id) || 0} schedule references in the current lens`,
         href: isExternal ? source.location : resolveArtifactHref(path.basename(source.location)),
@@ -752,7 +769,7 @@ export async function buildSchedulePayload() {
         {
           title: 'What is directly anchored',
           body:
-            'Public contract awards, formal program baseline gates, and named milestone entries from the schedule authority layer are presented as direct anchors.',
+            'Public contract awards, formal program baseline gates, and named milestone entries are presented as direct anchors.',
         },
         {
           title: 'Where interpretation enters',
@@ -784,15 +801,15 @@ export async function buildSchedulePayload() {
     years,
     drivers,
     methodology: {
-      title: 'What is directly schedule-anchored, and what is interpretive',
-      preview: 'Open the authority discipline, caveats, and interpretation boundaries.',
+      title: 'What is directly sourced, and what is interpretive',
+      preview: 'Open the sourcing notes, caveats, and interpretation boundaries.',
       summary:
-        'The milestone file and master schedule extract are the primary schedule authorities in this lens. Public announcements and formal baselines anchor some dates directly, while broader schedule meaning is built by linking those dates to critical tasks, risks, and supporting documents.',
+        'The milestone file and master schedule extract anchor this view. Public announcements and formal baselines pin some dates directly, while broader schedule meaning comes from linking those dates to critical tasks, risks, and supporting documents.',
       authorityGuideSummary,
       cards: [
         {
           eyebrow: 'Direct anchors',
-          title: 'Dates that come straight from schedule authority',
+          title: 'Dates anchored directly in source material',
           body:
             'Some schedule moments are directly anchored in public announcements or formal baseline decisions, and they are treated differently from purely interpretive rollups.',
           items: [
@@ -801,12 +818,12 @@ export async function buildSchedulePayload() {
           ],
         },
         {
-          eyebrow: 'IMS authority',
-          title: 'Dates that come from the schedule layer itself',
+          eyebrow: 'Schedule file',
+          title: 'Dates drawn from the schedule files',
           body:
-            'Many Gateway milestones are NET points from the integrated schedule authority. They are still anchored, but they should be read as controlled forecast points rather than immutable historical facts.',
+            'Many Gateway milestones are NET points from the integrated schedule. They remain useful anchors, but they should be read as controlled forecast dates rather than fixed historical facts.',
           items: [
-            `${imsCount} milestones are labeled as IMS NET schedule-authority points.`,
+            `${imsCount} milestones are labeled as IMS NET schedule points.`,
             'These dates are useful and explicit, but they are not identical to public event history.',
           ],
         },
@@ -817,14 +834,14 @@ export async function buildSchedulePayload() {
             'Phase stories and schedule-driver groups are analytic structures added by the app so a first-time audience can understand why the dates matter.',
           items: [
             'Driver groupings connect tasks, milestones, risks, and documents into a few consequential branches.',
-            'Plain-English explanations are derived from the authority layer, not copied from one single source.',
+            'Plain-English explanations are derived from the linked source material, not copied from one single file.',
           ],
         },
         {
           eyebrow: 'Limits',
-          title: 'What the schedule authority layer still does not expose',
+          title: 'What this view does not show',
           body:
-            'The authority files are strong enough for presentation and traceability, but they still are not a full live project-management tool.',
+            'The available source files support timeline review and traceability, but they are not a live project-management tool.',
           items: [
             'The app does not claim to show full network logic, float, or real-time replanning.',
             'When implications are inferred across branches, the app labels that as interpretation instead of direct schedule fact.',
@@ -834,9 +851,9 @@ export async function buildSchedulePayload() {
     },
     traceability: {
       title: 'Where the timeline comes from, and where interpretation begins',
-      preview: 'Open the authority files, source register, and evidence model behind the schedule.',
+      preview: 'Open the supporting files, source register, and evidence model behind the schedule.',
       summary:
-        'The schedule lens stands on named milestone and schedule artifacts first, then links out to risk, document, and source authorities so the user can see exactly what is direct, what is linked, and what is interpretive.',
+        'The schedule view starts with named milestone and schedule files, then links out to risk, document, and source records so the reader can see what is direct, what is linked, and where interpretation begins.',
       evidenceModel: [
         {
           label: 'Direct public or formal anchors',
@@ -844,9 +861,9 @@ export async function buildSchedulePayload() {
           description: 'Publicly announced awards, formal baseline gates, and other explicitly anchored moments.',
         },
         {
-          label: 'IMS schedule authority points',
+          label: 'IMS schedule points',
           value: `${imsCount} milestones`,
-          description: 'Named NET milestones coming directly from the schedule authority layer itself.',
+          description: 'Named NET milestones drawn directly from the schedule files.',
         },
         {
           label: 'Interpretive rollups',
@@ -856,11 +873,11 @@ export async function buildSchedulePayload() {
       ],
       artifacts: [
         {
-          title: 'Gateway milestone authority extract',
+          title: 'Gateway milestone extract',
           meta: 'Primary milestone file',
           fileType: 'CSV',
           description: 'Named milestones with date basis, source IDs, confidence, and traceability notes.',
-          href: '/schedule/artifacts/gateway_milestones.csv',
+          href: `../${encodeURI(dataFiles.milestones)}`,
           linkLabel: 'Open milestone CSV',
           tone: 'brand',
         },
@@ -869,7 +886,7 @@ export async function buildSchedulePayload() {
           meta: 'Critical task backbone',
           fileType: 'CSV',
           description: 'Task-level dates, predecessors, milestone flags, and criticality indicators used to frame schedule-driving work.',
-          href: '/schedule/artifacts/gateway_master_schedule.csv',
+          href: `../${encodeURI(dataFiles.masterSchedule)}`,
           linkLabel: 'Open schedule CSV',
           tone: 'plum',
         },
@@ -878,16 +895,16 @@ export async function buildSchedulePayload() {
           meta: 'Schedule-linked pressure',
           fileType: 'CSV',
           description: 'Risk statements, categories, mitigation notes, and source IDs that explain timing pressure on the schedule.',
-          href: '/schedule/artifacts/gateway_risk_register.csv',
+          href: `../${encodeURI(dataFiles.risks)}`,
           linkLabel: 'Open risk CSV',
           tone: 'danger',
         },
         {
           title: 'Gateway contract document tracker',
-          meta: 'Supporting authority map',
+          meta: 'Supporting document map',
           fileType: 'CSV',
           description: 'Controlled documents linked to milestones, WBS branches, and schedule evidence roles.',
-          href: '/schedule/artifacts/gateway_contract_documents_tracker.csv',
+          href: `../${encodeURI(dataFiles.documents)}`,
           linkLabel: 'Open document tracker CSV',
           tone: 'forest',
         },
@@ -896,17 +913,17 @@ export async function buildSchedulePayload() {
           meta: 'Source register',
           fileType: 'CSV',
           description: 'Public and internal references used to anchor the schedule artifacts and supporting analysis.',
-          href: '/schedule/artifacts/gateway_source_reference_register.csv',
+          href: `../${encodeURI(dataFiles.sources)}`,
           linkLabel: 'Open source register CSV',
           tone: 'brand',
         },
         {
-          title: 'Gateway data authority guide',
-          meta: 'Authority discipline',
+          title: 'Gateway data guide',
+          meta: 'Reading guide',
           fileType: 'RTF',
           description: 'Companion guidance describing how source-document rigor is separated from app-level interpretation.',
-          href: '/schedule/artifacts/gateway_data_authority_guide.rtf',
-          linkLabel: 'Open authority guide',
+          href: `../${encodeURI(dataFiles.authorityGuide)}`,
+          linkLabel: 'Open data guide',
           tone: 'forest',
         },
       ],
@@ -921,6 +938,16 @@ async function serveStaticFile(response, relativePath) {
   const body = await fs.readFile(absolutePath);
   response.writeHead(200, { 'Content-Type': mimeTypes[extension] || 'application/octet-stream' });
   response.end(body);
+}
+
+async function serveRepoCorpusPath(response, pathname) {
+  const relativePath = pathname.replace(/^\//, '');
+  const absolutePath = path.join(repoRoot, relativePath);
+  if (!absolutePath.startsWith(path.join(repoRoot, 'Contract_Cost_Schedule Documents'))) {
+    sendText(response, 404, 'Not found');
+    return;
+  }
+  await sendFile(response, absolutePath);
 }
 
 const server = http.createServer(async (request, response) => {
@@ -950,9 +977,12 @@ const server = http.createServer(async (request, response) => {
     }
 
     if (pathname === '/schedule/data/gateway-schedule.json') {
-      const body = JSON.stringify(await buildSchedulePayload());
-      response.writeHead(200, { 'Content-Type': mimeTypes['.json'] });
-      response.end(body);
+      await serveStaticFile(response, 'schedule/data/gateway-schedule.json');
+      return;
+    }
+
+    if (pathname.startsWith('/Contract_Cost_Schedule Documents/')) {
+      await serveRepoCorpusPath(response, pathname);
       return;
     }
 

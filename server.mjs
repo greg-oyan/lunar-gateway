@@ -3,10 +3,6 @@ import path from 'node:path';
 import { promises as fs } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-import { getDataset as buildCostDataset } from './cost/server.mjs';
-import { buildSchedulePayload } from './schedule/server.mjs';
-import { buildDataset as buildWbsDataset } from './wbs/server.mjs';
-
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = currentDir;
 const corpusRoot = path.join(repoRoot, 'Contract_Cost_Schedule Documents');
@@ -179,6 +175,28 @@ async function serveMappedArtifact(response, fileName, artifactMap) {
   await serveRepoFile(response, relativePath);
 }
 
+async function serveCorpusRepoPath(response, pathname) {
+  const relativePath = pathname.replace(/^\//, '');
+  const absolutePath = path.join(repoRoot, relativePath);
+  if (!isInsideDirectory(absolutePath, corpusRoot)) {
+    sendText(response, 404, 'Not found');
+    return;
+  }
+
+  try {
+    const stats = await fs.stat(absolutePath);
+    if (!stats.isFile()) {
+      sendText(response, 404, 'Not found');
+      return;
+    }
+  } catch {
+    sendText(response, 404, 'Not found');
+    return;
+  }
+
+  await sendFile(response, absolutePath);
+}
+
 const server = http.createServer(async (request, response) => {
   try {
     const url = new URL(request.url || '/', `http://${host}:${port}`);
@@ -210,13 +228,18 @@ const server = http.createServer(async (request, response) => {
       return;
     }
 
+    if (pathname.startsWith('/Contract_Cost_Schedule Documents/')) {
+      await serveCorpusRepoPath(response, pathname);
+      return;
+    }
+
     if (pathname === '/wbs/data/gateway-wbs.json') {
-      sendJson(response, await buildWbsDataset());
+      await serveRepoFile(response, 'wbs/data/gateway-wbs.json');
       return;
     }
 
     if (pathname === '/schedule/data/gateway-schedule.json') {
-      sendJson(response, await buildSchedulePayload());
+      await serveRepoFile(response, 'schedule/data/gateway-schedule.json');
       return;
     }
 
@@ -226,7 +249,7 @@ const server = http.createServer(async (request, response) => {
     }
 
     if (pathname === '/cost/data/gateway-cost.json') {
-      sendJson(response, await buildCostDataset());
+      await serveRepoFile(response, 'cost/data/gateway-cost.json');
       return;
     }
 

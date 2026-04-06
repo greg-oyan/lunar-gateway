@@ -486,7 +486,7 @@ function renderFocus() {
 }
 
 function buildSupportList(items, builder) {
-  if (!items.length) return buildEmptyState('Nothing linked here yet', 'The authority layer does not expose a stronger direct link for this group.');
+  if (!items.length) return buildEmptyState('Nothing linked here yet', 'No stronger direct source is attached to this group in the current dataset.');
 
   return `
     <div class="support-list">
@@ -554,7 +554,7 @@ function buildMilestoneSupport(milestone) {
                   </div>
                 </div>
               `
-              : buildEmptyState('No direct task record', 'The current authority layer does not tie this milestone to one specific task line.')
+              : buildEmptyState('No direct task record', 'The current source set does not tie this milestone to one specific task line.')
           }
         </section>
 
@@ -596,9 +596,9 @@ function buildMilestoneSupport(milestone) {
 
         <section class="support-card">
           <div class="support-card__header">
-            <p class="support-card__eyebrow">Source authority and linkage</p>
+            <p class="support-card__eyebrow">Source references</p>
             <h3>${escapeHtml(pluralize(milestone.linkedSources.length, 'source'))}</h3>
-            <p class="support-card__summary">These are the named sources most directly linked to this date. Broader authority files appear below.</p>
+            <p class="support-card__summary">These are the named sources most directly linked to this date. Additional supporting files appear below.</p>
           </div>
           ${buildSupportList(
             milestone.linkedSources,
@@ -606,7 +606,7 @@ function buildMilestoneSupport(milestone) {
               <div class="support-item">
                 <span class="item-meta">${escapeHtml(`${source.id} - ${source.publisher}`)}</span>
                 <strong>${escapeHtml(source.title)}</strong>
-                <p class="support-item__copy">${escapeHtml(source.href ? 'External or linked authority source.' : 'Local authority source in the schedule corpus.')}</p>
+                <p class="support-item__copy">${escapeHtml(source.href ? 'External or linked source.' : 'Local source file in the schedule dataset.')}</p>
               </div>
             `,
           )}
@@ -674,8 +674,8 @@ function buildMilestoneSupport(milestone) {
 
       <section class="support-card support-card--span">
         <div class="support-card__header">
-          <p class="support-card__eyebrow">Authority files behind this schedule view</p>
-          <h3>Files and sources supporting the schedule lens</h3>
+          <p class="support-card__eyebrow">Files behind this schedule view</p>
+          <h3>Files and sources supporting the schedule</h3>
           <p class="support-card__summary">${escapeHtml(compactText(traceability.summary, 24))}</p>
         </div>
 
@@ -706,7 +706,7 @@ function buildMilestoneSupport(milestone) {
             ? `
               <div class="card-actions">
                 <button class="trace-button" type="button" data-action="toggle-reveal" data-reveal="artifacts">
-                  ${state.reveal.artifacts ? 'Show fewer authority files' : `Show all ${traceability.artifacts.length} authority files`}
+                  ${state.reveal.artifacts ? 'Show fewer files' : `Show all ${traceability.artifacts.length} files`}
                 </button>
               </div>
             `
@@ -720,7 +720,7 @@ function buildMilestoneSupport(milestone) {
                 <section class="source-card">
                   <div class="source-card__row">
                     <span class="item-meta">${escapeHtml(`${source.id} - ${source.publisher}`)}</span>
-                    <span class="${tagClass(source.tone)}">${escapeHtml(source.authorityTierLabel)}</span>
+                    <span class="${tagClass(source.tone)}">${escapeHtml(source.sourceTypeLabel)}</span>
                   </div>
                   <h3>${escapeHtml(source.title)}</h3>
                   <p>${escapeHtml(compactText(source.relevance, 14))}</p>
@@ -794,7 +794,7 @@ function renderSupport() {
 function renderApp() {
   appTitle.textContent = state.data.appTitle;
   appSubtitle.textContent = 'Visual schedule map of Gateway across major phases and milestone dates.';
-  generatedAt.textContent = `Preprocessed locally ${dateTimeFormatter.format(new Date(state.data.generatedAt))}`;
+  generatedAt.textContent = `Updated ${dateTimeFormatter.format(new Date(state.data.generatedAt))}`;
   stageFrame.textContent = '2017 to 2031. Major phases. Key milestone dates.';
 
   buildSignalPills();
@@ -865,7 +865,7 @@ function renderError(error) {
   timelineChart.innerHTML = '';
   focusLayer.hidden = true;
   supportLayer.hidden = true;
-  generatedAt.textContent = 'Authority data unavailable';
+  generatedAt.textContent = 'Schedule data unavailable';
 }
 
 document.body.addEventListener('click', (event) => {

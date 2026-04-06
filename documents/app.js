@@ -55,7 +55,30 @@ export function filterDocuments(documents, filters = {}) {
 }
 
 function openDocumentHref(relativePath) {
-  return `/documents/source/${encodeURIComponent(relativePath)}`;
+  return `../${encodeURI(relativePath)}`;
+}
+
+function buildDocumentUseNote(documentRecord) {
+  switch (documentRecord.category) {
+    case 'Program Reference':
+      return 'This document defines program scope, structure, or estimating context used across Gateway.';
+    case 'WBS Dataset':
+      return 'This dataset lays out the Gateway work breakdown and responsibility structure.';
+    case 'Cost Dataset':
+      return 'This dataset supports cost rollups, detail rows, and yearly phasing for Gateway.';
+    case 'Contract Pricing Dataset':
+      return 'This dataset preserves priced contract evidence used to anchor parts of the estimate.';
+    case 'Schedule Dataset':
+      return 'This dataset supports milestone and task-level schedule analysis for Gateway.';
+    case 'Risk Dataset':
+      return 'This dataset captures the risk issues and mitigation actions tied to Gateway execution.';
+    case 'Document Control Dataset':
+      return 'This tracker links controlled documents to the program structure, milestones, and supporting evidence.';
+    case 'Reference Dataset':
+      return 'This reference file helps interpret the broader set of Gateway source material.';
+    default:
+      return 'This document is part of the Gateway source library and provides supporting program context.';
+  }
 }
 
 function getSelectedDocument() {
@@ -130,7 +153,7 @@ function renderList() {
   if (state.loadState === 'error') {
     elements.listState.hidden = false;
     elements.listState.innerHTML =
-      `<strong>Unable to load the document corpus.</strong><br />${state.loadError}`;
+      `<strong>Unable to load the document library.</strong><br />${state.loadError}`;
     elements.documentList.innerHTML = '';
     elements.resultsLabel.textContent = 'Load error';
     return;
@@ -189,8 +212,7 @@ function renderDetailEmptyState(eyebrow, title, body) {
 
 function renderDetailCard(documentRecord) {
   const tags = Array.isArray(documentRecord.tags) ? documentRecord.tags : [];
-  const detailUseNote =
-    `${documentRecord.title} sits in the corpus as a ${documentRecord.category.toLowerCase()} artifact and helps anchor the Gateway briefing set without forcing the user into raw folder browsing.`;
+  const detailUseNote = buildDocumentUseNote(documentRecord);
 
   elements.detailPaneContent.innerHTML = `
     <article class="detail-card">
@@ -234,8 +256,8 @@ function renderDetailCard(documentRecord) {
 
       <section class="detail-section">
         <div class="detail-section__header">
-          <p class="detail-section__eyebrow">Research Use</p>
-          <h3>Why this artifact is in the corpus</h3>
+          <p class="detail-section__eyebrow">Program use</p>
+          <h3>Why this document matters</h3>
         </div>
         <p class="detail-section__body">${escapeHtml(detailUseNote)}</p>
       </section>
@@ -243,7 +265,7 @@ function renderDetailCard(documentRecord) {
       <section class="detail-section">
         <div class="detail-section__header">
           <p class="detail-section__eyebrow">Tags</p>
-          <h3>Searchable handles</h3>
+          <h3>Search tags</h3>
         </div>
         <div class="tag-row">
           ${tags.map((tag) => `<span class="tag-chip">${escapeHtml(tag)}</span>`).join('')}

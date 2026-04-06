@@ -6,7 +6,7 @@
     <title>Documents Explorer | Lunar Gateway</title>
     <meta
       name="description"
-      content="A documents explorer within the Lunar Gateway application ecosystem."
+      content="A document explorer for Lunar Gateway."
     />
     <meta name="theme-color" content="#0b1624" />
     <meta property="og:type" content="website" />
@@ -14,40 +14,40 @@
     <meta property="og:title" content="Documents Explorer | Lunar Gateway" />
     <meta
       property="og:description"
-      content="A documents explorer within the Lunar Gateway application ecosystem."
+      content="A document explorer for Lunar Gateway."
     />
-    <meta property="og:url" content="/documents/" />
-    <meta property="og:image" content="/suite-assets/lunar-gateway-share-card.svg" />
-    <meta property="og:image:alt" content="Lunar Gateway Application Ecosystem preview" />
+    <meta property="og:url" content="./" />
+    <meta property="og:image" content="../suite-assets/lunar-gateway-share-card.svg" />
+    <meta property="og:image:alt" content="Lunar Gateway Documents Explorer" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Documents Explorer | Lunar Gateway" />
     <meta
       name="twitter:description"
-      content="A documents explorer within the Lunar Gateway application ecosystem."
+      content="A document explorer for Lunar Gateway."
     />
-    <meta name="twitter:image" content="/suite-assets/lunar-gateway-share-card.svg" />
-    <link rel="icon" type="image/svg+xml" href="/suite-assets/lunar-gateway-favicon.svg" />
+    <meta name="twitter:image" content="../suite-assets/lunar-gateway-share-card.svg" />
+    <link rel="icon" type="image/svg+xml" href="../suite-assets/lunar-gateway-favicon.svg" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <div class="app-shell">
       <nav class="suite-nav" aria-label="Gateway suite navigation">
-        <a class="suite-nav__home" href="/" data-suite-route="simulation">Simulation</a>
+        <a class="suite-nav__home" href="../" data-suite-route="simulation">Simulation</a>
         <div class="suite-nav__links">
-          <a class="suite-nav__link suite-nav__link--active" href="/documents/" data-suite-route="documents" aria-current="page">Documents</a>
-          <a class="suite-nav__link" href="/wbs/" data-suite-route="wbs">WBS</a>
-          <a class="suite-nav__link" href="/schedule/" data-suite-route="schedule">Schedule</a>
-          <a class="suite-nav__link" href="/cost/" data-suite-route="cost">Cost</a>
-          <a class="suite-nav__link" href="/risk/" data-suite-route="risk">Risk</a>
+          <a class="suite-nav__link suite-nav__link--active" href="./" data-suite-route="documents" aria-current="page">Documents</a>
+          <a class="suite-nav__link" href="../wbs/" data-suite-route="wbs">WBS</a>
+          <a class="suite-nav__link" href="../schedule/" data-suite-route="schedule">Schedule</a>
+          <a class="suite-nav__link" href="../cost/" data-suite-route="cost">Cost</a>
+          <a class="suite-nav__link" href="../risk/" data-suite-route="risk">Risk</a>
         </div>
       </nav>
 
       <header class="topbar">
         <div class="topbar__identity">
-          <p class="topbar__eyebrow">Gateway Source Corpus</p>
+          <p class="topbar__eyebrow">Gateway Source Library</p>
           <h1 id="appTitle">Documents Explorer</h1>
           <p class="topbar__subtitle">
-            A document intelligence view over the Gateway authority layer.
+            Browse the source material behind the Gateway program and open the documents that define cost, schedule, risk, and structure.
           </p>
           <div class="topbar__meta-row">
             <span id="headerCount" class="header-count">0 documents</span>
@@ -83,7 +83,7 @@
         </div>
       </header>
 
-      <section class="summary-strip" aria-label="Corpus summary">
+      <section class="summary-strip" aria-label="Document summary">
         <div class="summary-strip__stat">
           <span class="summary-strip__label">Documents</span>
           <strong id="visibleCount">0</strong>
@@ -97,20 +97,20 @@
           <strong id="fileTypeCount">0</strong>
         </div>
         <div class="summary-strip__context">
-          <p>
-            Start with the list, then select a document to reveal richer context,
-            metadata, and a direct link back to the source file.
-          </p>
+              <p>
+                Start with the list, then select a document to reveal richer context,
+                metadata, and a direct link back to the source file.
+              </p>
         </div>
       </section>
 
       <main class="workspace">
         <aside class="list-pane" aria-labelledby="listPaneTitle">
           <div class="pane-header">
-            <div>
-              <p class="pane-header__eyebrow">Browse</p>
-              <h2 id="listPaneTitle">Document Corpus</h2>
-            </div>
+              <div>
+                <p class="pane-header__eyebrow">Browse</p>
+                <h2 id="listPaneTitle">Source Library</h2>
+              </div>
             <p id="resultsLabel" class="pane-header__meta">0 results</p>
           </div>
 
@@ -135,28 +135,18 @@
     <script>
       (function () {
         const suitePorts = { documents: 4473, wbs: 4173, schedule: 4373, cost: 4273, risk: 4573 };
-        const suiteRoutes = {
-          simulation: '/',
-          documents: '/documents/',
-          wbs: '/wbs/',
-          schedule: '/schedule/',
-          cost: '/cost/',
-          risk: '/risk/',
-        };
         const suiteHost = window.location.hostname || '127.0.0.1';
         const standalonePorts = new Set(Object.values(suitePorts).map(String));
         const runningStandalone = standalonePorts.has(String(window.location.port || ''));
+        if (!runningStandalone) return;
         document.querySelectorAll('[data-suite-route]').forEach((link) => {
           const route = link.getAttribute('data-suite-route');
-          if (!suiteRoutes[route]) return;
-          if (runningStandalone) {
-            link.href =
-              route === 'simulation'
-                ? '/index.html'
-                : `http://${suiteHost}:${suitePorts[route]}/${route}/`;
+          if (route === 'simulation') {
+            link.href = '/index.html';
             return;
           }
-          link.href = suiteRoutes[route];
+          if (!suitePorts[route]) return;
+          link.href = `http://${suiteHost}:${suitePorts[route]}/${route}/`;
         });
       })();
     </script>

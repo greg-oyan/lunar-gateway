@@ -4,20 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lunar Gateway Application Ecosystem</title>
-  <meta name="description" content="An interconnected Lunar Gateway simulation and decision-support app suite built from public NASA source material.">
+  <meta name="description" content="A Lunar Gateway simulation and explorer suite built from public NASA source material.">
   <meta name="theme-color" content="#08121f">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Lunar Gateway Application Ecosystem">
   <meta property="og:title" content="Lunar Gateway Application Ecosystem">
-  <meta property="og:description" content="An interconnected Lunar Gateway simulation and decision-support app suite built from public NASA source material.">
-  <meta property="og:url" content="/">
-  <meta property="og:image" content="/suite-assets/lunar-gateway-share-card.svg">
-  <meta property="og:image:alt" content="Lunar Gateway Application Ecosystem preview">
+  <meta property="og:description" content="A Lunar Gateway simulation and explorer suite built from public NASA source material.">
+  <meta property="og:url" content="./">
+  <meta property="og:image" content="./suite-assets/lunar-gateway-share-card.svg">
+  <meta property="og:image:alt" content="Lunar Gateway simulation and explorer suite">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Lunar Gateway Application Ecosystem">
-  <meta name="twitter:description" content="An interconnected Lunar Gateway simulation and decision-support app suite built from public NASA source material.">
-  <meta name="twitter:image" content="/suite-assets/lunar-gateway-share-card.svg">
-  <link rel="icon" type="image/svg+xml" href="/suite-assets/lunar-gateway-favicon.svg">
+  <meta name="twitter:description" content="A Lunar Gateway simulation and explorer suite built from public NASA source material.">
+  <meta name="twitter:image" content="./suite-assets/lunar-gateway-share-card.svg">
+  <link rel="icon" type="image/svg+xml" href="./suite-assets/lunar-gateway-favicon.svg">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
@@ -570,18 +570,17 @@
       </div>
 
       <section class="launch-suite" aria-labelledby="launch-suite-heading">
-        <div class="launch-label" id="launch-suite-heading">Gateway Ecosystem</div>
+        <div class="launch-label" id="launch-suite-heading">Gateway Suite</div>
         <div class="launch-suite-copy">
-          Move through the full Gateway application ecosystem from one tab, with the simulation as
-          the home layer and the explorers as supporting mission lenses.
+          Move between the simulation and the supporting explorers from one menu.
         </div>
         <div class="launch-suite-links">
-          <a class="launch-suite-link launch-suite-link--active" href="/" data-suite-route="simulation" aria-current="page">Simulation</a>
-          <a class="launch-suite-link" href="/documents/" data-suite-route="documents">Documents</a>
-          <a class="launch-suite-link" href="/wbs/" data-suite-route="wbs">WBS</a>
-          <a class="launch-suite-link" href="/schedule/" data-suite-route="schedule">Schedule</a>
-          <a class="launch-suite-link" href="/cost/" data-suite-route="cost">Cost</a>
-          <a class="launch-suite-link" href="/risk/" data-suite-route="risk">Risk</a>
+          <a class="launch-suite-link launch-suite-link--active" href="./" data-suite-route="simulation" aria-current="page">Simulation</a>
+          <a class="launch-suite-link" href="./documents/" data-suite-route="documents">Documents</a>
+          <a class="launch-suite-link" href="./wbs/" data-suite-route="wbs">WBS</a>
+          <a class="launch-suite-link" href="./schedule/" data-suite-route="schedule">Schedule</a>
+          <a class="launch-suite-link" href="./cost/" data-suite-route="cost">Cost</a>
+          <a class="launch-suite-link" href="./risk/" data-suite-route="risk">Risk</a>
         </div>
       </section>
 
@@ -681,16 +680,15 @@
     <summary>Gateway Suite</summary>
     <div class="suite-dock__panel">
       <div class="suite-dock__copy">
-        Stay inside one Gateway application, with the simulation as home and the explorers as
-        companion views.
+        Keep the simulation as home and jump to the explorer you need.
       </div>
       <div class="suite-dock__links">
-        <a class="suite-dock__link suite-dock__link--active" href="/" data-suite-route="simulation" aria-current="page">Simulation</a>
-        <a class="suite-dock__link" href="/documents/" data-suite-route="documents">Documents</a>
-        <a class="suite-dock__link" href="/wbs/" data-suite-route="wbs">WBS</a>
-        <a class="suite-dock__link" href="/schedule/" data-suite-route="schedule">Schedule</a>
-        <a class="suite-dock__link" href="/cost/" data-suite-route="cost">Cost</a>
-        <a class="suite-dock__link" href="/risk/" data-suite-route="risk">Risk</a>
+        <a class="suite-dock__link suite-dock__link--active" href="./" data-suite-route="simulation" aria-current="page">Simulation</a>
+        <a class="suite-dock__link" href="./documents/" data-suite-route="documents">Documents</a>
+        <a class="suite-dock__link" href="./wbs/" data-suite-route="wbs">WBS</a>
+        <a class="suite-dock__link" href="./schedule/" data-suite-route="schedule">Schedule</a>
+        <a class="suite-dock__link" href="./cost/" data-suite-route="cost">Cost</a>
+        <a class="suite-dock__link" href="./risk/" data-suite-route="risk">Risk</a>
       </div>
     </div>
   </details>
@@ -708,27 +706,18 @@
   <script>
   (function(){
     var suitePorts = { documents:4473, wbs:4173, schedule:4373, cost:4273, risk:4573 };
-    var suiteRoutes = {
-      simulation: '/',
-      documents: '/documents/',
-      wbs: '/wbs/',
-      schedule: '/schedule/',
-      cost: '/cost/',
-      risk: '/risk/'
-    };
     var suiteHost = window.location.hostname || '127.0.0.1';
     var standalonePorts = Object.values(suitePorts).map(String);
     var runningStandalone = standalonePorts.indexOf(String(window.location.port || '')) !== -1;
+    if(!runningStandalone) return;
     document.querySelectorAll('[data-suite-route]').forEach(function(link){
       var route = link.getAttribute('data-suite-route');
-      if(!suiteRoutes[route]) return;
-      if(runningStandalone){
-        link.href = route === 'simulation'
-          ? '/index.html'
-          : 'http://' + suiteHost + ':' + suitePorts[route] + '/' + route + '/';
+      if(route === 'simulation'){
+        link.href = '/index.html';
         return;
       }
-      link.href = suiteRoutes[route];
+      if(!suitePorts[route]) return;
+      link.href = 'http://' + suiteHost + ':' + suitePorts[route] + '/' + route + '/';
     });
 
     function showErr(m){

@@ -284,7 +284,7 @@ function renderSummary() {
     elements.summaryNarrative.textContent =
       'No risks are visible with the current filters. Clear or broaden the filter set to repopulate the review surface.';
     elements.summaryMethod.textContent =
-      `Transparent v1 scoring: ${scoreFormulaText()}. ${bandThresholdText()}`;
+      `Scoring: ${scoreFormulaText()}. ${bandThresholdText()}`;
     return;
   }
 
@@ -292,14 +292,14 @@ function renderSummary() {
     elements.summaryNarrative.textContent =
       'The current risk set keeps priority, ownership, and mitigation visible without overwhelming the first screen.';
     elements.summaryMethod.textContent =
-      `Transparent v1 scoring: ${scoreFormulaText()}. ${bandThresholdText()}`;
+      `Scoring: ${scoreFormulaText()}. ${bandThresholdText()}`;
     return;
   }
 
   elements.summaryNarrative.textContent =
     `${topRisk.title} currently sets the tone for this view at ${priorityLabel(topRisk.priority)} priority, while ${attentionCount} visible risks still sit in the high-attention range.`;
   elements.summaryMethod.textContent =
-    `Transparent v1 scoring: ${scoreFormulaText()}. ${bandThresholdText()}`;
+    `Scoring: ${scoreFormulaText()}. ${bandThresholdText()}`;
 }
 
 function renderFilters(allRisks) {
@@ -480,7 +480,7 @@ function renderRiskDetail(risk) {
             <h3>How this score is computed</h3>
           </div>
           <p class="scoring-logic__note">
-            Transparent v1 scoring for this explorer. The app does not claim a more complex validated model than the source values expose.
+            Priority score is calculated directly from the visible likelihood and impact values. The app does not imply a more complex model than the source data supports.
           </p>
         </div>
 

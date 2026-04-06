@@ -23,6 +23,8 @@ const dataFiles = {
   wbsDictionary: 'Contract_Cost_Schedule Documents/docs/gateway_wbs_dictionary.rtf',
 };
 
+const staticDatasetPath = path.join(currentDir, 'data', 'gateway-cost.json');
+
 const exposedArtifacts = {
   'gateway_cost_estimate.csv': dataFiles.estimate,
   'gateway_cost_phasing.csv': dataFiles.phasing,
@@ -315,10 +317,7 @@ function normalizeSourceRow(row) {
 
 function buildLocalSourceHref(location) {
   if (!location || /^https?:/i.test(location)) return null;
-  const fileName = path.basename(location);
-  return Object.prototype.hasOwnProperty.call(exposedArtifacts, fileName)
-    ? `/cost/source/${fileName}`
-    : null;
+  return `../${encodeURI(location)}`;
 }
 
 function buildDataset({
@@ -491,7 +490,7 @@ function buildDataset({
       topBreakdown,
       narrative: driverNames.length
         ? `${fy} is driven most by ${driverNames.join(' and ')}.${reserveSentence}`.trim()
-        : `${fy} has no direct cost phasing in the current authority set.`,
+        : `${fy} has no direct cost phasing in the current source set.`,
     };
   });
 
@@ -566,7 +565,7 @@ function buildDataset({
       ? 'This is the full program-reference rollup for the Cost Explorer.'
       : summarizeText(category.notes || category.methodologyNote, 2);
     const includedNote = category.scope === 'program_reference_partner_value'
-      ? 'This bucket is carried as a partner reference value for ecosystem completeness, not as NASA budget authority.'
+      ? 'This bucket is carried as a partner reference value for completeness, not as a NASA appropriated cost line.'
       : 'This bucket sits inside the NASA-led portion of the program-reference estimate.';
     const judgmentNote = category.basisType.includes('schedule') || category.basisType.includes('estimate')
       ? 'Some timing, subsystem, or campaign allocation remains modeled rather than directly priced.'
@@ -653,23 +652,23 @@ function buildDataset({
         'The rebuilt cost layer keeps the CARD as the NASA-accountable baseline, then adds clearly flagged partner reference values where the ecosystem story would otherwise be incomplete.',
       items: [
         'Program-reference current cost is used for structural understanding and app-facing rollups.',
-        'Partner contribution rows are labeled as reference values rather than NASA budget authority.',
+        'Partner contribution rows are labeled as reference values rather than NASA appropriated cost lines.',
         'The headline total spans FY2020 through FY2033.',
       ],
-      sourceArtifact: '/cost/source/gateway_cost_basis_of_estimate.rtf',
+      sourceArtifact: `../${encodeURI(dataFiles.costBasis)}`,
     },
     {
       id: 'methods',
       eyebrow: 'Build Method',
       title: 'How the estimate is built',
       summary:
-        'Level-2 buckets reconcile to annual phasing, while level-3 rows preserve technical weighting under each parent. This keeps the estimate readable while still tying back to time-phased authority data.',
+        'Level-2 buckets reconcile to annual phasing, while level-3 rows preserve technical weighting under each parent. This keeps the estimate readable while still tying back to time-phased source data.',
       items: [
         'Current-cost rollups are reconciled to summed annual phasing.',
         'Schedule timing drives the phasing profile where no public burn plan exists.',
         'Subsystem rows remain weighted allocations unless priced evidence or direct sourcing is available.',
       ],
-      sourceArtifact: '/cost/source/gateway_cost_basis_of_estimate.rtf',
+      sourceArtifact: `../${encodeURI(dataFiles.costBasis)}`,
     },
     {
       id: 'reserve',
@@ -687,33 +686,33 @@ function buildDataset({
               maximumFractionDigits: 0,
             })}`,
         ),
-      sourceArtifact: '/cost/source/gateway_cost_estimate_detail.csv',
+      sourceArtifact: `../${encodeURI(dataFiles.detail)}`,
     },
     {
       id: 'judgment',
       eyebrow: 'Judgment Areas',
       title: 'Where judgment still remains',
       summary:
-        'The authority layer now says clearly what is directly sourced, what is priced, what is partner reference, and what still relies on allocation or schedule judgment.',
+        'The estimate now makes clear what is directly sourced, what is priced, what is partner reference, and what still relies on allocation or schedule judgment.',
       items: [
         'Public award values rarely provide a year-by-year burn plan.',
         'Partner contribution values remain reference values rather than appropriated NASA budget lines.',
         'Reserve annual placement is a management planning judgment informed by risk timing.',
       ],
-      sourceArtifact: '/cost/source/gateway_cost_basis_of_estimate.rtf',
+      sourceArtifact: `../${encodeURI(dataFiles.costBasis)}`,
     },
     {
       id: 'authority',
-      eyebrow: 'Authority Discipline',
+      eyebrow: 'Source Discipline',
       title: 'How traceability is enforced',
       summary:
-        'The authority guide makes the evidence model visible: source IDs, authority tiers, basis types, and clearly labeled judgment where a public fact does not exist.',
+        'The data guide explains the evidence model: source IDs, source types, basis types, and clearly labeled judgment where a public fact does not exist.',
       items: [
-        'Risk, milestone, and document artifacts now carry explicit authority cues.',
+        'Risk, milestone, and document artifacts carry clear sourcing cues.',
         'The source register centralizes internal and public references.',
         'The Cost Explorer surfaces evidence after meaning, not instead of meaning.',
       ],
-      sourceArtifact: '/cost/source/gateway_data_authority_guide.rtf',
+      sourceArtifact: `../${encodeURI(dataFiles.authorityGuide)}`,
     },
   ];
 
@@ -722,7 +721,7 @@ function buildDataset({
       id: 'gateway_cost_estimate.csv',
       title: 'Cost estimate rollup',
       type: 'CSV',
-      href: '/cost/source/gateway_cost_estimate.csv',
+      href: `../${encodeURI(dataFiles.estimate)}`,
       description: 'Current-cost rollup by WBS with uncertainty ranges, basis types, source IDs, and explicit-dollar companions.',
       tags: ['Rollup', 'Authority data'],
     },
@@ -730,7 +729,7 @@ function buildDataset({
       id: 'gateway_cost_phasing.csv',
       title: 'Annual cost phasing',
       type: 'CSV',
-      href: '/cost/source/gateway_cost_phasing.csv',
+      href: `../${encodeURI(dataFiles.phasing)}`,
       description: 'Year-by-year current-cost values with labor, material, integration, and traceability metadata.',
       tags: ['By year', 'Current dollars'],
     },
@@ -738,7 +737,7 @@ function buildDataset({
       id: 'gateway_cost_estimate_detail.csv',
       title: 'Grouped cost detail',
       type: 'CSV',
-      href: '/cost/source/gateway_cost_estimate_detail.csv',
+      href: `../${encodeURI(dataFiles.detail)}`,
       description: 'Grouped bridge from WBS total to cost component to fiscal year, including explicit reserve detail.',
       tags: ['Drilldown', 'Reserve'],
     },
@@ -746,7 +745,7 @@ function buildDataset({
       id: 'gateway_section_b_pricing.csv',
       title: 'Priced line evidence',
       type: 'CSV',
-      href: '/cost/source/gateway_section_b_pricing.csv',
+      href: `../${encodeURI(dataFiles.pricing)}`,
       description: 'Direct priced lines that anchor portions of the estimate with CLIN-level evidence.',
       tags: ['Direct evidence', 'Pricing'],
     },
@@ -754,25 +753,25 @@ function buildDataset({
       id: 'gateway_source_reference_register.csv',
       title: 'Source reference register',
       type: 'CSV',
-      href: '/cost/source/gateway_source_reference_register.csv',
-      description: 'Internal and public source register used to support the rebuilt authority layer.',
+      href: `../${encodeURI(dataFiles.sources)}`,
+      description: 'Internal and public source register used across the cost package.',
       tags: ['Sources', 'Traceability'],
     },
     {
       id: 'gateway_cost_basis_of_estimate.rtf',
       title: 'Cost basis of estimate',
       type: 'RTF',
-      href: '/cost/source/gateway_cost_basis_of_estimate.rtf',
+      href: `../${encodeURI(dataFiles.costBasis)}`,
       description: 'Narrative explanation of scope, annual phasing logic, reserve treatment, and remaining judgment.',
-      tags: ['Methodology', 'Authority doc'],
+      tags: ['Methodology', 'Source guide'],
     },
     {
       id: 'gateway_data_authority_guide.rtf',
-      title: 'Data authority guide',
+      title: 'Data guide',
       type: 'RTF',
-      href: '/cost/source/gateway_data_authority_guide.rtf',
-      description: 'Explains how source IDs, authority tiers, and supporting artifacts are meant to be read.',
-      tags: ['Traceability', 'Authority doc'],
+      href: `../${encodeURI(dataFiles.authorityGuide)}`,
+      description: 'Explains how source IDs, source types, and supporting artifacts are meant to be read.',
+      tags: ['Traceability', 'Source guide'],
     },
   ];
 
@@ -796,7 +795,7 @@ function buildDataset({
         title: 'Direct priced lines',
         value: pricingRows.length,
         label: 'priced lines',
-        note: `${pricedEvidenceUsd.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })} of direct priced evidence is available in the authority set.`,
+        note: `${pricedEvidenceUsd.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })} of direct priced evidence is available in the current source set.`,
         tone: 'brand',
       },
       {
@@ -810,7 +809,7 @@ function buildDataset({
         title: 'Partner reference buckets',
         value: topCategories.filter((category) => category.scope === 'program_reference_partner_value').length,
         label: 'major buckets',
-        note: 'These are clearly labeled as reference values to avoid implying NASA budget authority where that would be misleading.',
+        note: 'These are clearly labeled as reference values to avoid implying NASA appropriated cost where that would be misleading.',
         tone: 'forest',
       },
       {
@@ -833,7 +832,7 @@ function buildDataset({
         'This is where the program cost comes from, how it is distributed over time, and why the estimate looks the way it does.',
       storyLine: 'Meaning first. Numbers second. Evidence third.',
       sourceNote:
-        'The Cost Explorer reads a single preprocessed JSON payload from the local cost server and links back to the rebuilt authority-side source files.',
+        'The Cost Explorer reads a single preprocessed JSON payload and links back to the supporting cost source files.',
     },
     overview,
     years: yearlyTotals,
@@ -847,7 +846,7 @@ function buildDataset({
     categories: categoryPayload,
     methodology: {
       summary:
-        'The method layer is part of the product, not a footnote. Assumptions, rollup logic, reserve treatment, and remaining judgment are all visible because that is what makes the estimate presentation-grade and defensible.',
+        'Assumptions, rollup logic, reserve treatment, and remaining judgment are all visible so the estimate can be read and challenged clearly.',
       cards: methodologyCards,
       costBasisExcerpt: summarizeText(costBasisText, 5),
       authorityGuideExcerpt: summarizeText(authorityGuideText, 4),
@@ -902,6 +901,16 @@ async function sendFile(response, absolutePath) {
   response.end(contents);
 }
 
+async function serveRepoCorpusPath(response, pathname) {
+  const relativePath = pathname.replace(/^\//, '');
+  const absolutePath = path.join(repoRoot, relativePath);
+  if (!absolutePath.startsWith(path.join(repoRoot, 'Contract_Cost_Schedule Documents'))) {
+    notFound(response);
+    return;
+  }
+  await sendFile(response, absolutePath);
+}
+
 function notFound(response) {
   response.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
   response.end('Not found');
@@ -910,7 +919,7 @@ function notFound(response) {
 const server = http.createServer(async (request, response) => {
   try {
     const url = new URL(request.url || '/', `http://${host}:${port}`);
-    const pathname = url.pathname;
+    const pathname = decodeURIComponent(url.pathname);
 
     if (pathname === '/index.html' || pathname === '/simulation' || pathname === '/simulation/') {
       await sendFile(response, path.join(repoRoot, 'index.html'));
@@ -934,9 +943,7 @@ const server = http.createServer(async (request, response) => {
     }
 
     if (pathname === '/cost/data/gateway-cost.json') {
-      const dataset = await getDataset();
-      response.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-      response.end(JSON.stringify(dataset));
+      await sendFile(response, staticDatasetPath);
       return;
     }
 
@@ -947,6 +954,11 @@ const server = http.createServer(async (request, response) => {
         return;
       }
       await sendFile(response, path.join(repoRoot, exposedArtifacts[fileName]));
+      return;
+    }
+
+    if (pathname.startsWith('/Contract_Cost_Schedule Documents/')) {
+      await serveRepoCorpusPath(response, pathname);
       return;
     }
 

@@ -6,7 +6,7 @@
     <title>Risk Explorer | Lunar Gateway</title>
     <meta
       name="description"
-      content="A risk explorer within the Lunar Gateway application ecosystem."
+      content="A risk explorer for Lunar Gateway."
     />
     <meta name="theme-color" content="#0b1624" />
     <meta property="og:type" content="website" />
@@ -14,37 +14,37 @@
     <meta property="og:title" content="Risk Explorer | Lunar Gateway" />
     <meta
       property="og:description"
-      content="A risk explorer within the Lunar Gateway application ecosystem."
+      content="A risk explorer for Lunar Gateway."
     />
-    <meta property="og:url" content="/risk/" />
-    <meta property="og:image" content="/suite-assets/lunar-gateway-share-card.svg" />
-    <meta property="og:image:alt" content="Lunar Gateway Application Ecosystem preview" />
+    <meta property="og:url" content="./" />
+    <meta property="og:image" content="../suite-assets/lunar-gateway-share-card.svg" />
+    <meta property="og:image:alt" content="Lunar Gateway Risk Explorer" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Risk Explorer | Lunar Gateway" />
     <meta
       name="twitter:description"
-      content="A risk explorer within the Lunar Gateway application ecosystem."
+      content="A risk explorer for Lunar Gateway."
     />
-    <meta name="twitter:image" content="/suite-assets/lunar-gateway-share-card.svg" />
-    <link rel="icon" type="image/svg+xml" href="/suite-assets/lunar-gateway-favicon.svg" />
+    <meta name="twitter:image" content="../suite-assets/lunar-gateway-share-card.svg" />
+    <link rel="icon" type="image/svg+xml" href="../suite-assets/lunar-gateway-favicon.svg" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <div class="app-shell">
       <nav class="suite-nav" aria-label="Gateway suite navigation">
-        <a class="suite-nav__home" href="/" data-suite-route="simulation">Simulation</a>
+        <a class="suite-nav__home" href="../" data-suite-route="simulation">Simulation</a>
         <div class="suite-nav__links">
-          <a class="suite-nav__link" href="/documents/" data-suite-route="documents">Documents</a>
-          <a class="suite-nav__link" href="/wbs/" data-suite-route="wbs">WBS</a>
-          <a class="suite-nav__link" href="/schedule/" data-suite-route="schedule">Schedule</a>
-          <a class="suite-nav__link" href="/cost/" data-suite-route="cost">Cost</a>
-          <a class="suite-nav__link suite-nav__link--active" href="/risk/" data-suite-route="risk" aria-current="page">Risk</a>
+          <a class="suite-nav__link" href="../documents/" data-suite-route="documents">Documents</a>
+          <a class="suite-nav__link" href="../wbs/" data-suite-route="wbs">WBS</a>
+          <a class="suite-nav__link" href="../schedule/" data-suite-route="schedule">Schedule</a>
+          <a class="suite-nav__link" href="../cost/" data-suite-route="cost">Cost</a>
+          <a class="suite-nav__link suite-nav__link--active" href="./" data-suite-route="risk" aria-current="page">Risk</a>
         </div>
       </nav>
 
       <header class="topbar">
         <div class="topbar__identity">
-          <p class="topbar__eyebrow">Gateway Decision Support</p>
+          <p class="topbar__eyebrow">Gateway Risk Review</p>
           <h1 id="appTitle">Risk Explorer</h1>
           <p id="appSubtitle" class="topbar__subtitle">
             Focus on the risks that matter most, then inspect why they matter and
@@ -160,28 +160,18 @@
     <script>
       (function () {
         const suitePorts = { documents: 4473, wbs: 4173, schedule: 4373, cost: 4273, risk: 4573 };
-        const suiteRoutes = {
-          simulation: '/',
-          documents: '/documents/',
-          wbs: '/wbs/',
-          schedule: '/schedule/',
-          cost: '/cost/',
-          risk: '/risk/',
-        };
         const suiteHost = window.location.hostname || '127.0.0.1';
         const standalonePorts = new Set(Object.values(suitePorts).map(String));
         const runningStandalone = standalonePorts.has(String(window.location.port || ''));
+        if (!runningStandalone) return;
         document.querySelectorAll('[data-suite-route]').forEach((link) => {
           const route = link.getAttribute('data-suite-route');
-          if (!suiteRoutes[route]) return;
-          if (runningStandalone) {
-            link.href =
-              route === 'simulation'
-                ? '/index.html'
-                : `http://${suiteHost}:${suitePorts[route]}/${route}/`;
+          if (route === 'simulation') {
+            link.href = '/index.html';
             return;
           }
-          link.href = suiteRoutes[route];
+          if (!suitePorts[route]) return;
+          link.href = `http://${suiteHost}:${suitePorts[route]}/${route}/`;
         });
       })();
     </script>

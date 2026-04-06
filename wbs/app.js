@@ -223,32 +223,32 @@ function buildLensCards(node) {
       label: 'Cost',
       value: node.related.cost.estimates.length ? pluralize(node.related.cost.estimates.length, 'related item') : 'No linked items',
       hint: node.related.cost.totalBaseCost
-        ? 'Preview the main cost signal attached to this branch.'
-        : 'No cost preview is available yet for this branch.',
+        ? 'See the linked cost signals for this branch.'
+        : 'No linked cost items are attached to this branch.',
     },
     {
       key: 'schedule',
       label: 'Schedule',
       value: scheduleValue,
       hint: node.metrics.taskCount
-        ? 'Preview the timing signals attached to this branch.'
-        : 'No schedule preview is available yet for this branch.',
+        ? 'See the linked timing signals for this branch.'
+        : 'No linked schedule activity is attached to this branch.',
     },
     {
       key: 'risks',
       label: 'Risks',
       value: activeRiskCount ? pluralize(activeRiskCount, 'notable risk') : 'No notable risks',
       hint: activeRiskCount
-        ? 'Preview the main issues attached to this branch.'
-        : 'No risk preview is available yet for this branch.',
+        ? 'See the linked issues attached to this branch.'
+        : 'No linked risks are attached to this branch.',
     },
     {
       key: 'documents',
       label: 'Documents',
       value: node.metrics.documentCount ? pluralize(node.metrics.documentCount, 'supporting file') : 'No supporting files',
       hint: node.metrics.documentCount
-        ? 'Preview the files and terms attached to this branch.'
-        : 'No document preview is available yet for this branch.',
+        ? 'See the files and terms attached to this branch.'
+        : 'No supporting files are attached to this branch.',
     },
   ];
 }
@@ -708,42 +708,42 @@ function renderListGrid(items, renderItem) {
   return `<div class="list-grid">${items.map(renderItem).join('')}</div>`;
 }
 
-function buildFuturePreviewLabel(detailKey) {
+function buildDetailScopeNote(detailKey) {
   return {
-    cost: 'View full cost analysis',
-    schedule: 'Explore full schedule view',
-    risks: 'Open full risk view',
-    documents: 'Open full document view',
+    cost: 'This view summarizes the linked cost records attached to the selected branch.',
+    schedule: 'This view summarizes the linked schedule records attached to the selected branch.',
+    risks: 'This view summarizes the linked risk records attached to the selected branch.',
+    documents: 'This view summarizes the linked documents and terms attached to the selected branch.',
   }[detailKey];
 }
 
 function buildLensInterpretation(node, detailKey) {
   if (detailKey === 'cost') {
     if (!node.related.cost.estimates.length) {
-      return 'No linked cost rows are visible here yet, so this hub can only offer a structural preview for now.';
+      return 'No linked cost rows are attached to this branch in the current dataset.';
     }
     const topType = node.related.cost.byType[0]?.label || 'linked estimate items';
-    return `This branch has a real cost footprint, but the hub view keeps it lightweight: the picture is mainly driven by ${topType.toLowerCase()} and a small number of linked estimate items.`;
+    return `This branch carries a measurable cost footprint, led by ${topType.toLowerCase()} and a focused set of linked estimate items.`;
   }
 
   if (detailKey === 'schedule') {
     if (!node.metrics.taskCount) {
-      return 'No linked schedule activity is visible here yet, so this preview simply signals that there is no schedule story attached to this branch in the current extract.';
+      return 'No linked schedule activity is attached to this branch in the current extract.';
     }
-    return `This branch has a schedule story, but the hub only previews the pacing: the important signal is how work is timed, where the milestones sit, and whether any critical tasks stand out.`;
+    return 'The linked schedule records show how work in this branch unfolds over time, where milestone dates appear, and whether any critical tasks stand out.';
   }
 
   if (detailKey === 'risks') {
     if (!node.metrics.riskCount) {
-      return 'No linked risks are visible here yet, so this preview remains intentionally light.';
+      return 'No linked risks are attached to this branch in the current extract.';
     }
-    return `This branch has a risk picture, but the hub only surfaces the headline exposure: how many active risks matter right now and what the top issue appears to be.`;
+    return 'The linked risk set shows how many active issues affect this branch and which one carries the highest score.';
   }
 
   if (!node.metrics.documentCount) {
-    return 'No linked documents are visible here yet, so this preview simply shows that there is no document trail attached to the branch in the current tracker.';
+    return 'No linked documents are attached to this branch in the current tracker.';
   }
-  return 'This branch has supporting documentation, but the hub only previews the kind of material attached here and a few representative files or terms.';
+  return 'The linked documents show the main source material and terminology associated with this branch.';
 }
 
 function buildLensTakeaways(node, detailKey) {
@@ -753,15 +753,15 @@ function buildLensTakeaways(node, detailKey) {
         label: 'Main signal',
         headline: node.related.cost.byType[0]?.label || 'No dominant cost driver',
         text: node.related.cost.estimates.length
-          ? `${pluralize(node.related.cost.estimates.length, 'linked cost item')} shape this preview.`
-          : 'There are no linked cost items to preview here yet.',
+          ? `${pluralize(node.related.cost.estimates.length, 'linked cost item')} shape the current picture.`
+          : 'No linked cost items are attached to this branch.',
       },
       {
-        label: 'Preview footprint',
+        label: 'Visible estimate',
         headline: node.related.cost.totalBaseCost ? formatMillions(node.related.cost.totalBaseCost) : 'No estimate linked',
         text: node.related.cost.totalBaseCost
-          ? 'This is the rolled-up base estimate visible from the hub.'
-          : 'A future cost app would take over once deeper analysis is needed.',
+          ? 'This is the rolled-up base estimate attached to the branch.'
+          : 'No rolled-up estimate is attached to this branch.',
       },
     ];
   }
@@ -786,7 +786,7 @@ function buildLensTakeaways(node, detailKey) {
           ? 'Milestones are the clearest timing signal in this branch.'
           : node.related.schedule.criticalCount
             ? 'Critical tasks are the clearest timing signal in this branch.'
-            : 'A future schedule app would carry the deeper timeline view.',
+            : 'No key dates are attached to this branch in the current extract.',
       },
     ];
   }
@@ -804,8 +804,8 @@ function buildLensTakeaways(node, detailKey) {
         label: 'Strongest signal',
         headline: node.related.risks.highestScore ? `Score ${formatNumber(node.related.risks.highestScore)}` : 'No scored issue',
         text: node.related.risks.highestScore
-          ? 'The preview uses the highest linked risk score as its headline indicator.'
-          : 'A deeper future risk app would take over when more context is needed.',
+          ? 'The highest linked risk score is used as the headline indicator for this branch.'
+          : 'No scored issue is attached to this branch.',
       },
     ];
   }
@@ -822,8 +822,8 @@ function buildLensTakeaways(node, detailKey) {
       label: 'Main document type',
       headline: node.related.documents.byType[0]?.label || 'No dominant type',
       text: node.related.documents.byType.length
-        ? 'This is the strongest document category visible in the preview.'
-        : 'A future document app would surface richer document structure when needed.',
+        ? 'This is the strongest document category linked to the branch.'
+        : 'No dominant document type is attached here.',
     },
   ];
 }
@@ -905,7 +905,7 @@ function renderOverview() {
           )
           .join('')}
       </section>
-      <div class="overview-prompt">These four cards are hub previews of deeper future specialist views. The WBS app stays focused on structure, meaning, and orientation.</div>
+      <div class="overview-prompt">Open any card to see the linked cost, schedule, risk, or document signals for this branch.</div>
     </section>
   `;
 }
@@ -915,9 +915,9 @@ function renderCostDetail(node) {
     ${renderTakeawayCards(buildLensTakeaways(node, 'cost'))}
     ${renderPreviewSection({
       detailKey: 'cost',
-      eyebrow: 'Preview items',
+      eyebrow: 'Linked items',
       title: 'Representative cost signals',
-      text: 'A few items that show what is driving the current cost picture for this branch.',
+      text: 'Representative items that show what is driving the current cost picture for this branch.',
       items: node.related.cost.estimates.length
         ? node.related.cost.estimates
         : node.related.cost.contractHighlights,
@@ -954,7 +954,7 @@ function renderScheduleDetail(node) {
       detailKey: 'schedule',
       eyebrow: 'Schedule at a glance',
       title: 'Representative timing signals',
-      text: 'A small set of milestones or tasks that tells the story of this branch without turning the WBS hub into a full schedule workspace.',
+      text: 'Representative milestones and tasks connected to this branch.',
       items: schedulePreviewItems,
       renderItem: ({ kind, item }) => `
         <article class="list-card">
@@ -984,7 +984,7 @@ function renderRiskDetail(node) {
       detailKey: 'risks',
       eyebrow: 'Representative issues',
       title: 'A few risks that shape the picture',
-      text: 'Only a small number of risks are shown here so the WBS hub stays readable and orientation-focused.',
+      text: 'A focused set of risks linked to this branch.',
       items: node.related.risks.items,
       renderItem: (item) => `
         <article class="list-card list-card--risk">
@@ -1007,7 +1007,7 @@ function renderDocumentDetail(node) {
       detailKey: 'documents',
       eyebrow: 'Representative support',
       title: 'Files and terms that define this branch',
-      text: 'This is a guided preview of the supporting material, not a full document workspace.',
+      text: 'Representative files and glossary terms tied to this branch.',
       items: node.related.documents.items.length
         ? node.related.documents.items
         : node.related.glossary.items,
@@ -1066,8 +1066,8 @@ function renderFocus() {
         </div>
         <p class="focus-summary">${escapeHtml(buildLensInterpretation(node, detailKey))}</p>
         <div class="preview-note">
-          <span class="preview-note__eyebrow">Hub preview</span>
-          <span class="preview-note__text">This is a lightweight preview inside the WBS hub. Future specialist app: ${escapeHtml(buildFuturePreviewLabel(detailKey))}.</span>
+          <span class="preview-note__eyebrow">Linked records</span>
+          <span class="preview-note__text">${escapeHtml(buildDetailScopeNote(detailKey))}</span>
         </div>
       </header>
       ${detailRenderers[detailKey](node)}
@@ -1111,7 +1111,7 @@ async function loadData() {
     state.data = data;
     buildClientIndex(data);
     appTitle.textContent = data.app.title;
-    appSubtitle.textContent = 'Use this as the ecosystem map: understand how Gateway is organized, what a branch means, and get a lightweight preview of the dimensions attached to it.';
+    appSubtitle.textContent = 'See how Gateway is organized, what each branch includes, and how the program rolls up from detailed work to the full mission architecture.';
     buildIntroSignals();
 
     const requestedId = decodeURIComponent(window.location.hash.replace(/^#/, ''));
@@ -1124,7 +1124,7 @@ async function loadData() {
     overviewContent.innerHTML = `
       <section class="error-state">
         <h2>Unable to load the WBS dataset</h2>
-        <p>The standalone demo expects the local server to expose <code>/wbs/data/gateway-wbs.json</code>.</p>
+        <p>The local server did not provide <code>/wbs/data/gateway-wbs.json</code>.</p>
         <p><strong>Error:</strong> ${escapeHtml(error.message)}</p>
         <p>Run <code>node wbs/server.mjs</code> from the repo root, then open <code>http://127.0.0.1:4173/wbs/</code>.</p>
       </section>

@@ -39,9 +39,9 @@ const viewDefinitions = {
   },
   method: {
     kicker: 'Defensibility',
-    heading: 'Open the authority logic only when needed',
+    heading: 'Open supporting estimate notes when needed',
     subcopy:
-      'This stays secondary so the cost story can stay visual first during a live presentation.',
+      'Keep this secondary so the main cost story stays visual and easy to read.',
   },
 };
 
@@ -103,7 +103,7 @@ const anchorBlueprints = [
     groupIds: ['1.8'],
     tone: 'brand',
     visualId: 'arm',
-    summary: 'The robotic arm is a visible standalone cost area.',
+    summary: 'The robotic arm is a distinct cost area.',
     why: 'It is easy to recognize spatially and carries a substantial partner-reference value.',
   },
   {
@@ -166,6 +166,10 @@ function uniqueById(items) {
     seen.add(item.id);
     return true;
   });
+}
+
+function repoSourceHref(relativePath) {
+  return `../${encodeURI(relativePath)}`;
 }
 
 function sum(values) {
@@ -433,7 +437,7 @@ function buildSourceCards(sources) {
           <div class="support-card__topline">
             <div>
               <h4>${escapeHtml(source.title)}</h4>
-              <p class="support-card__meta">${escapeHtml(source.publisher || 'Source')} - ${escapeHtml(source.authorityTier || 'authority')}</p>
+              <p class="support-card__meta">${escapeHtml(source.publisher || 'Source')}</p>
             </div>
             ${source.href ? `<a class="support-link" href="${escapeHtml(source.href)}" target="_blank" rel="noreferrer">Open</a>` : ''}
           </div>
@@ -987,15 +991,15 @@ function getMethodSupportingFiles(cardId) {
       {
         id: 'gateway_cost_basis_of_estimate.rtf',
         title: 'Cost basis of estimate',
-        href: '/cost/source/gateway_cost_basis_of_estimate.rtf',
-        publisher: 'Authority file',
+        href: repoSourceHref('Contract_Cost_Schedule Documents/docs/gateway_cost_basis_of_estimate.rtf'),
+        publisher: 'Source file',
         authorityTier: 'methodology',
       },
       {
         id: 'gateway_cost_estimate_detail.csv',
         title: 'Grouped cost detail',
-        href: '/cost/source/gateway_cost_estimate_detail.csv',
-        publisher: 'Authority file',
+        href: repoSourceHref('Contract_Cost_Schedule Documents/data/gateway_cost_estimate_detail.csv'),
+        publisher: 'Source file',
         authorityTier: 'detail data',
       },
     );
@@ -1005,16 +1009,16 @@ function getMethodSupportingFiles(cardId) {
     files.push(
       {
         id: 'gateway_data_authority_guide.rtf',
-        title: 'Data authority guide',
-        href: '/cost/source/gateway_data_authority_guide.rtf',
-        publisher: 'Authority file',
+        title: 'Data guide',
+        href: repoSourceHref('Contract_Cost_Schedule Documents/docs/gateway_data_authority_guide.rtf'),
+        publisher: 'Source file',
         authorityTier: 'traceability',
       },
       {
         id: 'gateway_source_reference_register.csv',
         title: 'Source reference register',
-        href: '/cost/source/gateway_source_reference_register.csv',
-        publisher: 'Authority file',
+        href: repoSourceHref('Contract_Cost_Schedule Documents/data/gateway_source_reference_register.csv'),
+        publisher: 'Source file',
         authorityTier: 'source register',
       },
     );
@@ -1036,7 +1040,7 @@ function renderMethodView() {
             <h3>Why the estimate is defensible</h3>
           </div>
           <p class="method-panel__note">
-            Open one topic only when you need to explain authority, reserve, or where judgment enters the estimate.
+            Open one topic only when you need to explain sourcing, reserve, or where judgment enters the estimate.
           </p>
         </div>
 
@@ -1062,7 +1066,7 @@ function renderMethodView() {
 
       <aside class="focus-panel detail-panel">
         <div>
-          <p class="section-kicker">Selected authority topic</p>
+          <p class="section-kicker">Selected method topic</p>
           <h3>${escapeHtml(method.title)}</h3>
           <p class="focus-panel__summary">${escapeHtml(method.summary)}</p>
         </div>
@@ -1123,10 +1127,10 @@ function renderError(message) {
   const safeMessage = escapeHtml(message);
   elements.storySignals.innerHTML = '';
   elements.viewSwitcher.innerHTML = '';
-  elements.snapshotStamp.textContent = 'Authority data unavailable';
+  elements.snapshotStamp.textContent = 'Cost data unavailable';
   elements.activeViewKicker.textContent = 'Cost Explorer unavailable';
   elements.activeViewHeading.textContent = 'The cost story could not load';
-  elements.activeViewSubcopy.textContent = 'The local authority payload did not load cleanly.';
+  elements.activeViewSubcopy.textContent = 'The cost dataset did not load cleanly.';
   elements.activeViewContent.innerHTML = `
     <section class="loading-state">
       <h3>Unable to render the Cost Explorer</h3>

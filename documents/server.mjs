@@ -77,6 +77,11 @@ async function serveCorpusFile(response, encodedRelativePath) {
   await sendFile(response, absolutePath);
 }
 
+async function serveRepoCorpusPath(response, pathname) {
+  const relativePath = pathname.replace(/^\//, '');
+  await serveCorpusFile(response, encodeURIComponent(relativePath).replace(/%2F/g, '/'));
+}
+
 const server = http.createServer(async (request, response) => {
   try {
     const url = new URL(request.url || '/', `http://${host}:${port}`);
@@ -106,6 +111,11 @@ const server = http.createServer(async (request, response) => {
     if (pathname.startsWith('/documents/source/')) {
       const encodedRelativePath = pathname.replace('/documents/source/', '');
       await serveCorpusFile(response, encodedRelativePath);
+      return;
+    }
+
+    if (pathname.startsWith('/Contract_Cost_Schedule Documents/')) {
+      await serveRepoCorpusPath(response, pathname);
       return;
     }
 
