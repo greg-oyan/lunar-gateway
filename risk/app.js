@@ -1,4 +1,15 @@
+import {
+  applySuiteNav,
+  buildSuiteHref,
+  getSharedContextEntries,
+  hasSharedContext,
+  loadSuiteCrosswalk,
+  mergeQueryState,
+  readSharedContext,
+} from '../suite-assets/suite-context.js';
+
 const DATA_URL = './data/risks.json';
+const CROSSWALK_URL = '../suite-assets/data/gateway-crosswalk.json';
 
 const state = {
   allRisks: [],
@@ -11,6 +22,9 @@ const state = {
   sortBy: 'priority_desc',
   loadState: 'loading',
   loadError: '',
+  crosswalk: null,
+  sharedContext: {},
+  context: null,
 };
 
 const elements = {};
@@ -120,6 +134,143 @@ function clampText(text, maxLength = 120) {
   const value = String(text ?? '').trim();
   if (value.length <= maxLength) return value;
   return `${value.slice(0, maxLength - 1).trim()}...`;
+}
+
+function findNearestRiskBearingWbs(wbsId) {
+  let currentId = wbsId;
+  while (currentId) {
+    const context = state.crosswalk?.wbs?.byId?.[currentId];
+    if (!context) return null;
+    if (context.risks.ids.length) return context;
+    currentId = context.parentId || '';
+  }
+  return null;
+}
+
+function deriveRiskContext() {
+  const shared = state.sharedContext || {};
+  if (!hasSharedContext(shared)) return null;
+
+  if (shared.milestone) {
+    const milestoneContext = state.crosswalk?.schedule?.byMilestoneId?.[shared.milestone];
+    if (milestoneContext) {
+      return {
+        title: milestoneContext.primaryWbsId
+          ? `Showing risks related to WBS ${milestoneContext.primaryWbsId}`
+          : `Showing risks related to milestone ${shared.milestone}`,
+        body: milestoneContext.reason,
+        wbsId: milestoneContext.primaryWbsId || '',
+        milestoneId: shared.milestone,
+        riskIds: milestoneContext.risks.ids || [],
+        docId: milestoneContext.documents.sourceDocIds?.[0] || '',
+        moduleKey: milestoneContext.simulation.moduleKeys?.[0] || '',
+      };
+    }
+  }
+
+  if (shared.wbs) {
+    const directContext = state.crosswalk?.wbs?.byId?.[shared.wbs];
+    if (directContext?.risks.ids.length) {
+      return {
+        title: `Showing risks related to WBS ${shared.wbs}`,
+        body: directContext.risks.reason,
+        wbsId: shared.wbs,
+        milestoneId: directContext.schedule.primaryMilestoneId || '',
+        riskIds: directContext.risks.ids,
+        docId: directContext.documents.sourceDocIds?.[0] || '',
+        moduleKey: directContext.simulation.moduleKeys?.[0] || '',
+      };
+    }
+
+    const broaderContext = findNearestRiskBearingWbs(shared.wbs);
+    if (broaderContext) {
+      return {
+        title: `Showing the nearest broader risk context for WBS ${shared.wbs}`,
+        body: `No direct risks are linked to WBS ${shared.wbs}. Showing the nearest broader branch with linked risks: WBS ${broaderContext.id}.`,
+        wbsId: broaderContext.id,
+        milestoneId: broaderContext.schedule.primaryMilestoneId || '',
+        riskIds: broaderContext.risks.ids,
+        docId: broaderContext.documents.sourceDocIds?.[0] || '',
+        moduleKey: broaderContext.simulation.moduleKeys?.[0] || '',
+      };
+    }
+  }
+
+  if (shared.module) {
+    const moduleContext = state.crosswalk?.simulation?.byModuleKey?.[shared.module];
+    if (moduleContext?.primaryWbsId) {
+      const broaderContext = findNearestRiskBearingWbs(moduleContext.primaryWbsId);
+      if (broaderContext) {
+        return {
+          title: `Showing risks related to ${shared.module}`,
+          body: moduleContext.note,
+          wbsId: broaderContext.id,
+          milestoneId: broaderContext.schedule.primaryMilestoneId || '',
+          riskIds: broaderContext.risks.ids,
+          docId: broaderContext.documents.sourceDocIds?.[0] || '',
+          moduleKey: shared.module,
+        };
+      }
+    }
+  }
+
+  if (shared.risk) {
+    const riskContext = state.crosswalk?.risk?.byId?.[shared.risk];
+    if (riskContext) {
+      return {
+        title: `Showing risk ${shared.risk}`,
+        body: riskContext.reason,
+        wbsId: riskContext.primaryWbsId || '',
+        milestoneId: riskContext.primaryMilestoneId || '',
+        riskIds: [],
+        docId: riskContext.documents.sourceDocIds?.[0] || '',
+        moduleKey: riskContext.simulation.moduleKeys?.[0] || '',
+      };
+    }
+  }
+
+  return null;
+}
+
+function buildSuiteAction(route, label, params) {
+  return `
+    <a class="suite-context-action" href="${escapeHtml(buildSuiteHref(route, params))}">
+      ${escapeHtml(label)}
+    </a>
+  `;
+}
+
+function buildRiskNavContext(risk = getSelectedRisk()) {
+  const riskContext = risk ? state.crosswalk?.risk?.byId?.[risk.id] : null;
+  return {
+    from: 'risk',
+    wbs: riskContext?.primaryWbsId || state.context?.wbsId || '',
+    module: riskContext?.simulation.moduleKeys?.[0] || state.context?.moduleKey || '',
+    milestone: riskContext?.primaryMilestoneId || state.context?.milestoneId || '',
+    risk: risk?.id || '',
+    doc: riskContext?.documents.sourceDocIds?.[0] || state.context?.docId || '',
+  };
+}
+
+function syncSuiteNavigation() {
+  applySuiteNav(buildRiskNavContext(), { currentRoute: 'risk' });
+}
+
+function syncUrlState() {
+  const defaultRiskId = state.visibleRisks[0]?.id || state.allRisks[0]?.id || '';
+  const shouldPersistRiskId =
+    hasSharedContext(state.sharedContext) ||
+    Boolean(state.searchQuery) ||
+    Boolean(state.category) ||
+    Boolean(state.status) ||
+    Boolean(state.priorityBand) ||
+    state.sortBy !== 'priority_desc' ||
+    (state.selectedRiskId && state.selectedRiskId !== defaultRiskId);
+
+  mergeQueryState({
+    ...getSharedContextEntries(state.sharedContext),
+    risk: shouldPersistRiskId ? state.selectedRiskId || '' : '',
+  });
 }
 
 function buildConsequenceCue(risk) {
@@ -249,7 +400,11 @@ function syncSelectedRiskId() {
 }
 
 function updateVisibleRisks() {
-  const filtered = filterRisks(state.allRisks, {
+  const baseRisks = state.context?.riskIds?.length
+    ? state.allRisks.filter((risk) => state.context.riskIds.includes(risk.id))
+    : state.allRisks;
+
+  const filtered = filterRisks(baseRisks, {
     searchQuery: state.searchQuery,
     category: state.category,
     status: state.status,
@@ -290,14 +445,20 @@ function renderSummary() {
 
   if (!topRisk) {
     elements.summaryNarrative.textContent =
-      'The current risk set keeps priority, ownership, and mitigation visible without overwhelming the first screen.';
+      state.context?.title
+        ? `${state.context.title}. ${state.context.body}`
+        : 'The current risk set keeps priority, ownership, and mitigation visible without overwhelming the first screen.';
     elements.summaryMethod.textContent =
       `Scoring: ${scoreFormulaText()}. ${bandThresholdText()}`;
     return;
   }
 
+  const contextLead =
+    state.context?.title && (state.context.wbsId || state.context.milestoneId || state.sharedContext.from)
+      ? `${state.context.title}. `
+      : '';
   elements.summaryNarrative.textContent =
-    `${topRisk.title} currently sets the tone for this view at ${priorityLabel(topRisk.priority)} priority, while ${attentionCount} visible risks still sit in the high-attention range.`;
+    `${contextLead}${topRisk.title} currently sets the tone for this view at ${priorityLabel(topRisk.priority)} priority, while ${attentionCount} visible risks still sit in the high-attention range.`;
   elements.summaryMethod.textContent =
     `Scoring: ${scoreFormulaText()}. ${bandThresholdText()}`;
 }
@@ -432,6 +593,7 @@ function renderRiskDetail(risk) {
     `${priorityLabel(risk.priority)} ${risk.category.toLowerCase()} risk owned by ${risk.owner}. The current posture is ${statusLabel(risk.status).toLowerCase()}.`;
   const severityReason = buildSeverityReason(risk);
   const driverTags = (Array.isArray(risk.tags) ? risk.tags : []).slice(0, 4);
+  const riskContext = state.crosswalk?.risk?.byId?.[risk.id];
 
   elements.detailPaneContent.innerHTML = `
     <article class="risk-card risk-card--${band} risk-card--${categoryTone}">
@@ -459,6 +621,55 @@ function renderRiskDetail(risk) {
           </div>
         </aside>
       </header>
+
+      <section class="suite-context-card">
+        <p class="suite-context-card__eyebrow">Program Mapping</p>
+        <h3 class="suite-context-card__title">Where this risk sits in the suite</h3>
+        <p class="suite-context-card__body">${escapeHtml(riskContext?.reason || state.context?.body || 'This risk remains linked to the strongest available WBS, schedule, and document context in the current crosswalk.')}</p>
+        <div class="suite-context-card__grid">
+          <div class="suite-context-stat">
+            <span class="suite-context-stat__label">WBS</span>
+            <span class="suite-context-stat__value">${escapeHtml(riskContext?.primaryWbsId || state.context?.wbsId || 'No direct WBS branch')}</span>
+          </div>
+          <div class="suite-context-stat">
+            <span class="suite-context-stat__label">Schedule</span>
+            <span class="suite-context-stat__value">${escapeHtml(riskContext?.primaryMilestoneId || state.context?.milestoneId || 'No direct milestone')}</span>
+          </div>
+          <div class="suite-context-stat">
+            <span class="suite-context-stat__label">Documents</span>
+            <span class="suite-context-stat__value">${escapeHtml(String(riskContext?.documents.sourceDocIds?.length || 0))}</span>
+          </div>
+          <div class="suite-context-stat">
+            <span class="suite-context-stat__label">Module</span>
+            <span class="suite-context-stat__value">${escapeHtml(riskContext?.simulation.moduleKeys?.[0] || state.context?.moduleKey || 'Not mapped')}</span>
+          </div>
+        </div>
+        <div class="suite-context-actions">
+          ${buildSuiteAction('wbs', 'Open in WBS', {
+            from: 'risk',
+            wbs: riskContext?.primaryWbsId || state.context?.wbsId || '',
+            risk: risk.id,
+          })}
+          ${buildSuiteAction('schedule', 'Open in Schedule', {
+            from: 'risk',
+            wbs: riskContext?.primaryWbsId || state.context?.wbsId || '',
+            milestone: riskContext?.primaryMilestoneId || state.context?.milestoneId || '',
+            risk: risk.id,
+          })}
+          ${buildSuiteAction('documents', 'Open in Documents', {
+            from: 'risk',
+            wbs: riskContext?.primaryWbsId || state.context?.wbsId || '',
+            risk: risk.id,
+            doc: riskContext?.documents.sourceDocIds?.[0] || state.context?.docId || '',
+          })}
+          ${buildSuiteAction('cost', 'Open in Cost', {
+            from: 'risk',
+            wbs: riskContext?.primaryWbsId || state.context?.wbsId || '',
+            risk: risk.id,
+            view: 'module',
+          })}
+        </div>
+      </section>
 
       <section class="risk-signal-grid" aria-label="Risk signal">
         <div class="risk-signal-card">
@@ -601,6 +812,8 @@ function render() {
   renderSummary();
   renderRiskList();
   renderDetailPane();
+  syncUrlState();
+  syncSuiteNavigation();
 }
 
 function handleRiskListClick(event) {
@@ -649,6 +862,9 @@ function attachEvents() {
     state.status = '';
     state.priorityBand = '';
     state.sortBy = 'priority_desc';
+    state.sharedContext = {};
+    state.context = null;
+    state.selectedRiskId = null;
 
     elements.searchInput.value = '';
     elements.categoryFilter.value = '';
@@ -697,7 +913,9 @@ async function loadManifest() {
 
 function initializeFromManifest(manifest) {
   state.allRisks = Array.isArray(manifest.risks) ? manifest.risks : [];
-  state.selectedRiskId = null;
+  state.context = deriveRiskContext();
+  state.selectedRiskId =
+    hasSharedContext(state.sharedContext) && state.sharedContext.risk ? state.sharedContext.risk : null;
   state.loadState = 'ready';
   state.loadError = '';
 
@@ -725,7 +943,12 @@ async function initializeApp() {
   attachEvents();
 
   try {
-    const manifest = await loadManifest();
+    const [manifest, crosswalk] = await Promise.all([
+      loadManifest(),
+      loadSuiteCrosswalk(CROSSWALK_URL),
+    ]);
+    state.crosswalk = crosswalk;
+    state.sharedContext = readSharedContext();
     initializeFromManifest(manifest);
   } catch (error) {
     console.error('Failed to load risks.json', error);

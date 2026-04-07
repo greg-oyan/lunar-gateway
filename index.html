@@ -18,6 +18,7 @@
   <meta name="twitter:description" content="A Lunar Gateway simulation and explorer suite built from public NASA source material.">
   <meta name="twitter:image" content="./suite-assets/lunar-gateway-share-card.svg">
   <link rel="icon" type="image/svg+xml" href="./suite-assets/lunar-gateway-favicon.svg">
+  <link rel="stylesheet" href="./suite-assets/suite-context.css">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
@@ -499,6 +500,22 @@
     .i-lbl   { font-size:12px; color:#2a5278; }
     .i-val   { font-size:20px; color:#64c0e8; text-align:right; }
     .i-desc  { font-size:12px; color:#3c7295; line-height:1.9; margin-top:12px; }
+    .i-links { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+    .i-links .suite-context-action {
+      padding:8px 10px;
+      font-size:11px;
+      letter-spacing:.08em;
+      background:rgba(16, 44, 66, 0.72);
+    }
+    .i-links .suite-context-action:hover {
+      background:rgba(28, 74, 110, 0.92);
+    }
+    .i-links-note {
+      margin-top:8px;
+      color:#5d89a6;
+      font-size:11px;
+      line-height:1.6;
+    }
 
     /* ═══ Corner labels ════════════════════════════════════════════ */
     .corner {
@@ -669,6 +686,8 @@
     <div class="i-row"><span class="i-lbl">PROVIDER</span>   <span class="i-val" id="i-elem">—</span></div>
     <hr class="i-div">
     <div class="i-desc" id="i-desc">Click any Gateway module to view specifications from DSG-RQMT-001.</div>
+    <div class="i-links" id="i-links" hidden></div>
+    <div class="i-links-note" id="i-links-note" hidden></div>
   </div>
 
   <div class="corner" id="cr">Textures: NASA · Three.js · Wikimedia · Procedural<br>DSG-RQMT-001 Simulation</div>
@@ -753,6 +772,7 @@
     import { OutputPass }                     from 'three/addons/postprocessing/OutputPass.js';
     import { SMAAPass }                       from 'three/addons/postprocessing/SMAAPass.js';
     import { Lensflare, LensflareElement }    from 'three/addons/objects/Lensflare.js';
+    import { applySuiteNav, buildSuiteHref, loadSuiteCrosswalk, mergeQueryState, readSharedContext } from './suite-assets/suite-context.js';
 
     // Surface any uncaught JS/promise errors in the loading screen
     // so a frozen blank screen becomes a diagnosable message.
@@ -834,6 +854,79 @@
       EVR:    { abbr:'EVR',   name:'Extravehicular Robotics',       elem:'CSA (Canada)', mass:'1,600 kg', color:0x7a8c9a,
                 desc:'Robotic arm (CSA) that walks end-over-end along grapple fixtures on Gateway\'s exterior. Deploys and retrieves external payloads, supports EVA crew, performs autonomous maintenance and inspection, and supports berthing of visiting vehicles.' },
     };
+    const requestedContext = readSharedContext();
+    let suiteCrosswalk = null;
+    let selKey = null;
+
+    function getSimulationContext(key) {
+      const mapped = suiteCrosswalk?.simulation?.byModuleKey?.[key] || null;
+      return {
+        module: key || '',
+        wbs: mapped?.primaryWbsId || '',
+        milestone: mapped?.primaryMilestoneId || '',
+        risk: mapped?.primaryRiskId || '',
+        doc: mapped?.documents?.sourceDocIds?.[0] || '',
+        note: mapped?.note || '',
+      };
+    }
+
+    function syncSuiteLinks() {
+      const context = selKey ? getSimulationContext(selKey) : {};
+      applySuiteNav({
+        from: 'simulation',
+        module: context.module || '',
+        wbs: context.wbs || '',
+        milestone: context.milestone || '',
+        risk: context.risk || '',
+        doc: context.doc || '',
+      }, { currentRoute: 'simulation' });
+    }
+
+    function syncSimulationUrl() {
+      mergeQueryState({ module: selKey || '' });
+    }
+
+    function renderModuleLinks(key) {
+      const linksEl = document.getElementById('i-links');
+      const noteEl = document.getElementById('i-links-note');
+      const context = key ? getSimulationContext(key) : null;
+      if(!linksEl || !noteEl) return;
+
+      if(!key){
+        linksEl.hidden = true;
+        linksEl.innerHTML = '';
+        noteEl.hidden = true;
+        noteEl.textContent = '';
+        syncSuiteLinks();
+        syncSimulationUrl();
+        return;
+      }
+
+      linksEl.hidden = false;
+      linksEl.innerHTML = [
+        { route:'wbs', label:'Open in WBS' },
+        { route:'cost', label:'Open in Cost' },
+        { route:'schedule', label:'Open in Schedule' },
+        { route:'risk', label:'Open in Risk' },
+        { route:'documents', label:'Open in Documents' },
+      ].map((item)=>`<a class="suite-context-action" href="${buildSuiteHref(item.route, {
+        from: 'simulation',
+        module: context.module || '',
+        wbs: context.wbs || '',
+        milestone: context.milestone || '',
+        risk: context.risk || '',
+        doc: context.doc || '',
+      })}">${item.label}</a>`).join('');
+
+      noteEl.hidden = !context.note;
+      noteEl.textContent = context.note || '';
+      syncSuiteLinks();
+      syncSimulationUrl();
+    }
+
+    loadSuiteCrosswalk('./suite-assets/data/gateway-crosswalk.json')
+      .then(data => { suiteCrosswalk = data; syncSuiteLinks(); if(selKey) renderModuleLinks(selKey); })
+      .catch(() => { syncSuiteLinks(); });
 
     // ═══════════════════════════════════════════════════════════════
     //  LOADING UI
@@ -1706,7 +1799,7 @@
     //  RAYCASTER + SELECTION
     // ═══════════════════════════════════════════════════════════════
     const ray=new THREE.Raycaster(); const ptr=new THREE.Vector2();
-    let selKey=null, mDown={x:0,y:0}, dragged=false;
+    let mDown={x:0,y:0}, dragged=false;
     const TOUR_SHOTS = [
       {
         title: 'Lunar Operating Context',
@@ -1785,7 +1878,7 @@
     }
     function selectModule(key) {
       clearHL();
-      if(key===selKey){ selKey=null; document.getElementById('info').classList.remove('show'); return; }
+      if(key===selKey){ selKey=null; document.getElementById('info').classList.remove('show'); renderModuleLinks(null); return; }
       selKey=key;
       gatewayGroup.traverse(c=>{
         if(c.isMesh&&c.material&&c.userData.moduleKey===key){
@@ -1799,6 +1892,7 @@
         }[id];
       });
       document.getElementById('info').classList.add('show');
+      renderModuleLinks(key);
       let found=false; const wp=new THREE.Vector3();
       gatewayGroup.traverse(c=>{ if(!found&&c.isMesh&&c.userData.moduleKey===key){ c.getWorldPosition(wp); found=true; } });
       if(found) { followGateway=false; followEarth=false; startLerp(wp, 3.0); }
@@ -2027,6 +2121,11 @@
     // ═══════════════════════════════════════════════════════════════
     setLoad(100,'Launching simulation…');
     setTimeout(hideLoading, 380);
+    if(requestedContext.module && MODS[requestedContext.module]){
+      setTimeout(()=>selectModule(requestedContext.module), 460);
+    } else {
+      syncSuiteLinks();
+    }
     if(window.__TOUR_MODE__){
       setTimeout(()=>startTourMode(), 1700);
     }

@@ -1,4 +1,15 @@
+import {
+  applySuiteNav,
+  buildSuiteHref,
+  getSharedContextEntries,
+  hasSharedContext,
+  loadSuiteCrosswalk,
+  mergeQueryState,
+  readSharedContext,
+} from '../suite-assets/suite-context.js';
+
 const DATA_URL = './data/documents.json';
+const CROSSWALK_URL = '../suite-assets/data/gateway-crosswalk.json';
 
 const state = {
   allDocuments: [],
@@ -9,6 +20,9 @@ const state = {
   category: '',
   loadState: 'loading',
   loadError: '',
+  crosswalk: null,
+  sharedContext: {},
+  context: null,
 };
 
 const elements = {};
@@ -81,6 +95,130 @@ function buildDocumentUseNote(documentRecord) {
   }
 }
 
+function deriveDocumentContext() {
+  const shared = state.sharedContext || {};
+  const docCatalog = state.crosswalk?.documents?.byId || {};
+  if (!hasSharedContext(shared)) return null;
+
+  if (shared.milestone) {
+    const milestoneContext = state.crosswalk?.schedule?.byMilestoneId?.[shared.milestone];
+    if (milestoneContext) {
+      return {
+        title: milestoneContext.primaryWbsId
+          ? `Showing documents related to WBS ${milestoneContext.primaryWbsId}`
+          : `Showing documents related to milestone ${shared.milestone}`,
+        body: milestoneContext.reason,
+        sourceDocIds: milestoneContext.documents.sourceDocIds || [],
+        controlDocuments: milestoneContext.documents.controlDocuments || [],
+        wbsId: milestoneContext.primaryWbsId || '',
+        milestoneId: shared.milestone,
+        riskId: milestoneContext.risks.ids?.[0] || '',
+        moduleKey: milestoneContext.simulation.moduleKeys?.[0] || '',
+      };
+    }
+  }
+
+  if (shared.risk) {
+    const riskContext = state.crosswalk?.risk?.byId?.[shared.risk];
+    if (riskContext) {
+      return {
+        title: `Showing documents related to risk ${shared.risk}`,
+        body: riskContext.reason,
+        sourceDocIds: riskContext.documents.sourceDocIds || [],
+        controlDocuments: riskContext.documents.controlDocuments || [],
+        wbsId: riskContext.primaryWbsId || '',
+        milestoneId: riskContext.primaryMilestoneId || '',
+        riskId: shared.risk,
+        moduleKey: riskContext.simulation.moduleKeys?.[0] || '',
+      };
+    }
+  }
+
+  if (shared.wbs) {
+    const wbsContext = state.crosswalk?.wbs?.byId?.[shared.wbs];
+    if (wbsContext) {
+      return {
+        title: `Showing documents related to WBS ${shared.wbs}`,
+        body: wbsContext.documents.reason,
+        sourceDocIds: wbsContext.documents.sourceDocIds || [],
+        controlDocuments: wbsContext.documents.controlDocuments || [],
+        wbsId: shared.wbs,
+        milestoneId: wbsContext.schedule.primaryMilestoneId || '',
+        riskId: wbsContext.risks.primaryRiskId || '',
+        moduleKey: wbsContext.simulation.moduleKeys?.[0] || '',
+      };
+    }
+  }
+
+  if (shared.module) {
+    const moduleContext = state.crosswalk?.simulation?.byModuleKey?.[shared.module];
+    if (moduleContext) {
+      return {
+        title: `Showing documents related to ${shared.module}`,
+        body: moduleContext.note,
+        sourceDocIds: moduleContext.documents.sourceDocIds || [],
+        controlDocuments: moduleContext.documents.controlDocuments || [],
+        wbsId: moduleContext.primaryWbsId || '',
+        milestoneId: moduleContext.primaryMilestoneId || '',
+        riskId: moduleContext.primaryRiskId || '',
+        moduleKey: shared.module,
+      };
+    }
+  }
+
+  const selectedDoc = shared.doc && docCatalog[shared.doc] ? shared.doc : '';
+  if (!selectedDoc) return null;
+
+  return {
+    title: `Showing ${docCatalog[selectedDoc].title}`,
+    body: 'This document was selected directly from another suite view.',
+    sourceDocIds: [],
+    controlDocuments: [],
+    wbsId: '',
+    milestoneId: '',
+    riskId: '',
+    moduleKey: '',
+  };
+}
+
+function buildSuiteAction(route, label, params) {
+  return `
+    <a class="suite-context-action" href="${escapeHtml(buildSuiteHref(route, params))}">
+      ${escapeHtml(label)}
+    </a>
+  `;
+}
+
+function buildDocumentNavContext(documentRecord = getSelectedDocument()) {
+  return {
+    from: 'documents',
+    wbs: state.context?.wbsId || '',
+    module: state.context?.moduleKey || '',
+    milestone: state.context?.milestoneId || '',
+    risk: state.context?.riskId || '',
+    doc: documentRecord?.id || state.sharedContext.doc || '',
+  };
+}
+
+function syncSuiteNavigation() {
+  applySuiteNav(buildDocumentNavContext(), { currentRoute: 'documents' });
+}
+
+function syncUrlState() {
+  const defaultDocumentId = state.visibleDocuments[0]?.id || state.allDocuments[0]?.id || '';
+  const shouldPersistDocumentId =
+    hasSharedContext(state.sharedContext) ||
+    Boolean(state.searchQuery) ||
+    Boolean(state.fileType) ||
+    Boolean(state.category) ||
+    (state.selectedDocumentId && state.selectedDocumentId !== defaultDocumentId);
+
+  mergeQueryState({
+    ...getSharedContextEntries(state.sharedContext),
+    doc: shouldPersistDocumentId ? state.selectedDocumentId || '' : '',
+  });
+}
+
 function getSelectedDocument() {
   if (!state.selectedDocumentId) return null;
   return (
@@ -122,6 +260,9 @@ function renderActiveFilters() {
   if (state.searchQuery) chips.push(`Search: ${state.searchQuery}`);
   if (state.fileType) chips.push(`Type: ${state.fileType}`);
   if (state.category) chips.push(`Category: ${state.category}`);
+  if (state.context?.wbsId) chips.push(`Context: WBS ${state.context.wbsId}`);
+  if (state.context?.milestoneId) chips.push(`Milestone: ${state.context.milestoneId}`);
+  if (state.context?.riskId) chips.push(`Risk: ${state.context.riskId}`);
 
   if (!chips.length) {
     elements.activeFilters.innerHTML = '';
@@ -213,6 +354,7 @@ function renderDetailEmptyState(eyebrow, title, body) {
 function renderDetailCard(documentRecord) {
   const tags = Array.isArray(documentRecord.tags) ? documentRecord.tags : [];
   const detailUseNote = buildDocumentUseNote(documentRecord);
+  const trackedRecords = Array.isArray(state.context?.controlDocuments) ? state.context.controlDocuments : [];
 
   elements.detailPaneContent.innerHTML = `
     <article class="detail-card">
@@ -234,6 +376,43 @@ function renderDetailCard(documentRecord) {
           </a>
         </div>
       </header>
+
+      ${
+        state.context?.title
+          ? `
+            <section class="suite-context-card">
+              <p class="suite-context-card__eyebrow">Cross-App Context</p>
+              <h3 class="suite-context-card__title">${escapeHtml(state.context.title)}</h3>
+              <p class="suite-context-card__body">${escapeHtml(state.context.body || detailUseNote)}</p>
+              <div class="suite-context-actions">
+                ${buildSuiteAction('wbs', 'Open in WBS', {
+                  from: 'documents',
+                  wbs: state.context.wbsId || '',
+                  doc: documentRecord.id,
+                })}
+                ${buildSuiteAction('schedule', 'Open in Schedule', {
+                  from: 'documents',
+                  wbs: state.context.wbsId || '',
+                  milestone: state.context.milestoneId || '',
+                  doc: documentRecord.id,
+                })}
+                ${buildSuiteAction('cost', 'Open in Cost', {
+                  from: 'documents',
+                  wbs: state.context.wbsId || '',
+                  doc: documentRecord.id,
+                  view: 'module',
+                })}
+                ${buildSuiteAction('risk', 'Open in Risk', {
+                  from: 'documents',
+                  wbs: state.context.wbsId || '',
+                  risk: state.context.riskId || '',
+                  doc: documentRecord.id,
+                })}
+              </div>
+            </section>
+          `
+          : ''
+      }
 
       <section class="detail-grid" aria-label="Document metadata">
         <div class="detail-meta-card">
@@ -261,6 +440,33 @@ function renderDetailCard(documentRecord) {
         </div>
         <p class="detail-section__body">${escapeHtml(detailUseNote)}</p>
       </section>
+
+      ${
+        trackedRecords.length
+          ? `
+            <section class="detail-section">
+              <div class="detail-section__header">
+                <p class="detail-section__eyebrow">Tracked records</p>
+                <h3>Controlled records behind this context</h3>
+              </div>
+              <div class="suite-context-list">
+                ${trackedRecords
+                  .slice(0, 6)
+                  .map(
+                    (record) => `
+                      <article class="suite-context-list__item">
+                        <p class="suite-context-list__meta">${escapeHtml(`${record.id} · ${record.type}`)}</p>
+                        <h4 class="suite-context-list__title">${escapeHtml(record.name)}</h4>
+                        <p class="suite-context-list__copy">${escapeHtml(record.notes || `${record.status} · ${record.owner}`)}</p>
+                      </article>
+                    `,
+                  )
+                  .join('')}
+              </div>
+            </section>
+          `
+          : ''
+      }
 
       <section class="detail-section">
         <div class="detail-section__header">
@@ -315,7 +521,11 @@ function syncSelectedDocumentId() {
 }
 
 function updateVisibleDocuments() {
-  state.visibleDocuments = filterDocuments(state.allDocuments, {
+  const baseDocuments = state.context?.sourceDocIds?.length
+    ? state.allDocuments.filter((documentRecord) => state.context.sourceDocIds.includes(documentRecord.id))
+    : state.allDocuments;
+
+  state.visibleDocuments = filterDocuments(baseDocuments, {
     searchQuery: state.searchQuery,
     fileType: state.fileType,
     category: state.category,
@@ -328,6 +538,8 @@ function render() {
   renderActiveFilters();
   renderList();
   renderDetail();
+  syncUrlState();
+  syncSuiteNavigation();
 }
 
 function handleListClick(event) {
@@ -362,6 +574,9 @@ function attachEvents() {
     state.searchQuery = '';
     state.fileType = '';
     state.category = '';
+    state.sharedContext = {};
+    state.context = null;
+    state.selectedDocumentId = null;
     elements.searchInput.value = '';
     elements.typeFilter.value = '';
     elements.categoryFilter.value = '';
@@ -400,7 +615,11 @@ async function loadManifest() {
 
 function initializeFromManifest(manifest) {
   state.allDocuments = Array.isArray(manifest.documents) ? manifest.documents : [];
-  state.selectedDocumentId = state.allDocuments[0]?.id || null;
+  state.context = deriveDocumentContext();
+  state.selectedDocumentId =
+    hasSharedContext(state.sharedContext) && state.sharedContext.doc
+      ? state.sharedContext.doc
+      : state.allDocuments[0]?.id || null;
   state.loadState = 'ready';
   state.loadError = '';
   elements.appTitle.textContent = manifest.appTitle || 'Documents Explorer';
@@ -423,7 +642,12 @@ async function initializeApp() {
   attachEvents();
 
   try {
-    const manifest = await loadManifest();
+    const [manifest, crosswalk] = await Promise.all([
+      loadManifest(),
+      loadSuiteCrosswalk(CROSSWALK_URL),
+    ]);
+    state.crosswalk = crosswalk;
+    state.sharedContext = readSharedContext();
     initializeFromManifest(manifest);
   } catch (error) {
     console.error('Failed to load documents.json', error);

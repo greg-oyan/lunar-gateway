@@ -646,6 +646,21 @@ async function sendStaticFile(response, requestedPath) {
   }
 }
 
+async function sendFile(response, absolutePath) {
+  const extension = path.extname(absolutePath).toLowerCase();
+  const fileContents = await fs.readFile(absolutePath);
+  response.writeHead(200, {
+    'Cache-Control': 'no-store',
+    'Content-Type': mimeTypes[extension] || 'application/octet-stream',
+  });
+  response.end(fileContents);
+}
+
+function notFound(response) {
+  response.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+  response.end('Not found');
+}
+
 const server = http.createServer(async (request, response) => {
   const requestUrl = new URL(request.url || '/', `http://${host}:${port}`);
   const pathname = decodeURIComponent(requestUrl.pathname);
@@ -656,12 +671,12 @@ const server = http.createServer(async (request, response) => {
   }
 
   if (pathname.startsWith('/suite-assets/')) {
-    const fileName = pathname.replace('/suite-assets/', '');
-    if (!Object.prototype.hasOwnProperty.call(suiteAssets, fileName)) {
+    const absolutePath = path.resolve(repoRoot, `.${pathname}`);
+    if (!absolutePath.startsWith(path.join(repoRoot, 'suite-assets'))) {
       notFound(response);
       return;
     }
-    await sendFile(response, path.join(repoRoot, suiteAssets[fileName]));
+    await sendFile(response, absolutePath);
     return;
   }
 

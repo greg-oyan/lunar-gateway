@@ -927,12 +927,12 @@ const server = http.createServer(async (request, response) => {
     }
 
     if (pathname.startsWith('/suite-assets/')) {
-      const fileName = pathname.replace('/suite-assets/', '');
-      if (!Object.prototype.hasOwnProperty.call(suiteAssets, fileName)) {
+      const absolutePath = path.resolve(repoRoot, `.${pathname}`);
+      if (!absolutePath.startsWith(path.join(repoRoot, 'suite-assets'))) {
         notFound(response);
         return;
       }
-      await sendFile(response, path.join(repoRoot, suiteAssets[fileName]));
+      await sendFile(response, absolutePath);
       return;
     }
 

@@ -1,7 +1,7 @@
 {
   "appTitle": "Gateway Schedule Explorer",
   "appSubtitle": "This is how the Gateway program unfolds over time, what moments matter most, and which schedule branches drive everything else.",
-  "generatedAt": "2026-04-05T22:50:10.023Z",
+  "generatedAt": "2026-04-06T15:24:09.934Z",
   "defaultSelection": {
     "type": "milestone",
     "id": "M-024"

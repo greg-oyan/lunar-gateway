@@ -1,4 +1,35 @@
+import {
+  applySuiteNav,
+  buildSuiteHref,
+  getSharedContextEntries,
+  hasSharedContext,
+  loadSuiteCrosswalk,
+  mergeQueryState,
+  readSharedContext,
+} from '../suite-assets/suite-context.js';
+
 const DATA_URL = './data/gateway-wbs.json';
+const CROSSWALK_URL = '../suite-assets/data/gateway-crosswalk.json';
+
+const COST_AREA_LABELS = {
+  ppe: 'PPE',
+  halo: 'HALO',
+  airlock: 'Airlock',
+  ihab: 'I-HAB',
+  esprit: 'ESPRIT',
+  canadarm3: 'Canadarm3',
+  launch: 'Launch Services',
+  backbone: 'Program Backbone',
+};
+
+const SOURCE_LABELS = {
+  simulation: 'Simulation',
+  documents: 'Documents',
+  wbs: 'WBS',
+  schedule: 'Schedule',
+  cost: 'Cost',
+  risk: 'Risk',
+};
 
 const DETAIL_META = {
   cost: { label: 'Cost' },
@@ -49,6 +80,8 @@ const state = {
     documents: false,
   },
   structureLayout: null,
+  crosswalk: null,
+  sharedContext: {},
 };
 
 function escapeHtml(value) {
@@ -138,6 +171,248 @@ function buildClientIndex(data) {
 
 function getRootNode() {
   return state.nodesById.get(state.data?.rootId || '');
+}
+
+function getNodeContext(nodeId = state.selectedId) {
+  return state.crosswalk?.wbs?.byId?.[nodeId] || null;
+}
+
+function getResolvedSharedContext(node) {
+  const sharedContext = state.sharedContext || {};
+  if (!node || !Object.keys(sharedContext).length) return null;
+  if (!sharedContext.from || sharedContext.from === 'wbs') return null;
+  return sharedContext;
+}
+
+function resolveSelectedIdFromContext(sharedContext) {
+  const preferredWbsId = sharedContext.wbs;
+  if (preferredWbsId && state.nodesById.has(preferredWbsId)) {
+    return preferredWbsId;
+  }
+
+  const phaseContext = sharedContext.phase
+    ? state.crosswalk?.schedule?.byPhaseId?.[sharedContext.phase]
+    : null;
+  const milestoneContext = sharedContext.milestone
+    ? state.crosswalk?.schedule?.byMilestoneId?.[sharedContext.milestone]
+    : null;
+  const riskContext = sharedContext.risk
+    ? state.crosswalk?.risk?.byId?.[sharedContext.risk]
+    : null;
+  const moduleContext = sharedContext.module
+    ? state.crosswalk?.simulation?.byModuleKey?.[sharedContext.module]
+    : null;
+
+  const candidates = [
+    phaseContext?.primaryWbsId,
+    milestoneContext?.primaryWbsId,
+    riskContext?.primaryWbsId,
+    moduleContext?.primaryWbsId,
+  ].filter(Boolean);
+
+  return candidates.find((nodeId) => state.nodesById.has(nodeId)) || '';
+}
+
+function buildSuiteAction(route, label, params) {
+  return `
+    <a class="suite-context-action" href="${escapeHtml(buildSuiteHref(route, params))}">
+      ${escapeHtml(label)}
+    </a>
+  `;
+}
+
+function buildWbsNavContext(node = state.nodesById.get(state.selectedId)) {
+  const context = getNodeContext(node?.id);
+  const params = {
+    from: 'wbs',
+    wbs: node?.id || '',
+    module: context?.simulation.moduleKeys?.[0] || '',
+    milestone: context?.schedule.primaryMilestoneId || '',
+    phase: context?.schedule.phaseId || '',
+    risk: context?.risks.primaryRiskId || '',
+    doc: context?.documents.sourceDocIds?.[0] || '',
+  };
+
+  return params;
+}
+
+function syncSuiteNavigation() {
+  applySuiteNav(buildWbsNavContext(), { currentRoute: 'wbs' });
+}
+
+function syncUrlState() {
+  const rootId = state.data?.rootId || '';
+  const contextIsActive = hasSharedContext(state.sharedContext);
+
+  mergeQueryState(
+    {
+      ...getSharedContextEntries(state.sharedContext),
+      wbs:
+        contextIsActive || (state.selectedId && state.selectedId !== rootId) || Boolean(state.activeDetail)
+          ? state.selectedId
+          : '',
+      detail: state.activeDetail || '',
+      mode: state.viewMode === 'structure' ? 'structure' : '',
+    },
+    { hash: '' },
+  );
+}
+
+function buildContextChips(sharedContext, nodeContext) {
+  const chips = [];
+  if (sharedContext.from && SOURCE_LABELS[sharedContext.from]) {
+    chips.push(`<span class="suite-context-chip"><strong>From</strong>${escapeHtml(SOURCE_LABELS[sharedContext.from])}</span>`);
+  }
+  if (sharedContext.module) {
+    chips.push(`<span class="suite-context-chip"><strong>Module</strong>${escapeHtml(sharedContext.module)}</span>`);
+  }
+  if (sharedContext.milestone) {
+    chips.push(`<span class="suite-context-chip"><strong>Milestone</strong>${escapeHtml(sharedContext.milestone)}</span>`);
+  }
+  if (sharedContext.risk) {
+    chips.push(`<span class="suite-context-chip"><strong>Risk</strong>${escapeHtml(sharedContext.risk)}</span>`);
+  }
+  if (sharedContext.doc) {
+    chips.push(`<span class="suite-context-chip"><strong>Document</strong>${escapeHtml(sharedContext.doc)}</span>`);
+  }
+  if (nodeContext?.schedule.primaryMilestoneId && !sharedContext.milestone) {
+    chips.push(`<span class="suite-context-chip"><strong>Primary schedule anchor</strong>${escapeHtml(nodeContext.schedule.primaryMilestoneId)}</span>`);
+  }
+  return chips.join('');
+}
+
+function buildContextBanner(node) {
+  const sharedContext = getResolvedSharedContext(node);
+  const nodeContext = getNodeContext(node?.id);
+  if (!sharedContext || !nodeContext) return '';
+
+  const sourceLabel = SOURCE_LABELS[sharedContext.from] || 'another suite view';
+  const title = `Showing WBS ${node.id} in context`;
+
+  let body = `Opened from ${sourceLabel}. This branch is selected because it is the strongest structural match in the current cross-app crosswalk.`;
+  if (sharedContext.milestone && state.crosswalk?.schedule?.byMilestoneId?.[sharedContext.milestone]?.reason) {
+    body = `Opened from ${sourceLabel}. ${state.crosswalk.schedule.byMilestoneId[sharedContext.milestone].reason}`;
+  } else if (sharedContext.risk && state.crosswalk?.risk?.byId?.[sharedContext.risk]?.reason) {
+    body = `Opened from ${sourceLabel}. ${state.crosswalk.risk.byId[sharedContext.risk].reason}`;
+  } else if (sharedContext.module && state.crosswalk?.simulation?.byModuleKey?.[sharedContext.module]?.note) {
+    body = `Opened from ${sourceLabel}. ${state.crosswalk.simulation.byModuleKey[sharedContext.module].note}`;
+  }
+
+  return `
+    <section class="suite-context-banner">
+      <p class="suite-context-banner__eyebrow">Cross-App Context</p>
+      <h3 class="suite-context-banner__title">${escapeHtml(title)}</h3>
+      <p class="suite-context-banner__body">${escapeHtml(body)}</p>
+      <div class="suite-context-banner__chips">
+        ${buildContextChips(sharedContext, nodeContext)}
+      </div>
+      <div class="suite-context-actions">
+        <button class="suite-context-action" type="button" data-action="reset-view">Reset view</button>
+      </div>
+    </section>
+  `;
+}
+
+function renderConnectedViews(node) {
+  const nodeContext = getNodeContext(node.id);
+  if (!nodeContext) return '';
+
+  const scheduleLabel = nodeContext.schedule.primaryMilestoneId
+    ? `${nodeContext.schedule.primaryMilestoneId}${nodeContext.schedule.phaseName ? ` · ${nodeContext.schedule.phaseName}` : ''}`
+    : nodeContext.schedule.phaseName || 'No direct schedule anchor';
+  const riskLabel = nodeContext.risks.ids.length
+    ? `${pluralize(nodeContext.risks.ids.length, 'linked risk')}`
+    : 'No direct risks linked';
+  const documentLabel = nodeContext.documents.sourceDocIds.length
+    ? `${pluralize(nodeContext.documents.sourceDocIds.length, 'source file')}`
+    : nodeContext.documents.controlDocuments.length
+      ? `${pluralize(nodeContext.documents.controlDocuments.length, 'controlled record')}`
+      : 'No source-library file selected';
+
+  return `
+    <section class="suite-context-card">
+      <p class="suite-context-card__eyebrow">Connected Views</p>
+      <h3 class="suite-context-card__title">Trace this branch across the suite</h3>
+      <p class="suite-context-card__body">
+        Use these handoffs to carry WBS ${escapeHtml(node.id)} straight into the most relevant cost, schedule, risk, and document context.
+      </p>
+      <div class="suite-context-card__grid">
+        <div class="suite-context-stat">
+          <span class="suite-context-stat__label">Cost area</span>
+          <span class="suite-context-stat__value">${escapeHtml(COST_AREA_LABELS[nodeContext.cost.anchorId] || 'No direct cost area')}</span>
+        </div>
+        <div class="suite-context-stat">
+          <span class="suite-context-stat__label">Schedule anchor</span>
+          <span class="suite-context-stat__value">${escapeHtml(scheduleLabel)}</span>
+        </div>
+        <div class="suite-context-stat">
+          <span class="suite-context-stat__label">Risk context</span>
+          <span class="suite-context-stat__value">${escapeHtml(riskLabel)}</span>
+        </div>
+        <div class="suite-context-stat">
+          <span class="suite-context-stat__label">Documents</span>
+          <span class="suite-context-stat__value">${escapeHtml(documentLabel)}</span>
+        </div>
+      </div>
+      <div class="suite-context-actions">
+        ${buildSuiteAction('cost', 'View related cost context', {
+          from: 'wbs',
+          wbs: node.id,
+          anchor: nodeContext.cost.anchorId,
+          view: 'module',
+        })}
+        ${buildSuiteAction('schedule', 'View related schedule activity', {
+          from: 'wbs',
+          wbs: node.id,
+          milestone: nodeContext.schedule.primaryMilestoneId,
+          phase: nodeContext.schedule.phaseId,
+        })}
+        ${buildSuiteAction('risk', 'View related risks', {
+          from: 'wbs',
+          wbs: node.id,
+          risk: nodeContext.risks.primaryRiskId,
+        })}
+        ${buildSuiteAction('documents', 'View supporting documents', {
+          from: 'wbs',
+          wbs: node.id,
+          doc: nodeContext.documents.sourceDocIds?.[0] || '',
+        })}
+      </div>
+      <p class="suite-context-note">${escapeHtml(nodeContext.schedule.reason)}</p>
+    </section>
+  `;
+}
+
+function renderFocusActions(node) {
+  const nodeContext = getNodeContext(node.id);
+  if (!nodeContext) return '';
+
+  return `
+    <div class="suite-context-actions">
+      ${buildSuiteAction('cost', 'Open in Cost', {
+        from: 'wbs',
+        wbs: node.id,
+        anchor: nodeContext.cost.anchorId,
+        view: 'module',
+      })}
+      ${buildSuiteAction('schedule', 'Open in Schedule', {
+        from: 'wbs',
+        wbs: node.id,
+        milestone: nodeContext.schedule.primaryMilestoneId,
+        phase: nodeContext.schedule.phaseId,
+      })}
+      ${buildSuiteAction('risk', 'Open in Risk', {
+        from: 'wbs',
+        wbs: node.id,
+        risk: nodeContext.risks.primaryRiskId,
+      })}
+      ${buildSuiteAction('documents', 'Open in Documents', {
+        from: 'wbs',
+        wbs: node.id,
+        doc: nodeContext.documents.sourceDocIds?.[0] || '',
+      })}
+    </div>
+  `;
 }
 
 function getDefaultExpandedIds() {
@@ -275,6 +550,29 @@ function setViewMode(mode) {
   }
 }
 
+function resetView() {
+  const rootNode = getRootNode();
+  state.sharedContext = {};
+  state.searchQuery = '';
+  state.searchMatches = new Set();
+  state.visibleIds = null;
+  state.autoExpandedIds = new Set();
+  state.activeDetail = null;
+  state.viewMode = 'explorer';
+  state.expandedPreviewByDetail = {
+    cost: false,
+    schedule: false,
+    risks: false,
+    documents: false,
+  };
+  state.expandedIds = getDefaultExpandedIds();
+  state.selectedId = rootNode?.id || state.data?.rootId || '';
+  if (searchInput) searchInput.value = '';
+  updateSearchState();
+  ensureAncestorsExpanded(state.selectedId);
+  render();
+}
+
 function updateSearchState() {
   const query = state.searchQuery.trim().toLowerCase();
   state.searchMatches = new Set();
@@ -330,7 +628,6 @@ function toggleNode(nodeId) {
 function selectNode(nodeId) {
   state.selectedId = nodeId;
   ensureAncestorsExpanded(nodeId);
-  if (history.replaceState) history.replaceState(null, '', `#${encodeURIComponent(nodeId)}`);
   render();
   if (state.viewMode === 'structure') {
     requestAnimationFrame(() => {
@@ -878,6 +1175,7 @@ function renderOverview() {
   const lensCards = buildLensCards(node);
   overviewContent.innerHTML = `
     <section class="overview-shell">
+      ${buildContextBanner(node)}
       <section class="overview-hero">
         <p class="overview-hero__code">${escapeHtml(node.id)}</p>
         <h2 class="overview-hero__title">${escapeHtml(node.name)}</h2>
@@ -905,6 +1203,7 @@ function renderOverview() {
           )
           .join('')}
       </section>
+      ${renderConnectedViews(node)}
       <div class="overview-prompt">Open any card to see the linked cost, schedule, risk, or document signals for this branch.</div>
     </section>
   `;
@@ -1069,6 +1368,7 @@ function renderFocus() {
           <span class="preview-note__eyebrow">Linked records</span>
           <span class="preview-note__text">${escapeHtml(buildDetailScopeNote(detailKey))}</span>
         </div>
+        ${renderFocusActions(node)}
       </header>
       ${detailRenderers[detailKey](node)}
     </section>
@@ -1097,25 +1397,38 @@ function renderNavigationMode() {
 }
 
 function render() {
-  renderFocus();
-  renderNavigationMode();
   renderOverview();
+  renderNavigationMode();
+  renderFocus();
+  syncUrlState();
+  syncSuiteNavigation();
 }
 
 async function loadData() {
   try {
-    const response = await fetch(DATA_URL, { cache: 'no-store' });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const [dataResponse, crosswalk] = await Promise.all([
+      fetch(DATA_URL, { cache: 'no-store' }),
+      loadSuiteCrosswalk(CROSSWALK_URL),
+    ]);
+    if (!dataResponse.ok) throw new Error(`HTTP ${dataResponse.status}`);
 
-    const data = await response.json();
+    const data = await dataResponse.json();
     state.data = data;
+    state.crosswalk = crosswalk;
     buildClientIndex(data);
     appTitle.textContent = data.app.title;
     appSubtitle.textContent = 'See how Gateway is organized, what each branch includes, and how the program rolls up from detailed work to the full mission architecture.';
     buildIntroSignals();
 
-    const requestedId = decodeURIComponent(window.location.hash.replace(/^#/, ''));
+    const urlParams = new URLSearchParams(window.location.search);
+    state.sharedContext = readSharedContext();
+    const requestedId =
+      resolveSelectedIdFromContext(state.sharedContext) ||
+      (state.nodesById.has(state.sharedContext.wbs) ? state.sharedContext.wbs : '') ||
+      decodeURIComponent(window.location.hash.replace(/^#/, ''));
     state.selectedId = state.nodesById.has(requestedId) ? requestedId : data.rootId;
+    state.activeDetail = DETAIL_META[urlParams.get('detail')] ? urlParams.get('detail') : null;
+    state.viewMode = urlParams.get('mode') === 'structure' ? 'structure' : 'explorer';
     state.expandedIds = getDefaultExpandedIds();
     ensureAncestorsExpanded(state.selectedId);
     updateSearchState();
@@ -1170,6 +1483,12 @@ treeElement.addEventListener('click', (event) => {
 });
 
 overviewContent.addEventListener('click', (event) => {
+  const resetControl = event.target.closest('[data-action="reset-view"]');
+  if (resetControl) {
+    resetView();
+    return;
+  }
+
   const control = event.target.closest('[data-action="open-detail"]');
   if (!control) return;
   const detailKey = control.dataset.detail;

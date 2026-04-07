@@ -46,13 +46,13 @@ const server = http.createServer(async (request, response) => {
       return;
     }
 
-    if (pathname === '/suite-assets/lunar-gateway-favicon.svg') {
-      await sendFile(response, path.join(repoRoot, 'suite-assets/lunar-gateway-favicon.svg'));
-      return;
-    }
-
-    if (pathname === '/suite-assets/lunar-gateway-share-card.svg') {
-      await sendFile(response, path.join(repoRoot, 'suite-assets/lunar-gateway-share-card.svg'));
+    if (pathname.startsWith('/suite-assets/')) {
+      const absolutePath = path.resolve(repoRoot, `.${pathname}`);
+      if (!isInsideDirectory(absolutePath, path.join(repoRoot, 'suite-assets'))) {
+        sendText(response, 404, 'Not found');
+        return;
+      }
+      await sendFile(response, absolutePath);
       return;
     }
 

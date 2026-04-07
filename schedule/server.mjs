@@ -45,6 +45,18 @@ const mimeTypes = {
   '.svg': 'image/svg+xml',
 };
 
+async function sendFile(response, absolutePath) {
+  const extension = path.extname(absolutePath).toLowerCase();
+  const body = await fs.readFile(absolutePath);
+  response.writeHead(200, { 'Content-Type': mimeTypes[extension] || 'application/octet-stream' });
+  response.end(body);
+}
+
+function sendText(response, statusCode, body) {
+  response.writeHead(statusCode, { 'Content-Type': 'text/plain; charset=utf-8' });
+  response.end(body);
+}
+
 const phaseNarratives = {
   Formulation: {
     id: 'phase-formulation',
@@ -961,12 +973,12 @@ const server = http.createServer(async (request, response) => {
     }
 
     if (pathname.startsWith('/suite-assets/')) {
-      const fileName = pathname.replace('/suite-assets/', '');
-      if (!Object.prototype.hasOwnProperty.call(suiteAssets, fileName)) {
+      const absolutePath = path.resolve(repoRoot, `.${pathname}`);
+      if (!absolutePath.startsWith(path.join(repoRoot, 'suite-assets'))) {
         sendText(response, 404, 'Not found');
         return;
       }
-      await sendFile(response, path.join(repoRoot, suiteAssets[fileName]));
+      await sendFile(response, absolutePath);
       return;
     }
 

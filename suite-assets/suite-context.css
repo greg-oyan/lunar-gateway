@@ -1,0 +1,205 @@
+.suite-context-host {
+  width: min(1320px, calc(100vw - 40px));
+  margin: 0 auto 20px;
+}
+
+.suite-context-banner {
+  border: 1px solid rgba(120, 183, 255, 0.24);
+  background:
+    linear-gradient(135deg, rgba(9, 19, 33, 0.94), rgba(9, 19, 33, 0.82)),
+    radial-gradient(circle at top right, rgba(103, 204, 255, 0.12), transparent 52%);
+  border-radius: 18px;
+  padding: 16px 18px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.18);
+}
+
+.suite-context-banner__eyebrow {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(143, 195, 255, 0.78);
+}
+
+.suite-context-banner__title {
+  margin: 0;
+  font-size: 1.02rem;
+  color: #f5f9ff;
+}
+
+.suite-context-banner__body {
+  margin: 8px 0 0;
+  color: rgba(227, 236, 247, 0.82);
+  line-height: 1.55;
+}
+
+.suite-context-banner__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.suite-context-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 7px 11px;
+  background: rgba(103, 204, 255, 0.1);
+  border: 1px solid rgba(103, 204, 255, 0.16);
+  color: #d8e9fb;
+  font-size: 0.82rem;
+}
+
+.suite-context-chip strong {
+  color: #ffffff;
+}
+
+.suite-context-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.suite-context-action {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(120, 183, 255, 0.24);
+  background: rgba(120, 183, 255, 0.08);
+  color: #eff7ff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  font: inherit;
+  cursor: pointer;
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.suite-context-action:hover {
+  transform: translateY(-1px);
+  border-color: rgba(147, 202, 255, 0.4);
+  background: rgba(120, 183, 255, 0.16);
+}
+
+.suite-context-card {
+  margin-top: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(120, 183, 255, 0.18);
+  background: rgba(10, 19, 32, 0.72);
+  padding: 16px 18px;
+}
+
+.suite-context-card__eyebrow {
+  margin: 0 0 4px;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(143, 195, 255, 0.78);
+}
+
+.suite-context-card__title {
+  margin: 0;
+  color: #f7fbff;
+  font-size: 1rem;
+}
+
+.suite-context-card__body {
+  margin: 8px 0 0;
+  color: rgba(227, 236, 247, 0.82);
+  line-height: 1.55;
+}
+
+.suite-context-card__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.suite-context-stat {
+  border-radius: 14px;
+  border: 1px solid rgba(120, 183, 255, 0.16);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 12px 14px;
+}
+
+.suite-context-stat__label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(155, 175, 201, 0.78);
+}
+
+.suite-context-stat__value {
+  display: block;
+  color: #f4f8ff;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.suite-context-note {
+  margin-top: 12px;
+  color: rgba(214, 226, 240, 0.78);
+  line-height: 1.55;
+}
+
+.suite-context-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.suite-context-list__item {
+  border-radius: 14px;
+  border: 1px solid rgba(120, 183, 255, 0.14);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 12px 14px;
+}
+
+.suite-context-list__meta {
+  margin: 0 0 4px;
+  color: rgba(155, 175, 201, 0.8);
+  font-size: 0.82rem;
+}
+
+.suite-context-list__title {
+  margin: 0;
+  color: #f4f8ff;
+  font-size: 0.95rem;
+}
+
+.suite-context-list__copy {
+  margin: 6px 0 0;
+  color: rgba(214, 226, 240, 0.78);
+  line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+  .suite-context-host {
+    width: min(100vw - 24px, 1320px);
+    margin-bottom: 16px;
+  }
+
+  .suite-context-banner,
+  .suite-context-card {
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .suite-context-actions {
+    flex-direction: column;
+  }
+
+  .suite-context-action {
+    width: 100%;
+  }
+}

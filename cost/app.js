@@ -1,3 +1,15 @@
+﻿import {
+  applySuiteNav,
+  buildSuiteHref,
+  getSharedContextEntries,
+  hasSharedContext,
+  loadSuiteCrosswalk,
+  mergeQueryState,
+  readSharedContext,
+} from '../suite-assets/suite-context.js';
+
+const CROSSWALK_URL = '../suite-assets/data/gateway-crosswalk.json';
+
 const state = {
   data: null,
   error: null,
@@ -10,6 +22,8 @@ const state = {
   categoriesById: new Map(),
   yearsById: new Map(),
   methodsById: new Map(),
+  crosswalk: null,
+  sharedContext: {},
 };
 
 const elements = {
@@ -176,6 +190,13 @@ function sum(values) {
   return values.reduce((total, value) => total + Number(value || 0), 0);
 }
 
+function getTopLevelWbsId(wbsId) {
+  const parts = String(wbsId || '').split('.').filter(Boolean);
+  if (!parts.length) return '';
+  if (parts.length < 2) return parts[0];
+  return `${parts[0]}.${parts[1]}`;
+}
+
 function getCategoryYearValue(category, fy) {
   return category.yearly.find((entry) => entry.fy === fy)?.totalUsd || 0;
 }
@@ -270,24 +291,259 @@ function getCurrentMethod() {
   return state.methodsById.get(state.selectedMethodId) || state.data?.methodology?.cards?.[0] || null;
 }
 
+function getAnchorContext(anchorId = state.selectedAnchorId) {
+  return state.crosswalk?.cost?.byAnchorId?.[anchorId] || null;
+}
+
+function resolveAnchorIdFromContext(sharedContext, explicitAnchorId = '') {
+  if (explicitAnchorId && state.anchorsById.has(explicitAnchorId)) {
+    return explicitAnchorId;
+  }
+
+  const wbsContext = sharedContext.wbs ? state.crosswalk?.wbs?.byId?.[sharedContext.wbs] : null;
+  if (wbsContext?.cost.anchorId && state.anchorsById.has(wbsContext.cost.anchorId)) {
+    return wbsContext.cost.anchorId;
+  }
+
+  const milestoneContext = sharedContext.milestone
+    ? state.crosswalk?.schedule?.byMilestoneId?.[sharedContext.milestone]
+    : null;
+  if (milestoneContext?.cost.anchorId && state.anchorsById.has(milestoneContext.cost.anchorId)) {
+    return milestoneContext.cost.anchorId;
+  }
+
+  const phaseContext = sharedContext.phase
+    ? state.crosswalk?.schedule?.byPhaseId?.[sharedContext.phase]
+    : null;
+  if (phaseContext?.primaryWbsId) {
+    const phaseWbsContext = state.crosswalk?.wbs?.byId?.[phaseContext.primaryWbsId];
+    if (phaseWbsContext?.cost.anchorId && state.anchorsById.has(phaseWbsContext.cost.anchorId)) {
+      return phaseWbsContext.cost.anchorId;
+    }
+  }
+
+  const riskContext = sharedContext.risk ? state.crosswalk?.risk?.byId?.[sharedContext.risk] : null;
+  if (riskContext?.cost.anchorId && state.anchorsById.has(riskContext.cost.anchorId)) {
+    return riskContext.cost.anchorId;
+  }
+
+  const moduleContext = sharedContext.module
+    ? state.crosswalk?.simulation?.byModuleKey?.[sharedContext.module]
+    : null;
+  if (moduleContext?.costAnchorId && state.anchorsById.has(moduleContext.costAnchorId)) {
+    return moduleContext.costAnchorId;
+  }
+
+  return getDefaultAnchorId();
+}
+
+function buildCostNavContext(anchor = getCurrentAnchor()) {
+  const sharedContext = buildCurrentContext(anchor);
+  return {
+    from: 'cost',
+    wbs: sharedContext.wbsId || '',
+    module: sharedContext.moduleKey || '',
+    milestone: sharedContext.milestoneId || '',
+    risk: sharedContext.riskId || '',
+    doc: sharedContext.docId || '',
+  };
+}
+
+function syncSuiteNavigation() {
+  applySuiteNav(buildCostNavContext(), { currentRoute: 'cost' });
+}
+
+function getDefaultYearId() {
+  return (
+    state.data?.defaultSelection?.defaultYear ||
+    state.data?.overview?.busiestYear?.fy ||
+    state.data?.years?.[0]?.fy ||
+    null
+  );
+}
+
+function getDefaultMethodId() {
+  return state.methodsById.has('methods')
+    ? 'methods'
+    : state.data?.methodology?.cards?.[0]?.id || null;
+}
+
+function syncUrlState() {
+  const defaultAnchorId = getDefaultAnchorId();
+  const defaultYearId = getDefaultYearId();
+  const defaultMethodId = getDefaultMethodId();
+  const contextIsActive = hasSharedContext(state.sharedContext);
+
+  mergeQueryState({
+    ...getSharedContextEntries(state.sharedContext),
+    view: state.view !== 'module' ? state.view : '',
+    anchor:
+      contextIsActive || (state.selectedAnchorId && state.selectedAnchorId !== defaultAnchorId)
+        ? state.selectedAnchorId || ''
+        : '',
+    year:
+      state.view === 'year' && (contextIsActive || state.selectedYearId !== defaultYearId)
+        ? state.selectedYearId || ''
+        : '',
+    method:
+      state.view === 'method' && (contextIsActive || state.selectedMethodId !== defaultMethodId)
+        ? state.selectedMethodId || ''
+        : '',
+  });
+}
+
+function buildCurrentContext(anchor = getCurrentAnchor()) {
+  const anchorContext = getAnchorContext(anchor?.id);
+  const sharedContext = state.sharedContext || {};
+  const candidateWbsId =
+    sharedContext.wbs && anchor?.groupIds?.includes(getTopLevelWbsId(sharedContext.wbs))
+      ? sharedContext.wbs
+      : anchorContext?.primaryWbsId || anchor?.groupIds?.[0] || '';
+  const wbsContext = candidateWbsId ? state.crosswalk?.wbs?.byId?.[candidateWbsId] : null;
+  const milestoneId =
+    sharedContext.milestone && anchorContext?.primaryMilestoneId === sharedContext.milestone
+      ? sharedContext.milestone
+      : wbsContext?.schedule.primaryMilestoneId || anchorContext?.primaryMilestoneId || '';
+  const riskId =
+    sharedContext.risk && anchorContext?.riskIds?.includes(sharedContext.risk)
+      ? sharedContext.risk
+      : wbsContext?.risks.primaryRiskId || anchorContext?.riskIds?.[0] || '';
+  const moduleKey =
+    sharedContext.module && (wbsContext?.simulation.moduleKeys || []).includes(sharedContext.module)
+      ? sharedContext.module
+      : wbsContext?.simulation.moduleKeys?.[0] || anchorContext?.simulation.moduleKeys?.[0] || '';
+  const docId =
+    sharedContext.doc && (wbsContext?.documents.sourceDocIds || anchorContext?.documents.sourceDocIds || []).includes(sharedContext.doc)
+      ? sharedContext.doc
+      : wbsContext?.documents.sourceDocIds?.[0] || anchorContext?.documents.sourceDocIds?.[0] || '';
+  const title = candidateWbsId
+    ? `Showing cost context related to WBS ${candidateWbsId}`
+    : `Showing cost context for ${anchor?.label || 'Gateway'}`;
+  const body = candidateWbsId && wbsContext
+    ? `${anchor?.label || 'This cost area'} carries the strongest mapped cost roll-up for WBS ${candidateWbsId}. ${wbsContext.schedule.reason}`
+    : anchorContext?.reason || 'This cost area groups the clearest mapped cost roll-up in the current suite crosswalk.';
+
+  return {
+    anchor,
+    anchorContext,
+    wbsId: candidateWbsId,
+    wbsName: candidateWbsId ? state.categoriesById.get(candidateWbsId)?.name || '' : '',
+    milestoneId,
+    riskId,
+    moduleKey,
+    docId,
+    title,
+    body,
+    riskCount: wbsContext?.risks.ids?.length || anchorContext?.riskIds?.length || 0,
+    documentCount: wbsContext?.documents.sourceDocIds?.length || anchorContext?.documents.sourceDocIds?.length || 0,
+  };
+}
+
+function buildSuiteAction(route, label, params) {
+  return `
+    <a class="suite-context-action" href="${escapeHtml(buildSuiteHref(route, params))}">
+      ${escapeHtml(label)}
+    </a>
+  `;
+}
+
+function renderContextBanner(anchor = getCurrentAnchor()) {
+  const context = buildCurrentContext(anchor);
+  if (!context.anchor || !hasSharedContext(state.sharedContext)) return '';
+
+  return `
+    <section class="suite-context-banner">
+      <p class="suite-context-banner__eyebrow">Cross-App Context</p>
+      <h3 class="suite-context-banner__title">${escapeHtml(context.title)}</h3>
+      <p class="suite-context-banner__body">${escapeHtml(context.body)}</p>
+      <div class="suite-context-banner__chips">
+        <span class="suite-context-chip"><strong>Cost area</strong>${escapeHtml(context.anchor.label)}</span>
+        ${context.wbsId ? `<span class="suite-context-chip"><strong>WBS</strong>${escapeHtml(context.wbsId)}</span>` : ''}
+        ${context.milestoneId ? `<span class="suite-context-chip"><strong>Schedule</strong>${escapeHtml(context.milestoneId)}</span>` : ''}
+        ${context.riskId ? `<span class="suite-context-chip"><strong>Risk</strong>${escapeHtml(context.riskId)}</span>` : ''}
+      </div>
+      <div class="suite-context-actions">
+        <button class="suite-context-action" type="button" data-action="reset-view">Reset view</button>
+      </div>
+    </section>
+  `;
+}
+
+function renderAnchorConnections(anchor) {
+  const context = buildCurrentContext(anchor);
+  if (!context.anchor) return '';
+
+  return `
+    <section class="suite-context-card">
+      <p class="suite-context-card__eyebrow">Program Mapping</p>
+      <h4 class="suite-context-card__title">How this cost view connects to the rest of Gateway</h4>
+      <p class="suite-context-card__body">${escapeHtml(context.body)}</p>
+      <div class="suite-context-card__grid">
+        <div class="suite-context-stat">
+          <span class="suite-context-stat__label">Mapped WBS</span>
+          <span class="suite-context-stat__value">${escapeHtml(context.wbsId ? `${context.wbsId}${context.wbsName ? ` - ${context.wbsName}` : ''}` : 'No direct WBS branch')}</span>
+        </div>
+        <div class="suite-context-stat">
+          <span class="suite-context-stat__label">Schedule anchor</span>
+          <span class="suite-context-stat__value">${escapeHtml(context.milestoneId || 'No direct schedule anchor')}</span>
+        </div>
+        <div class="suite-context-stat">
+          <span class="suite-context-stat__label">Linked risks</span>
+          <span class="suite-context-stat__value">${escapeHtml(String(context.riskCount))}</span>
+        </div>
+        <div class="suite-context-stat">
+          <span class="suite-context-stat__label">Source docs</span>
+          <span class="suite-context-stat__value">${escapeHtml(String(context.documentCount))}</span>
+        </div>
+      </div>
+      <div class="suite-context-actions">
+        ${buildSuiteAction('wbs', 'Open in WBS', {
+          from: 'cost',
+          wbs: context.wbsId,
+          module: context.moduleKey,
+        })}
+        ${buildSuiteAction('schedule', 'Open in Schedule', {
+          from: 'cost',
+          wbs: context.wbsId,
+          milestone: context.milestoneId,
+        })}
+        ${buildSuiteAction('documents', 'Open in Documents', {
+          from: 'cost',
+          wbs: context.wbsId,
+          doc: context.docId,
+        })}
+        ${buildSuiteAction('risk', 'Open in Risk', {
+          from: 'cost',
+          wbs: context.wbsId,
+          risk: context.riskId,
+        })}
+      </div>
+    </section>
+  `;
+}
+
 function normalizeSelections() {
   if (!state.selectedAnchorId || !state.anchorsById.has(state.selectedAnchorId)) {
     state.selectedAnchorId = getDefaultAnchorId();
   }
 
   if (!state.selectedYearId || !state.yearsById.has(state.selectedYearId)) {
-    state.selectedYearId =
-      state.data.defaultSelection?.defaultYear ||
-      state.data.overview.busiestYear?.fy ||
-      state.data.years[0]?.fy ||
-      null;
+    state.selectedYearId = getDefaultYearId();
   }
 
   if (!state.selectedMethodId || !state.methodsById.has(state.selectedMethodId)) {
-    state.selectedMethodId = state.methodsById.has('methods')
-      ? 'methods'
-      : state.data.methodology.cards[0]?.id || null;
+    state.selectedMethodId = getDefaultMethodId();
   }
+}
+
+function resetView() {
+  state.sharedContext = {};
+  state.view = 'module';
+  state.selectedAnchorId = getDefaultAnchorId();
+  state.selectedYearId = getDefaultYearId();
+  state.selectedMethodId = getDefaultMethodId();
+  normalizeSelections();
+  render();
 }
 
 function setView(view) {
@@ -678,6 +934,8 @@ function renderAnchorFocus(anchor) {
         <p>${escapeHtml(anchor.why)}</p>
       </section>
 
+      ${renderAnchorConnections(anchor)}
+
       <section class="detail-block">
         <h4>Main cost drivers</h4>
         <div class="detail-list">
@@ -762,6 +1020,7 @@ function renderModuleView() {
 
   return `
     <div class="module-story">
+      ${renderContextBanner(anchor)}
       <div class="module-story__primary">
         <section class="hero-map">
           <div class="hero-map__topline">
@@ -953,6 +1212,7 @@ function renderYearView() {
 
   return `
     <div class="year-story">
+      ${renderContextBanner(getCurrentAnchor())}
       <div class="year-story__primary">
         <section class="year-panel">
           <div class="year-panel__topline">
@@ -1033,6 +1293,7 @@ function renderMethodView() {
 
   return `
     <div class="method-story">
+      ${renderContextBanner(getCurrentAnchor())}
       <section class="method-panel">
         <div class="method-panel__topline">
           <div>
@@ -1147,9 +1408,17 @@ function render() {
 
   renderHero();
   renderActiveView();
+  syncUrlState();
+  syncSuiteNavigation();
 }
 
 function handleClick(event) {
+  const actionButton = event.target.closest('[data-action]');
+  if (actionButton?.dataset.action === 'reset-view') {
+    resetView();
+    return;
+  }
+
   const viewButton = event.target.closest('[data-view]');
   if (viewButton) {
     setView(viewButton.dataset.view);
@@ -1176,18 +1445,28 @@ function handleClick(event) {
 
 async function loadDataset() {
   try {
-    const response = await fetch('./data/gateway-cost.json');
+    const [response, crosswalk] = await Promise.all([
+      fetch('./data/gateway-cost.json'),
+      loadSuiteCrosswalk(CROSSWALK_URL),
+    ]);
     if (!response.ok) {
       throw new Error(`HTTP ${response.status} while loading gateway-cost.json`);
     }
 
     const data = await response.json();
+    const urlParams = new URLSearchParams(window.location.search);
     state.data = data;
+    state.crosswalk = crosswalk;
+    state.sharedContext = readSharedContext();
     state.categoriesById = new Map(data.categories.map((category) => [category.id, category]));
     state.yearsById = new Map(data.years.map((year) => [year.fy, year]));
     state.methodsById = new Map(data.methodology.cards.map((card) => [card.id, card]));
     state.anchors = buildAnchors(data);
     state.anchorsById = new Map(state.anchors.map((anchor) => [anchor.id, anchor]));
+    state.view = ['module', 'year', 'method'].includes(urlParams.get('view')) ? urlParams.get('view') : 'module';
+    state.selectedAnchorId = resolveAnchorIdFromContext(state.sharedContext, urlParams.get('anchor') || '');
+    state.selectedYearId = urlParams.get('year') || data.defaultSelection?.defaultYear || null;
+    state.selectedMethodId = urlParams.get('method') || null;
     normalizeSelections();
     render();
   } catch (error) {
@@ -1199,3 +1478,4 @@ async function loadDataset() {
 
 document.addEventListener('click', handleClick);
 loadDataset();
+

@@ -1,4 +1,15 @@
+import {
+  applySuiteNav,
+  buildSuiteHref,
+  getSharedContextEntries,
+  hasSharedContext,
+  loadSuiteCrosswalk,
+  mergeQueryState,
+  readSharedContext,
+} from '../suite-assets/suite-context.js';
+
 const DATA_URL = './data/gateway-schedule.json';
+const CROSSWALK_URL = '../suite-assets/data/gateway-crosswalk.json';
 
 const appTitle = document.getElementById('appTitle');
 const appSubtitle = document.getElementById('appSubtitle');
@@ -38,6 +49,8 @@ const state = {
     artifacts: false,
     sources: false,
   },
+  crosswalk: null,
+  sharedContext: {},
 };
 
 function escapeHtml(value) {
@@ -127,6 +140,188 @@ function getMilestoneDrivers(milestone) {
 
 function getActiveDriver() {
   return state.driversById.get(state.activeDriverId) || state.driversById.get(state.data.defaultDriverId) || state.data.drivers[0] || null;
+}
+
+function getSelectedContext() {
+  const milestone = getSelectedMilestone();
+  if (milestone) {
+    const milestoneContext = state.crosswalk?.schedule?.byMilestoneId?.[milestone.id];
+    return {
+      milestone,
+      phase: state.phasesById.get(milestone.phaseId) || null,
+      wbsId: milestoneContext?.primaryWbsId || milestone.task?.wbsId || '',
+      riskId: milestoneContext?.risks.ids?.[0] || milestone.linkedRisks[0]?.id || '',
+      docId: milestoneContext?.documents.sourceDocIds?.[0] || '',
+      moduleKey: milestoneContext?.simulation.moduleKeys?.[0] || '',
+      body: milestoneContext?.reason || `Selected because ${milestone.shortName} is the strongest linked schedule anchor in the current crosswalk.`,
+    };
+  }
+
+  const phase = getSelectedPhase();
+  if (phase) {
+    const phaseContext = state.crosswalk?.schedule?.byPhaseId?.[phase.id];
+    return {
+      milestone: phaseContext?.primaryMilestoneId ? state.milestonesById.get(phaseContext.primaryMilestoneId) || null : null,
+      phase,
+      wbsId: phaseContext?.primaryWbsId || '',
+      riskId: phaseContext?.riskIds?.[0] || '',
+      docId: phaseContext?.documents.sourceDocIds?.[0] || '',
+      moduleKey: phaseContext?.simulation.moduleKeys?.[0] || '',
+      body: phaseContext?.reason || `Selected because ${phase.name} is the clearest phase-level schedule grouping in the current data.`,
+    };
+  }
+
+  return {
+    milestone: null,
+    phase: null,
+    wbsId: '',
+    riskId: '',
+    docId: '',
+    moduleKey: '',
+    body: '',
+  };
+}
+
+function buildSuiteAction(route, label, params) {
+  return `
+    <a class="suite-context-action" href="${escapeHtml(buildSuiteHref(route, params))}">
+      ${escapeHtml(label)}
+    </a>
+  `;
+}
+
+function buildScheduleNavContext() {
+  const context = getSelectedContext();
+  return {
+    from: 'schedule',
+    wbs: context.wbsId,
+    module: context.moduleKey,
+    milestone: context.milestone?.id || '',
+    phase: context.phase?.id || '',
+    risk: context.riskId,
+    doc: context.docId,
+  };
+}
+
+function syncSuiteNavigation() {
+  applySuiteNav(buildScheduleNavContext(), { currentRoute: 'schedule' });
+}
+
+function getDefaultSelection() {
+  return state.data?.defaultSelection || null;
+}
+
+function isDefaultSelection(selection) {
+  const defaultSelection = getDefaultSelection();
+  if (!selection && !defaultSelection) return true;
+  if (!selection || !defaultSelection) return false;
+  return selection.type === defaultSelection.type && selection.id === defaultSelection.id;
+}
+
+function syncUrlState() {
+  const milestone = getSelectedMilestone();
+  const phase = getSelectedPhase();
+  const contextIsActive = hasSharedContext(state.sharedContext);
+  const selectionIsDefault = isDefaultSelection(state.selection);
+  const shouldPersistSelection = contextIsActive || !selectionIsDefault;
+
+  mergeQueryState({
+    ...getSharedContextEntries(state.sharedContext),
+    milestone: shouldPersistSelection ? milestone?.id || '' : '',
+    phase: shouldPersistSelection ? (milestone ? milestone.phaseId : phase?.id || '') : '',
+  });
+}
+
+function resolveInitialSelection() {
+  const milestoneFromUrl = state.sharedContext.milestone;
+  if (milestoneFromUrl && state.milestonesById.has(milestoneFromUrl)) {
+    return { type: 'milestone', id: milestoneFromUrl };
+  }
+
+  const phaseFromUrl = state.sharedContext.phase;
+  if (phaseFromUrl && state.phasesById.has(phaseFromUrl)) {
+    return { type: 'phase', id: phaseFromUrl };
+  }
+
+  const wbsContext = state.sharedContext.wbs ? state.crosswalk?.wbs?.byId?.[state.sharedContext.wbs] : null;
+  if (wbsContext?.schedule.primaryMilestoneId && state.milestonesById.has(wbsContext.schedule.primaryMilestoneId)) {
+    return { type: 'milestone', id: wbsContext.schedule.primaryMilestoneId };
+  }
+  if (wbsContext?.schedule.phaseId && state.phasesById.has(wbsContext.schedule.phaseId)) {
+    return { type: 'phase', id: wbsContext.schedule.phaseId };
+  }
+
+  const riskContext = state.sharedContext.risk ? state.crosswalk?.risk?.byId?.[state.sharedContext.risk] : null;
+  if (riskContext?.primaryMilestoneId && state.milestonesById.has(riskContext.primaryMilestoneId)) {
+    return { type: 'milestone', id: riskContext.primaryMilestoneId };
+  }
+
+  const moduleContext = state.sharedContext.module
+    ? state.crosswalk?.simulation?.byModuleKey?.[state.sharedContext.module]
+    : null;
+  if (moduleContext?.primaryMilestoneId && state.milestonesById.has(moduleContext.primaryMilestoneId)) {
+    return { type: 'milestone', id: moduleContext.primaryMilestoneId };
+  }
+
+  return state.data.defaultSelection || null;
+}
+
+function renderContextBanner() {
+  const context = getSelectedContext();
+  if (!hasSharedContext(state.sharedContext) || (!context.milestone && !context.phase)) return '';
+
+  const title = context.wbsId
+    ? `Showing schedule activity related to WBS ${context.wbsId}`
+    : context.milestone
+      ? `Showing schedule activity for ${context.milestone.shortName}`
+      : `Showing schedule activity for ${context.phase.name}`;
+
+  return `
+    <section class="suite-context-banner">
+      <p class="suite-context-banner__eyebrow">Cross-App Context</p>
+      <h3 class="suite-context-banner__title">${escapeHtml(title)}</h3>
+      <p class="suite-context-banner__body">${escapeHtml(context.body)}</p>
+      <div class="suite-context-banner__chips">
+        ${context.phase ? `<span class="suite-context-chip"><strong>Phase</strong>${escapeHtml(context.phase.name)}</span>` : ''}
+        ${context.milestone ? `<span class="suite-context-chip"><strong>Milestone</strong>${escapeHtml(context.milestone.id)}</span>` : ''}
+        ${context.wbsId ? `<span class="suite-context-chip"><strong>WBS</strong>${escapeHtml(context.wbsId)}</span>` : ''}
+      </div>
+      <div class="suite-context-actions">
+        <button class="suite-context-action" type="button" data-action="reset-view">Reset view</button>
+      </div>
+    </section>
+  `;
+}
+
+function renderContextActions() {
+  const context = getSelectedContext();
+  return `
+    <div class="suite-context-actions">
+      ${buildSuiteAction('wbs', 'Open in WBS', {
+        from: 'schedule',
+        wbs: context.wbsId,
+        milestone: context.milestone?.id || '',
+      })}
+      ${buildSuiteAction('cost', 'Open in Cost', {
+        from: 'schedule',
+        wbs: context.wbsId,
+        milestone: context.milestone?.id || '',
+        view: 'module',
+      })}
+      ${buildSuiteAction('risk', 'Open in Risk', {
+        from: 'schedule',
+        wbs: context.wbsId,
+        milestone: context.milestone?.id || '',
+        risk: context.riskId,
+      })}
+      ${buildSuiteAction('documents', 'Open in Documents', {
+        from: 'schedule',
+        wbs: context.wbsId,
+        milestone: context.milestone?.id || '',
+        doc: context.docId,
+      })}
+    </div>
+  `;
 }
 
 function scrollToId(id) {
@@ -223,6 +418,7 @@ function getTimelinePosition(date) {
 
 function buildStageOverview() {
   overviewContent.innerHTML = `
+    ${renderContextBanner()}
     <div class="stage-strip" aria-label="Schedule overview key">
       <span class="stage-pill stage-pill--primary mono">${escapeHtml(state.data.overview.spanValue)}</span>
       <span class="stage-pill">${escapeHtml(pluralize(state.data.phases.length, 'major phase'))}</span>
@@ -444,6 +640,7 @@ function buildFocusPhaseView(phase) {
             <strong class="phase-summary-stat__value">${escapeHtml(`${relatedRisks.length} / ${relatedDocuments.length}`)}</strong>
           </div>
         </div>
+        ${renderContextActions()}
       </section>
 
       <section class="focus-card focus-card--secondary">
@@ -534,6 +731,7 @@ function buildMilestoneSupport(milestone) {
             <strong class="phase-summary-stat__value">${escapeHtml(milestone.confidenceLabel)}</strong>
           </div>
         </div>
+        ${renderContextActions()}
       </section>
 
       <div class="support-grid support-grid--primary">
@@ -571,6 +769,11 @@ function buildMilestoneSupport(milestone) {
                 <span class="item-meta">${escapeHtml(`${risk.id} - ${risk.status}`)}</span>
                 <strong>${escapeHtml(risk.title)}</strong>
                 <p class="support-item__copy">${escapeHtml(`Risk score ${risk.score}`)}</p>
+                <div class="card-actions">
+                  <a class="artifact-card__link" href="${escapeHtml(buildSuiteHref('risk', { from: 'schedule', milestone: milestone.id, wbs: milestone.task?.wbsId || '', risk: risk.id }))}">
+                    Open in Risk
+                  </a>
+                </div>
               </div>
             `,
           )}
@@ -589,6 +792,11 @@ function buildMilestoneSupport(milestone) {
                 <span class="item-meta">${escapeHtml(`${document.id} - ${document.type}`)}</span>
                 <strong>${escapeHtml(document.name)}</strong>
                 <p class="support-item__copy">${escapeHtml(`${document.status} - ${document.evidenceRole}`)}</p>
+                <div class="card-actions">
+                  <a class="artifact-card__link" href="${escapeHtml(buildSuiteHref('documents', { from: 'schedule', milestone: milestone.id, wbs: milestone.task?.wbsId || '', doc: getSelectedContext().docId }))}">
+                    Open in Documents
+                  </a>
+                </div>
               </div>
             `,
           )}
@@ -607,6 +815,12 @@ function buildMilestoneSupport(milestone) {
                 <span class="item-meta">${escapeHtml(`${source.id} - ${source.publisher}`)}</span>
                 <strong>${escapeHtml(source.title)}</strong>
                 <p class="support-item__copy">${escapeHtml(source.href ? 'External or linked source.' : 'Local source file in the schedule dataset.')}</p>
+                <div class="card-actions">
+                  <a class="artifact-card__link" href="${escapeHtml(buildSuiteHref('documents', { from: 'schedule', milestone: milestone.id, wbs: milestone.task?.wbsId || '', doc: getSelectedContext().docId }))}">
+                    Open in Documents
+                  </a>
+                  ${source.href ? `<a class="source-card__link" href="${escapeHtml(source.href)}" target="_blank" rel="noreferrer">Open raw source</a>` : ''}
+                </div>
               </div>
             `,
           )}
@@ -802,6 +1016,8 @@ function renderApp() {
   renderTimeline();
   renderFocus();
   renderSupport();
+  syncUrlState();
+  syncSuiteNavigation();
 }
 
 function handleAction(target) {
@@ -812,6 +1028,19 @@ function handleAction(target) {
     state.selection = null;
     state.support.open = false;
     syncActiveDriver(null);
+    renderApp();
+    scrollToId('stageHeading');
+    return;
+  }
+
+  if (action === 'reset-view') {
+    state.sharedContext = {};
+    state.selection = getDefaultSelection();
+    state.support.open = state.selection?.type === 'milestone';
+    state.reveal.phaseMilestones = false;
+    state.reveal.artifacts = false;
+    state.reveal.sources = false;
+    syncActiveDriver(state.selection);
     renderApp();
     scrollToId('stageHeading');
     return;
@@ -840,16 +1069,23 @@ function handleSelection(target) {
 }
 
 async function loadData() {
-  const response = await fetch(DATA_URL);
+  const [response, crosswalk] = await Promise.all([
+    fetch(DATA_URL),
+    loadSuiteCrosswalk(CROSSWALK_URL),
+  ]);
   if (!response.ok) {
     throw new Error(`Unable to load schedule data (${response.status})`);
   }
 
   const data = await response.json();
   state.data = data;
+  state.crosswalk = crosswalk;
+  state.sharedContext = readSharedContext();
   buildMaps(data);
   state.activeDriverId = data.defaultDriverId;
-  state.selection = null;
+  state.selection = resolveInitialSelection();
+  syncActiveDriver(state.selection);
+  state.support.open = state.selection?.type === 'milestone';
 
   renderApp();
 }
