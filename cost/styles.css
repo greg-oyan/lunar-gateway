@@ -1316,3 +1316,103 @@ a {
   font-size: 14px;
   line-height: 1;
 }
+
+/* Defensibility accordion — progressive disclosure for method topics */
+.method-panel__summary {
+  margin: 8px 0 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  line-height: 1.55;
+  max-width: 64ch;
+}
+
+.method-accordion {
+  display: grid;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.method-accordion-item {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(13, 24, 36, 0.7);
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.method-accordion-item:hover {
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.method-accordion-item[open] {
+  border-color: rgba(103, 180, 255, 0.4);
+  background: rgba(13, 24, 36, 0.95);
+}
+
+.method-accordion-item__summary {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "eyebrow eyebrow chevron"
+    "title title chevron"
+    "preview preview chevron";
+  gap: 4px 12px;
+  padding: 14px 18px;
+  cursor: pointer;
+  list-style: none;
+  align-items: center;
+}
+
+.method-accordion-item__summary::-webkit-details-marker {
+  display: none;
+}
+
+.method-accordion-item__eyebrow {
+  grid-area: eyebrow;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(103, 180, 255, 0.9);
+}
+
+.method-accordion-item__title {
+  grid-area: title;
+  font-size: 17px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.method-accordion-item__preview {
+  grid-area: preview;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+}
+
+.method-accordion-item__chevron {
+  grid-area: chevron;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+  transition: transform 160ms ease;
+}
+
+.method-accordion-item[open] .method-accordion-item__chevron {
+  transform: rotate(180deg);
+}
+
+.method-accordion-item__body {
+  padding: 0 18px 18px;
+}
+
+.method-accordion-item__list {
+  margin: 0;
+  padding: 0 0 0 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.method-accordion-item__list li {
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+  font-size: 14px;
+}

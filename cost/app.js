@@ -1270,68 +1270,45 @@ function getMethodSupportingFiles(cardId) {
 }
 
 function renderMethodView() {
-  const method = getCurrentMethod();
-  const supportFiles = getMethodSupportingFiles(method.id);
+  const supportFiles = getMethodSupportingFiles('methods');
 
   return `
     <div class="method-story">
       ${renderContextBanner(getCurrentAnchor())}
-      <div class="method-story__primary">
+
       <section class="method-panel">
         <div class="method-panel__topline">
           <div>
             <h3>Why the estimate is defensible</h3>
+            <p class="method-panel__summary">${escapeHtml(state.data.methodology.summary)}</p>
           </div>
-          <p class="method-panel__note">
-            Open a topic for detail on sourcing, reserve, or judgment.
-          </p>
         </div>
 
-        <div class="method-list">
+        <div class="method-accordion">
           ${state.data.methodology.cards
             .map(
               (card) => `
-                <button
-                  class="method-card${card.id === state.selectedMethodId ? ' method-card--active' : ''}"
-                  type="button"
-                  data-method="${escapeHtml(card.id)}"
-                  aria-pressed="${String(card.id === state.selectedMethodId)}"
-                >
-                  <p class="method-card__eyebrow">${escapeHtml(card.eyebrow)}</p>
-                  <h3>${escapeHtml(card.title)}</h3>
-                  <p>${escapeHtml(card.summary)}</p>
-                </button>
+                <details class="method-accordion-item">
+                  <summary class="method-accordion-item__summary">
+                    <span class="method-accordion-item__eyebrow">${escapeHtml(card.eyebrow)}</span>
+                    <span class="method-accordion-item__title">${escapeHtml(card.title)}</span>
+                    <span class="method-accordion-item__preview">${escapeHtml(card.summary)}</span>
+                    <span class="method-accordion-item__chevron" aria-hidden="true">▾</span>
+                  </summary>
+                  <div class="method-accordion-item__body">
+                    <ul class="method-accordion-item__list">
+                      ${card.items
+                        .map(
+                          (item) => `<li>${escapeHtml(item)}</li>`,
+                        )
+                        .join('')}
+                    </ul>
+                  </div>
+                </details>
               `,
             )
             .join('')}
         </div>
-      </section>
-
-      <aside class="focus-panel detail-panel">
-        <div>
-          <h3>${escapeHtml(method.title)}</h3>
-          <p class="focus-panel__summary">${escapeHtml(method.summary)}</p>
-        </div>
-
-        <section class="focus-statement">
-          <h4>${escapeHtml(method.eyebrow)}</h4>
-          <p>${escapeHtml(state.data.methodology.summary)}</p>
-        </section>
-
-        <section class="detail-block">
-          <h4>Details</h4>
-          <div class="detail-list">
-            ${method.items
-              .map(
-                (item) => `
-                  <div class="detail-item">
-                    <p class="detail-item__title">${escapeHtml(item)}</p>
-                  </div>
-                `,
-              )
-              .join('')}
-          </div>
-        </section>
 
         ${buildEvidenceDisclosure(
           'Show source support',
@@ -1341,8 +1318,7 @@ function renderMethodView() {
             </div>
           `,
         )}
-      </aside>
-      </div>
+      </section>
     </div>
   `;
 }
