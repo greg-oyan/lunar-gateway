@@ -287,20 +287,19 @@ function buildContextBanner(node) {
   if (!sharedContext || !nodeContext) return '';
 
   const sourceLabel = SOURCE_LABELS[sharedContext.from] || 'another suite view';
-  const title = `Showing WBS ${node.id} in context`;
+  const title = `From ${sourceLabel}: WBS ${node.id}`;
 
-  let body = `Opened from ${sourceLabel}. This branch is selected because it is the strongest structural match in the current cross-app crosswalk.`;
+  let body = `The best-matching branch for what you were viewing.`;
   if (sharedContext.milestone && state.crosswalk?.schedule?.byMilestoneId?.[sharedContext.milestone]?.reason) {
-    body = `Opened from ${sourceLabel}. ${state.crosswalk.schedule.byMilestoneId[sharedContext.milestone].reason}`;
+    body = state.crosswalk.schedule.byMilestoneId[sharedContext.milestone].reason;
   } else if (sharedContext.risk && state.crosswalk?.risk?.byId?.[sharedContext.risk]?.reason) {
-    body = `Opened from ${sourceLabel}. ${state.crosswalk.risk.byId[sharedContext.risk].reason}`;
+    body = state.crosswalk.risk.byId[sharedContext.risk].reason;
   } else if (sharedContext.module && state.crosswalk?.simulation?.byModuleKey?.[sharedContext.module]?.note) {
-    body = `Opened from ${sourceLabel}. ${state.crosswalk.simulation.byModuleKey[sharedContext.module].note}`;
+    body = state.crosswalk.simulation.byModuleKey[sharedContext.module].note;
   }
 
   return `
     <section class="suite-context-banner">
-      <p class="suite-context-banner__eyebrow">Cross-App Context</p>
       <h3 class="suite-context-banner__title">${escapeHtml(title)}</h3>
       <p class="suite-context-banner__body">${escapeHtml(body)}</p>
       <div class="suite-context-banner__chips">
@@ -331,11 +330,7 @@ function renderConnectedViews(node) {
 
   return `
     <section class="suite-context-card">
-      <p class="suite-context-card__eyebrow">Connected Views</p>
-      <h3 class="suite-context-card__title">Trace this branch across the suite</h3>
-      <p class="suite-context-card__body">
-        Use these handoffs to carry WBS ${escapeHtml(node.id)} straight into the most relevant cost, schedule, risk, and document context.
-      </p>
+      <h3 class="suite-context-card__title">Open WBS ${escapeHtml(node.id)} elsewhere</h3>
       <div class="suite-context-card__grid">
         <div class="suite-context-stat">
           <span class="suite-context-stat__label">Cost area</span>
@@ -355,30 +350,29 @@ function renderConnectedViews(node) {
         </div>
       </div>
       <div class="suite-context-actions">
-        ${buildSuiteAction('cost', 'View related cost context', {
+        ${buildSuiteAction('cost', 'Open in Cost', {
           from: 'wbs',
           wbs: node.id,
           anchor: nodeContext.cost.anchorId,
           view: 'module',
         })}
-        ${buildSuiteAction('schedule', 'View related schedule activity', {
+        ${buildSuiteAction('schedule', 'Open in Schedule', {
           from: 'wbs',
           wbs: node.id,
           milestone: nodeContext.schedule.primaryMilestoneId,
           phase: nodeContext.schedule.phaseId,
         })}
-        ${buildSuiteAction('risk', 'View related risks', {
+        ${buildSuiteAction('risk', 'Open in Risk', {
           from: 'wbs',
           wbs: node.id,
           risk: nodeContext.risks.primaryRiskId,
         })}
-        ${buildSuiteAction('documents', 'View supporting documents', {
+        ${buildSuiteAction('documents', 'Open in Documents', {
           from: 'wbs',
           wbs: node.id,
           doc: nodeContext.documents.sourceDocIds?.[0] || '',
         })}
       </div>
-      <p class="suite-context-note">${escapeHtml(nodeContext.schedule.reason)}</p>
     </section>
   `;
 }
@@ -452,7 +446,7 @@ function buildShortExplanation(node) {
 
 function buildWhyItMatters(node) {
   if (node.id === state.data.rootId) {
-    return 'It matters because every Gateway branch rolls up here, making this the clearest executive view of the whole program.';
+    return 'Every branch of the program rolls up here.';
   }
 
   const reasons = [];
@@ -471,9 +465,9 @@ function buildWhyItMatters(node) {
     reasons.push(`${pluralize(node.metrics.documentCount, 'supporting document')} help define it`);
   }
   if (!reasons.length) {
-    return 'It matters because this is a distinct piece of work inside the wider Gateway program structure.';
+    return 'A distinct piece of work inside the program.';
   }
-  return `It matters because ${joinPhrases(reasons.slice(0, 2))}.`;
+  return `${joinPhrases(reasons.slice(0, 2))}.`;
 }
 
 function buildTreeHint(node) {
@@ -498,32 +492,32 @@ function buildLensCards(node) {
       label: 'Cost',
       value: node.related.cost.estimates.length ? pluralize(node.related.cost.estimates.length, 'related item') : 'No linked items',
       hint: node.related.cost.totalBaseCost
-        ? 'See the linked cost signals for this branch.'
-        : 'No linked cost items are attached to this branch.',
+        ? 'View cost detail.'
+        : 'No linked cost.',
     },
     {
       key: 'schedule',
       label: 'Schedule',
       value: scheduleValue,
       hint: node.metrics.taskCount
-        ? 'See the linked timing signals for this branch.'
-        : 'No linked schedule activity is attached to this branch.',
+        ? 'View schedule detail.'
+        : 'No linked schedule.',
     },
     {
       key: 'risks',
       label: 'Risks',
       value: activeRiskCount ? pluralize(activeRiskCount, 'notable risk') : 'No notable risks',
       hint: activeRiskCount
-        ? 'See the linked issues attached to this branch.'
-        : 'No linked risks are attached to this branch.',
+        ? 'View risk detail.'
+        : 'No linked risks.',
     },
     {
       key: 'documents',
       label: 'Documents',
       value: node.metrics.documentCount ? pluralize(node.metrics.documentCount, 'supporting file') : 'No supporting files',
       hint: node.metrics.documentCount
-        ? 'See the files and terms attached to this branch.'
-        : 'No supporting files are attached to this branch.',
+        ? 'View documents.'
+        : 'No linked documents.',
     },
   ];
 }
@@ -760,17 +754,17 @@ function renderStructureSummary() {
     {
       label: 'Detailed work',
       value: pluralize(countsByLevel.get(3) || 0, 'element'),
-      hint: 'Lower-level elements spread on the left side of the roll-up.',
+      hint: 'Detailed work, leftmost.',
     },
     {
       label: 'Major parts',
       value: pluralize(countsByLevel.get(2) || 0, 'element'),
-      hint: 'Middle-layer elements organize the program into major branches.',
+      hint: 'Major branches.',
     },
     {
       label: 'Program roll-up',
       value: pluralize(countsByLevel.get(1) || 0, 'program node'),
-      hint: 'The overall Gateway program sits on the right as the final roll-up.',
+      hint: 'The full program, rightmost.',
     },
   ];
 
@@ -865,8 +859,8 @@ function renderStructureView() {
   treeStatus.textContent = queryActive
     ? hasMatches
       ? `${pluralize(state.searchMatches.size, 'matching branch')} highlighted in Structure View while the full hierarchy remains visible.`
-      : 'No matching branches were found. Structure View keeps the full hierarchy visible for context.'
-    : 'Structure View shows the full roll-up at a glance: detailed work on the left, major elements in the middle, and the program on the right.';
+      : 'No matches. Full hierarchy still shown.'
+    : 'The full roll-up, left to right.';
 
   renderStructureSummary();
   const viewportWidth = Math.max(structureViewport.clientWidth - 36, 920);
@@ -957,14 +951,14 @@ function renderTree() {
 
   const queryActive = Boolean(state.searchQuery.trim());
   if (queryActive && state.searchMatches.size === 0) {
-    treeStatus.textContent = 'No matching branches. Try a broader term or clear the search.';
+    treeStatus.textContent = 'No matches. Clear search to reset.';
     treeElement.innerHTML = '<div class="tree-search-empty">No matching branches were found. Search supports WBS names, descriptions, risks, schedule terms, and linked documents.</div>';
     return;
   }
 
   treeStatus.textContent = queryActive
     ? `${pluralize(state.searchMatches.size, 'matching branch')} shown with its context.`
-    : 'The first screen shows the program at its highest level. Expand only when you want more structure.';
+    : 'Click to expand. Pick a branch to see detail.';
 
   treeElement.innerHTML = renderTreeBranch(rootNode);
 }
@@ -1017,7 +1011,7 @@ function buildDetailScopeNote(detailKey) {
 function buildLensInterpretation(node, detailKey) {
   if (detailKey === 'cost') {
     if (!node.related.cost.estimates.length) {
-      return 'No linked cost rows are attached to this branch in the current dataset.';
+      return 'No linked cost data.';
     }
     const topType = node.related.cost.byType[0]?.label || 'linked estimate items';
     return `This branch carries a measurable cost footprint, led by ${topType.toLowerCase()} and a focused set of linked estimate items.`;
@@ -1025,20 +1019,20 @@ function buildLensInterpretation(node, detailKey) {
 
   if (detailKey === 'schedule') {
     if (!node.metrics.taskCount) {
-      return 'No linked schedule activity is attached to this branch in the current extract.';
+      return 'No linked schedule data.';
     }
     return 'The linked schedule records show how work in this branch unfolds over time, where milestone dates appear, and whether any critical tasks stand out.';
   }
 
   if (detailKey === 'risks') {
     if (!node.metrics.riskCount) {
-      return 'No linked risks are attached to this branch in the current extract.';
+      return 'No linked risks.';
     }
     return 'The linked risk set shows how many active issues affect this branch and which one carries the highest score.';
   }
 
   if (!node.metrics.documentCount) {
-    return 'No linked documents are attached to this branch in the current tracker.';
+    return 'No linked documents.';
   }
   return 'The linked documents show the main source material and terminology associated with this branch.';
 }
@@ -1181,7 +1175,6 @@ function renderOverview() {
         <h2 class="overview-hero__title">${escapeHtml(node.name)}</h2>
         <div class="overview-hero__body">
           <article class="overview-blurb">
-            <p class="overview-blurb__label">What this part is</p>
             <p class="overview-blurb__text">${escapeHtml(buildShortExplanation(node))}</p>
           </article>
           <article class="overview-blurb">
@@ -1204,7 +1197,7 @@ function renderOverview() {
           .join('')}
       </section>
       ${renderConnectedViews(node)}
-      <div class="overview-prompt">Open any card to see the linked cost, schedule, risk, or document signals for this branch.</div>
+      <div class="overview-prompt">Click a card for detail.</div>
     </section>
   `;
 }
@@ -1215,8 +1208,8 @@ function renderCostDetail(node) {
     ${renderPreviewSection({
       detailKey: 'cost',
       eyebrow: 'Linked items',
-      title: 'Representative cost signals',
-      text: 'Representative items that show what is driving the current cost picture for this branch.',
+      title: 'Linked cost items',
+      text: 'Sample cost items linked to this branch.',
       items: node.related.cost.estimates.length
         ? node.related.cost.estimates
         : node.related.cost.contractHighlights,
@@ -1251,9 +1244,9 @@ function renderScheduleDetail(node) {
     ${renderTakeawayCards(buildLensTakeaways(node, 'schedule'))}
     ${renderPreviewSection({
       detailKey: 'schedule',
-      eyebrow: 'Schedule at a glance',
-      title: 'Representative timing signals',
-      text: 'Representative milestones and tasks connected to this branch.',
+      eyebrow: 'Timeline',
+      title: 'Linked milestones and tasks',
+      text: 'Sample milestones and tasks linked to this branch.',
       items: schedulePreviewItems,
       renderItem: ({ kind, item }) => `
         <article class="list-card">
@@ -1281,9 +1274,9 @@ function renderRiskDetail(node) {
     ${renderTakeawayCards(buildLensTakeaways(node, 'risks'))}
     ${renderPreviewSection({
       detailKey: 'risks',
-      eyebrow: 'Representative issues',
-      title: 'A few risks that shape the picture',
-      text: 'A focused set of risks linked to this branch.',
+      eyebrow: 'Open items',
+      title: 'Linked risks',
+      text: 'Risks linked to this branch.',
       items: node.related.risks.items,
       renderItem: (item) => `
         <article class="list-card list-card--risk">
@@ -1304,9 +1297,9 @@ function renderDocumentDetail(node) {
     ${renderTakeawayCards(buildLensTakeaways(node, 'documents'))}
     ${renderPreviewSection({
       detailKey: 'documents',
-      eyebrow: 'Representative support',
-      title: 'Files and terms that define this branch',
-      text: 'Representative files and glossary terms tied to this branch.',
+      eyebrow: 'Reference material',
+      title: 'Linked files and terms',
+      text: 'Files and glossary terms linked to this branch.',
       items: node.related.documents.items.length
         ? node.related.documents.items
         : node.related.glossary.items,
@@ -1357,17 +1350,12 @@ function renderFocus() {
       <header class="focus-shell__header">
         <div class="focus-shell__header-row">
           <div>
-            <p class="focus-shell__eyebrow">Focused detail</p>
             <h2 class="focus-shell__title">${escapeHtml(DETAIL_META[detailKey].label)}</h2>
             <p class="focus-shell__subtitle">${escapeHtml(node.id)} | ${escapeHtml(node.name)}</p>
           </div>
-          <button class="focus-close" type="button" data-action="close-detail">Back to overview</button>
+          <button class="focus-close" type="button" data-action="close-detail">Close</button>
         </div>
         <p class="focus-summary">${escapeHtml(buildLensInterpretation(node, detailKey))}</p>
-        <div class="preview-note">
-          <span class="preview-note__eyebrow">Linked records</span>
-          <span class="preview-note__text">${escapeHtml(buildDetailScopeNote(detailKey))}</span>
-        </div>
         ${renderFocusActions(node)}
       </header>
       ${detailRenderers[detailKey](node)}
@@ -1417,7 +1405,7 @@ async function loadData() {
     state.crosswalk = crosswalk;
     buildClientIndex(data);
     appTitle.textContent = data.app.title;
-    appSubtitle.textContent = 'See how Gateway is organized, what each branch includes, and how the program rolls up from detailed work to the full mission architecture.';
+    appSubtitle.textContent = 'How Gateway is organized, from detailed work up to the full program.';
     buildIntroSignals();
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -1436,13 +1424,11 @@ async function loadData() {
   } catch (error) {
     overviewContent.innerHTML = `
       <section class="error-state">
-        <h2>Unable to load the WBS dataset</h2>
-        <p>The local server did not provide <code>/wbs/data/gateway-wbs.json</code>.</p>
+        <h2>Could not load data</h2>
         <p><strong>Error:</strong> ${escapeHtml(error.message)}</p>
-        <p>Run <code>node wbs/server.mjs</code> from the repo root, then open <code>http://127.0.0.1:4173/wbs/</code>.</p>
       </section>
     `;
-    treeStatus.textContent = 'The hierarchy is unavailable until the JSON endpoint can be reached.';
+    treeStatus.textContent = 'Data unavailable.';
   }
 }
 
