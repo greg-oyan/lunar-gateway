@@ -350,7 +350,7 @@ function renderConnectedViews(node) {
           <span class="suite-context-stat__value">${escapeHtml(riskLabel)}</span>
         </div>
         <div class="suite-context-stat">
-          <span class="suite-context-stat__label">Documents</span>
+          <span class="suite-context-stat__label">Source library</span>
           <span class="suite-context-stat__value">${escapeHtml(documentLabel)}</span>
         </div>
       </div>
