@@ -41,21 +41,18 @@ const elements = {
 const viewDefinitions = {
   module: {
     kicker: 'Gateway Cost Map',
-    heading: 'Look at Gateway, then open one cost area',
-    subcopy:
-      'Physical modules stay on the station. Launch and backbone cost stay beside it as adjacent program nodes.',
+    heading: 'Where the money sits',
+    subcopy: 'Physical hardware on the station; program cost beside it.',
   },
   year: {
     kicker: 'Yearly Spend',
-    heading: 'See how Gateway spending rises, peaks, and falls',
-    subcopy:
-      'Select one fiscal year to see the annual total, reserve, and the main categories driving that moment.',
+    heading: 'Spend over time',
+    subcopy: 'Click a year to see its total, reserve, and top drivers.',
   },
   method: {
     kicker: 'Defensibility',
-    heading: 'Open supporting estimate notes when needed',
-    subcopy:
-      'Keep this secondary so the main cost story stays visual and easy to read.',
+    heading: 'Why the estimate is defensible',
+    subcopy: 'Sourcing, reserve logic, and where judgment enters the estimate.',
   },
 };
 
@@ -269,7 +266,7 @@ function buildAnchors(data) {
         judgmentNote:
           categories.length === 1
             ? categories[0].judgmentNote || categories[0].includedNote
-            : 'This view combines several non-physical program categories so the cost story stays simple on the first read.',
+            : 'Combines several non-physical program categories.',
       };
     })
     .filter(Boolean);
@@ -417,11 +414,11 @@ function buildCurrentContext(anchor = getCurrentAnchor()) {
       ? sharedContext.doc
       : wbsContext?.documents.sourceDocIds?.[0] || anchorContext?.documents.sourceDocIds?.[0] || '';
   const title = candidateWbsId
-    ? `Showing cost context related to WBS ${candidateWbsId}`
-    : `Showing cost context for ${anchor?.label || 'Gateway'}`;
+    ? `Cost area for WBS ${candidateWbsId}`
+    : `Cost area: ${anchor?.label || 'Gateway'}`;
   const body = candidateWbsId && wbsContext
-    ? `${anchor?.label || 'This cost area'} carries the strongest mapped cost roll-up for WBS ${candidateWbsId}. ${wbsContext.schedule.reason}`
-    : anchorContext?.reason || 'This cost area groups the clearest mapped cost roll-up in the current suite crosswalk.';
+    ? `${anchor?.label || 'This cost area'} is the best-matching roll-up for WBS ${candidateWbsId}.`
+    : anchorContext?.reason || 'The best-matching cost roll-up for what you were viewing.';
 
   return {
     anchor,
@@ -453,7 +450,6 @@ function renderContextBanner(anchor = getCurrentAnchor()) {
 
   return `
     <section class="suite-context-banner">
-      <p class="suite-context-banner__eyebrow">Cross-App Context</p>
       <h3 class="suite-context-banner__title">${escapeHtml(context.title)}</h3>
       <p class="suite-context-banner__body">${escapeHtml(context.body)}</p>
       <div class="suite-context-banner__chips">
@@ -475,9 +471,7 @@ function renderAnchorConnections(anchor) {
 
   return `
     <section class="suite-context-card">
-      <p class="suite-context-card__eyebrow">Program Mapping</p>
-      <h4 class="suite-context-card__title">How this cost view connects to the rest of Gateway</h4>
-      <p class="suite-context-card__body">${escapeHtml(context.body)}</p>
+      <h4 class="suite-context-card__title">Open ${escapeHtml(context.anchor.label)} elsewhere</h4>
       <div class="suite-context-card__grid">
         <div class="suite-context-stat">
           <span class="suite-context-stat__label">Mapped WBS</span>
@@ -618,9 +612,9 @@ function renderViewSwitcher() {
 }
 
 function renderHero() {
-  elements.appTitle.textContent = 'Gateway Cost Explorer';
+  elements.appTitle.textContent = 'Cost Explorer';
   elements.appSubtitle.textContent =
-    'Look at Gateway, see where the money sits, then switch to yearly spend only when you want the time story.';
+    'Where the money sits across Gateway, by module and by year.';
   elements.snapshotStamp.textContent = `Updated ${new Date(state.data.generatedAt).toLocaleString()}`;
   elements.storySignals.innerHTML = buildHeroSignals()
     .map(
@@ -714,7 +708,7 @@ function buildEvidenceDisclosure(title, bodyMarkup) {
   `;
 }
 
-function buildDefensibilityDisclosure(note, title = 'Why this number is defensible') {
+function buildDefensibilityDisclosure(note, title = 'How this was estimated') {
   const cards = state.data.methodology.cards.filter((card) =>
     ['methods', 'authority', 'judgment', 'reserve'].includes(card.id),
   );
@@ -912,7 +906,6 @@ function renderAnchorFocus(anchor) {
   return `
     <aside class="focus-panel detail-panel">
       <div>
-        <p class="section-kicker">Selected cost area</p>
         <h3>${escapeHtml(anchor.label)}</h3>
         <p class="focus-panel__summary">${escapeHtml(anchor.primaryNote)}</p>
       </div>
@@ -939,14 +932,14 @@ function renderAnchorFocus(anchor) {
       <section class="detail-block">
         <h4>Main cost drivers</h4>
         <div class="detail-list">
-          ${buildContributors(topDrivers, 'No grouped cost drivers are attached to this area.')}
+          ${buildContributors(topDrivers, 'No cost drivers.')}
         </div>
       </section>
 
       <section class="detail-block">
         <h4>When cost peaks</h4>
         <div class="detail-list">
-          ${buildContributors(peakYears, 'No annual phasing is attached to this area.')}
+          ${buildContributors(peakYears, 'No annual phasing.')}
         </div>
       </section>
     </aside>
@@ -958,12 +951,8 @@ function renderAnchorSupport(anchor) {
     <section class="module-support">
       <div class="module-support__heading">
         <div>
-          <p class="section-kicker">Deeper support</p>
-          <h3>Evidence, sources, and estimate logic for ${escapeHtml(anchor.label)}</h3>
+          <h3>Evidence and sources for ${escapeHtml(anchor.label)}</h3>
         </div>
-        <p class="section-subcopy">
-          The selected-area summary stays beside the visual. The detailed support opens here, where the layout has room to breathe.
-        </p>
       </div>
 
       ${buildEvidenceDisclosure(
@@ -979,7 +968,7 @@ function renderAnchorSupport(anchor) {
                     value: detail.amountUsd,
                     note: `${detail.fy || 'No FY stated'} - ${detail.component || 'detail'}`,
                   })),
-                  'No representative detail rows are attached to this area.',
+                  'No detail rows.',
                 )}
               </div>
             </section>
@@ -993,7 +982,7 @@ function renderAnchorSupport(anchor) {
                     value: line.totalUsd,
                     note: line.contractType || 'Priced line evidence',
                   })),
-                  'No direct priced lines are attached to this area.',
+                  'No priced lines.',
                 )}
               </div>
             </section>
@@ -1025,11 +1014,10 @@ function renderModuleView() {
         <section class="hero-map">
           <div class="hero-map__topline">
             <div>
-              <p class="hero-map__eyebrow">Default screen</p>
               <h3>Where the money sits across Gateway</h3>
             </div>
             <p class="hero-map__note">
-              Click one module label on the diagram. Physical hardware stays on the station. Adjacent program cost stays below it.
+              Click a module to see its cost detail.
             </p>
           </div>
 
@@ -1109,7 +1097,6 @@ function renderYearFocus(year) {
   return `
     <aside class="focus-panel detail-panel">
       <div>
-        <p class="section-kicker">Selected year</p>
         <h3>${escapeHtml(year.fy)}</h3>
         <p class="focus-panel__summary">${escapeHtml(year.narrative)}</p>
       </div>
@@ -1131,7 +1118,7 @@ function renderYearFocus(year) {
       <section class="detail-block">
         <h4>Main drivers in ${escapeHtml(year.fy)}</h4>
         <div class="detail-list">
-          ${buildContributors(drivers, 'No direct cost drivers are attached to this year.')}
+          ${buildContributors(drivers, 'No cost drivers.')}
         </div>
       </section>
 
@@ -1166,12 +1153,8 @@ function renderYearSupport(year) {
     <section class="module-support">
       <div class="module-support__heading">
         <div>
-          <p class="section-kicker">Deeper support</p>
-          <h3>Evidence, sources, and estimate logic for ${escapeHtml(year.fy)}</h3>
+          <h3>Evidence and sources for ${escapeHtml(year.fy)}</h3>
         </div>
-        <p class="section-subcopy">
-          The selected-year summary stays beside the annual spend visual. The detailed support opens here, where the layout has room to breathe.
-        </p>
       </div>
 
       ${buildEvidenceDisclosure(
@@ -1181,7 +1164,7 @@ function renderYearSupport(year) {
             <section class="support-block">
               <h4>Driver evidence</h4>
               <div class="detail-list">
-                ${buildContributors(drivers, 'No driver rows are attached to this year.')}
+                ${buildContributors(drivers, 'No drivers.')}
               </div>
             </section>
 
@@ -1217,11 +1200,10 @@ function renderYearView() {
         <section class="year-panel">
           <div class="year-panel__topline">
             <div>
-              <p class="hero-map__eyebrow">Separate time story</p>
               <h3>How annual spend moves over time</h3>
             </div>
             <p class="year-panel__note">
-              Click one fiscal year to see the annual total, reserve, and the cost areas shaping that year.
+              Click a year for detail.
             </p>
           </div>
 
@@ -1298,11 +1280,10 @@ function renderMethodView() {
       <section class="method-panel">
         <div class="method-panel__topline">
           <div>
-            <p class="hero-map__eyebrow">Secondary support view</p>
             <h3>Why the estimate is defensible</h3>
           </div>
           <p class="method-panel__note">
-            Open one topic only when you need to explain sourcing, reserve, or where judgment enters the estimate.
+            Open a topic for detail on sourcing, reserve, or judgment.
           </p>
         </div>
 
@@ -1328,7 +1309,6 @@ function renderMethodView() {
 
       <aside class="focus-panel detail-panel">
         <div>
-          <p class="section-kicker">Selected method topic</p>
           <h3>${escapeHtml(method.title)}</h3>
           <p class="focus-panel__summary">${escapeHtml(method.summary)}</p>
         </div>
@@ -1339,7 +1319,7 @@ function renderMethodView() {
         </section>
 
         <section class="detail-block">
-          <h4>What this topic explains</h4>
+          <h4>Details</h4>
           <div class="detail-list">
             ${method.items
               .map(
@@ -1390,13 +1370,13 @@ function renderError(message) {
   const safeMessage = escapeHtml(message);
   elements.storySignals.innerHTML = '';
   elements.viewSwitcher.innerHTML = '';
-  elements.snapshotStamp.textContent = 'Cost data unavailable';
-  elements.activeViewKicker.textContent = 'Cost Explorer unavailable';
-  elements.activeViewHeading.textContent = 'The cost story could not load';
-  elements.activeViewSubcopy.textContent = 'The cost dataset did not load cleanly.';
+  elements.snapshotStamp.textContent = 'Data unavailable';
+  elements.activeViewKicker.textContent = 'Cost Explorer';
+  elements.activeViewHeading.textContent = 'Could not load data';
+  elements.activeViewSubcopy.textContent = '';
   elements.activeViewContent.innerHTML = `
     <section class="loading-state">
-      <h3>Unable to render the Cost Explorer</h3>
+      <h3>Could not load data</h3>
       <p>${safeMessage}</p>
     </section>
   `;
