@@ -1033,6 +1033,19 @@ function handleAction(target) {
     return;
   }
 
+  if (action === 'home') {
+    state.sharedContext = {};
+    state.selection = getDefaultSelection();
+    state.support.open = state.selection?.type === 'milestone';
+    state.reveal.phaseMilestones = false;
+    state.reveal.artifacts = false;
+    state.reveal.sources = false;
+    syncActiveDriver(state.selection);
+    renderApp();
+    scrollToId('stageHeading');
+    return;
+  }
+
   if (action === 'reset-view') {
     state.sharedContext = {};
     state.selection = getDefaultSelection();

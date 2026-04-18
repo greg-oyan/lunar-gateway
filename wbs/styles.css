@@ -1286,3 +1286,36 @@ mark {
     min-height: 140px;
   }
 }
+
+/* Home button — universal reset control */
+.home-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.home-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.home-button:focus-visible {
+  outline: 2px solid rgba(103, 180, 255, 0.6);
+  outline-offset: 2px;
+}
+
+.home-button::before {
+  content: "↺";
+  font-size: 14px;
+  line-height: 1;
+}
