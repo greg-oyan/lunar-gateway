@@ -1384,7 +1384,7 @@ function renderNavigationMode() {
   structureViewBtn.setAttribute('aria-selected', explorerActive ? 'false' : 'true');
 
   treeElement.hidden = !explorerActive;
-  structureView.hidden = explorerActive;
+  structureView.hidden = false;
   navActions.hidden = !explorerActive;
 
   workspace.classList.toggle('workspace--structure-view', !explorerActive);
