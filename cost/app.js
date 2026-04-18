@@ -1298,10 +1298,7 @@ function renderMethodView() {
 
       <section class="method-panel">
         <div class="method-panel__topline">
-          <div>
-            <h3>Why the estimate is defensible</h3>
-            <p class="method-panel__summary">${escapeHtml(state.data.methodology.summary)}</p>
-          </div>
+          <p class="method-panel__summary">${escapeHtml(state.data.methodology.summary)}</p>
         </div>
 
         <div class="method-accordion">
