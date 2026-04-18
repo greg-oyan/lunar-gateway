@@ -622,29 +622,12 @@ function renderRiskDetail(risk) {
         </aside>
       </header>
 
-      <section class="suite-context-card">
-        <p class="suite-context-card__eyebrow">Program Mapping</p>
-        <h3 class="suite-context-card__title">Where this risk sits in the suite</h3>
-        <p class="suite-context-card__body">${escapeHtml(riskContext?.reason || state.context?.body || 'This risk remains linked to the strongest available WBS, schedule, and document context in the current crosswalk.')}</p>
-        <div class="suite-context-card__grid">
-          <div class="suite-context-stat">
-            <span class="suite-context-stat__label">WBS</span>
-            <span class="suite-context-stat__value">${escapeHtml(riskContext?.primaryWbsId || state.context?.wbsId || 'No direct WBS branch')}</span>
-          </div>
-          <div class="suite-context-stat">
-            <span class="suite-context-stat__label">Schedule</span>
-            <span class="suite-context-stat__value">${escapeHtml(riskContext?.primaryMilestoneId || state.context?.milestoneId || 'No direct milestone')}</span>
-          </div>
-          <div class="suite-context-stat">
-            <span class="suite-context-stat__label">Documents</span>
-            <span class="suite-context-stat__value">${escapeHtml(String(riskContext?.documents.sourceDocIds?.length || 0))}</span>
-          </div>
-          <div class="suite-context-stat">
-            <span class="suite-context-stat__label">Module</span>
-            <span class="suite-context-stat__value">${escapeHtml(riskContext?.simulation.moduleKeys?.[0] || state.context?.moduleKey || 'Not mapped')}</span>
-          </div>
-        </div>
-        <div class="suite-context-actions">
+      <details class="cross-app-collapsed">
+        <summary class="cross-app-collapsed__summary">
+          <span>Open this risk elsewhere</span>
+          <span class="cross-app-collapsed__chevron" aria-hidden="true">▾</span>
+        </summary>
+        <div class="cross-app-collapsed__actions">
           ${buildSuiteAction('wbs', 'Open in WBS', {
             from: 'risk',
             wbs: riskContext?.primaryWbsId || state.context?.wbsId || '',
@@ -669,7 +652,7 @@ function renderRiskDetail(risk) {
             view: 'module',
           })}
         </div>
-      </section>
+      </details>
 
       <section class="risk-signal-grid" aria-label="Risk signal">
         <div class="risk-signal-card">
