@@ -1319,3 +1319,108 @@ mark {
   font-size: 14px;
   line-height: 1;
 }
+
+/* Why-it-matters progressive disclosure */
+.overview-hero__summary {
+  margin: 12px 0 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 72ch;
+}
+
+.overview-why {
+  margin-top: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  background: rgba(13, 24, 36, 0.5);
+  max-width: 72ch;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.overview-why:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.overview-why[open] {
+  border-color: rgba(103, 180, 255, 0.35);
+  background: rgba(13, 24, 36, 0.85);
+}
+
+.overview-why__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.overview-why__summary::-webkit-details-marker {
+  display: none;
+}
+
+.overview-why__chevron {
+  color: rgba(255, 255, 255, 0.5);
+  transition: transform 160ms ease;
+}
+
+.overview-why[open] .overview-why__chevron {
+  transform: rotate(180deg);
+}
+
+.overview-why__text {
+  margin: 0;
+  padding: 0 14px 14px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+/* Connected Views (cross-app) — compact progressive disclosure */
+.connected-views {
+  margin-top: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(13, 24, 36, 0.5);
+}
+
+.connected-views[open] {
+  border-color: rgba(103, 180, 255, 0.35);
+  background: rgba(13, 24, 36, 0.85);
+}
+
+.connected-views__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.connected-views__summary::-webkit-details-marker {
+  display: none;
+}
+
+.connected-views__chevron {
+  color: rgba(255, 255, 255, 0.5);
+  transition: transform 160ms ease;
+}
+
+.connected-views[open] .connected-views__chevron {
+  transform: rotate(180deg);
+}
+
+.connected-views__actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+  padding: 0 16px 16px;
+}

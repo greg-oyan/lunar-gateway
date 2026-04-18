@@ -316,40 +316,13 @@ function renderConnectedViews(node) {
   const nodeContext = getNodeContext(node.id);
   if (!nodeContext) return '';
 
-  const scheduleLabel = nodeContext.schedule.primaryMilestoneId
-    ? `${nodeContext.schedule.primaryMilestoneId}${nodeContext.schedule.phaseName ? ` · ${nodeContext.schedule.phaseName}` : ''}`
-    : nodeContext.schedule.phaseName || 'No direct schedule anchor';
-  const riskLabel = nodeContext.risks.ids.length
-    ? `${pluralize(nodeContext.risks.ids.length, 'linked risk')}`
-    : 'No direct risks linked';
-  const documentLabel = nodeContext.documents.sourceDocIds.length
-    ? `${pluralize(nodeContext.documents.sourceDocIds.length, 'source file')}`
-    : nodeContext.documents.controlDocuments.length
-      ? `${pluralize(nodeContext.documents.controlDocuments.length, 'controlled record')}`
-      : 'No source-library file selected';
-
   return `
-    <section class="suite-context-card">
-      <h3 class="suite-context-card__title">Open WBS ${escapeHtml(node.id)} elsewhere</h3>
-      <div class="suite-context-card__grid">
-        <div class="suite-context-stat">
-          <span class="suite-context-stat__label">Cost area</span>
-          <span class="suite-context-stat__value">${escapeHtml(COST_AREA_LABELS[nodeContext.cost.anchorId] || 'No direct cost area')}</span>
-        </div>
-        <div class="suite-context-stat">
-          <span class="suite-context-stat__label">Schedule anchor</span>
-          <span class="suite-context-stat__value">${escapeHtml(scheduleLabel)}</span>
-        </div>
-        <div class="suite-context-stat">
-          <span class="suite-context-stat__label">Risk context</span>
-          <span class="suite-context-stat__value">${escapeHtml(riskLabel)}</span>
-        </div>
-        <div class="suite-context-stat">
-          <span class="suite-context-stat__label">Source library</span>
-          <span class="suite-context-stat__value">${escapeHtml(documentLabel)}</span>
-        </div>
-      </div>
-      <div class="suite-context-actions">
+    <details class="connected-views">
+      <summary class="connected-views__summary">
+        <span class="connected-views__title">Open WBS ${escapeHtml(node.id)} elsewhere</span>
+        <span class="connected-views__chevron" aria-hidden="true">▾</span>
+      </summary>
+      <div class="connected-views__actions">
         ${buildSuiteAction('cost', 'Open in Cost', {
           from: 'wbs',
           wbs: node.id,
@@ -373,7 +346,7 @@ function renderConnectedViews(node) {
           doc: nodeContext.documents.sourceDocIds?.[0] || '',
         })}
       </div>
-    </section>
+    </details>
   `;
 }
 
@@ -1173,15 +1146,14 @@ function renderOverview() {
       <section class="overview-hero">
         <p class="overview-hero__code">${escapeHtml(node.id)}</p>
         <h2 class="overview-hero__title">${escapeHtml(node.name)}</h2>
-        <div class="overview-hero__body">
-          <article class="overview-blurb">
-            <p class="overview-blurb__text">${escapeHtml(buildShortExplanation(node))}</p>
-          </article>
-          <article class="overview-blurb">
-            <p class="overview-blurb__label">Why it matters</p>
-            <p class="overview-blurb__text">${escapeHtml(buildWhyItMatters(node))}</p>
-          </article>
-        </div>
+        <p class="overview-hero__summary">${escapeHtml(buildShortExplanation(node))}</p>
+        <details class="overview-why">
+          <summary class="overview-why__summary">
+            <span>Why it matters</span>
+            <span class="overview-why__chevron" aria-hidden="true">▾</span>
+          </summary>
+          <p class="overview-why__text">${escapeHtml(buildWhyItMatters(node))}</p>
+        </details>
       </section>
       <section class="lens-grid" aria-label="Focused detail options">
         ${lensCards
@@ -1197,7 +1169,6 @@ function renderOverview() {
           .join('')}
       </section>
       ${renderConnectedViews(node)}
-      <div class="overview-prompt">Click a card for detail.</div>
     </section>
   `;
 }
