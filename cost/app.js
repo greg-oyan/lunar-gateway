@@ -1294,6 +1294,7 @@ function renderMethodView() {
   return `
     <div class="method-story">
       ${renderContextBanner(getCurrentAnchor())}
+      <div class="method-story__primary">
       <section class="method-panel">
         <div class="method-panel__topline">
           <div>
@@ -1361,6 +1362,7 @@ function renderMethodView() {
           `,
         )}
       </aside>
+      </div>
     </div>
   `;
 }

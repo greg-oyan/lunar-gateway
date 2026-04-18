@@ -356,6 +356,12 @@ a {
   align-items: start;
 }
 
+.method-story__primary {
+  display: grid;
+  gap: 18px;
+  align-items: start;
+}
+
 .hero-map,
 .year-panel,
 .method-panel,
@@ -1148,7 +1154,7 @@ a {
 @media (min-width: 1080px) {
   .module-story__primary,
   .year-story__primary,
-  .method-story {
+  .method-story__primary {
     grid-template-columns: minmax(0, 1.42fr) minmax(420px, 0.78fr);
   }
 }
