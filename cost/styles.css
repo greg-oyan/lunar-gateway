@@ -1416,3 +1416,51 @@ a {
   line-height: 1.6;
   font-size: 14px;
 }
+
+/* Focus-panel progressive disclosure */
+.focus-disclosure {
+  margin-top: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(13, 24, 36, 0.6);
+  transition: border-color 160ms ease;
+}
+
+.focus-disclosure:hover {
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.focus-disclosure[open] {
+  border-color: rgba(103, 180, 255, 0.35);
+  background: rgba(13, 24, 36, 0.9);
+}
+
+.focus-disclosure__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.focus-disclosure__summary::-webkit-details-marker {
+  display: none;
+}
+
+.focus-disclosure__chevron {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+  transition: transform 160ms ease;
+}
+
+.focus-disclosure[open] .focus-disclosure__chevron {
+  transform: rotate(180deg);
+}
+
+.focus-disclosure__body {
+  padding: 0 16px 16px;
+}

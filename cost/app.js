@@ -927,21 +927,31 @@ function renderAnchorFocus(anchor) {
         <p>${escapeHtml(anchor.why)}</p>
       </section>
 
+      <details class="focus-disclosure">
+        <summary class="focus-disclosure__summary">
+          <span class="focus-disclosure__title">Main cost drivers</span>
+          <span class="focus-disclosure__chevron" aria-hidden="true">▾</span>
+        </summary>
+        <div class="focus-disclosure__body">
+          <div class="detail-list">
+            ${buildContributors(topDrivers, 'No cost drivers.')}
+          </div>
+        </div>
+      </details>
+
+      <details class="focus-disclosure">
+        <summary class="focus-disclosure__summary">
+          <span class="focus-disclosure__title">When cost peaks</span>
+          <span class="focus-disclosure__chevron" aria-hidden="true">▾</span>
+        </summary>
+        <div class="focus-disclosure__body">
+          <div class="detail-list">
+            ${buildContributors(peakYears, 'No annual phasing.')}
+          </div>
+        </div>
+      </details>
+
       ${renderAnchorConnections(anchor)}
-
-      <section class="detail-block">
-        <h4>Main cost drivers</h4>
-        <div class="detail-list">
-          ${buildContributors(topDrivers, 'No cost drivers.')}
-        </div>
-      </section>
-
-      <section class="detail-block">
-        <h4>When cost peaks</h4>
-        <div class="detail-list">
-          ${buildContributors(peakYears, 'No annual phasing.')}
-        </div>
-      </section>
     </aside>
   `;
 }
@@ -1115,28 +1125,38 @@ function renderYearFocus(year) {
         <p>${escapeHtml(year.narrative)}</p>
       </section>
 
-      <section class="detail-block">
-        <h4>Main drivers in ${escapeHtml(year.fy)}</h4>
-        <div class="detail-list">
-          ${buildContributors(drivers, 'No cost drivers.')}
+      <details class="focus-disclosure">
+        <summary class="focus-disclosure__summary">
+          <span class="focus-disclosure__title">Main drivers in ${escapeHtml(year.fy)}</span>
+          <span class="focus-disclosure__chevron" aria-hidden="true">▾</span>
+        </summary>
+        <div class="focus-disclosure__body">
+          <div class="detail-list">
+            ${buildContributors(drivers, 'No cost drivers.')}
+          </div>
         </div>
-      </section>
+      </details>
 
-      <section class="detail-block">
-        <h4>Reserve and timing</h4>
-        <div class="detail-list">
-          <div class="detail-item">
-            <p class="detail-item__title">
-              ${year.reserveUsd
-                ? `Reserve carries ${formatCurrency(year.reserveUsd)} in ${year.fy}.`
-                : `No explicit reserve is carried in ${year.fy}.`}
-            </p>
-          </div>
-          <div class="detail-item">
-            <p class="detail-item__title">Direct cost in ${escapeHtml(year.fy)} is ${formatCurrency(year.directUsd)}.</p>
+      <details class="focus-disclosure">
+        <summary class="focus-disclosure__summary">
+          <span class="focus-disclosure__title">Reserve and timing</span>
+          <span class="focus-disclosure__chevron" aria-hidden="true">▾</span>
+        </summary>
+        <div class="focus-disclosure__body">
+          <div class="detail-list">
+            <div class="detail-item">
+              <p class="detail-item__title">
+                ${year.reserveUsd
+                  ? `Reserve carries ${formatCurrency(year.reserveUsd)} in ${year.fy}.`
+                  : `No explicit reserve is carried in ${year.fy}.`}
+              </p>
+            </div>
+            <div class="detail-item">
+              <p class="detail-item__title">Direct cost in ${escapeHtml(year.fy)} is ${formatCurrency(year.directUsd)}.</p>
+            </div>
           </div>
         </div>
-      </section>
+      </details>
     </aside>
   `;
 }
