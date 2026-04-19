@@ -775,29 +775,6 @@ function attachEvents() {
     render();
   });
 
-  const homeButton = document.querySelector('[data-action="home"]');
-  if (homeButton) {
-    homeButton.addEventListener('click', () => {
-      state.searchQuery = '';
-      state.category = '';
-      state.status = '';
-      state.priorityBand = '';
-      state.sortBy = 'priority_desc';
-      state.sharedContext = {};
-      state.context = null;
-      state.selectedRiskId = null;
-
-      elements.searchInput.value = '';
-      elements.categoryFilter.value = '';
-      elements.statusFilter.value = '';
-      elements.priorityFilter.value = '';
-      elements.sortSelect.value = 'priority_desc';
-
-      updateVisibleRisks();
-      render();
-    });
-  }
-
   elements.riskList.addEventListener('click', handleRiskListClick);
 }
 

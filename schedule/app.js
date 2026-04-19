@@ -601,12 +601,9 @@ function buildLinkedMomentButtons(items) {
 function buildFocusPhaseView(phase) {
   const selectedMilestone = getSelectedMilestone();
   const focusMilestones = phase.keyMilestoneIds.map((id) => state.milestonesById.get(id)).filter(Boolean);
-  const relatedRisks = uniqueById(focusMilestones.flatMap((item) => item.linkedRisks));
-  const relatedDocuments = uniqueById(focusMilestones.flatMap((item) => item.linkedDocuments));
 
   focusHeading.textContent = 'Selected phase';
-  focusSubtitle.textContent =
-    'Choose one key milestone in this phase to open the evidence behind that date.';
+  focusSubtitle.textContent = 'Choose a milestone to open the evidence behind that date.';
 
   return `
     <div class="focus-layout focus-layout--phase">
@@ -616,53 +613,20 @@ function buildFocusPhaseView(phase) {
           <h3>${escapeHtml(phase.name)}</h3>
           <div class="focus-meta">
             <span class="mono">${escapeHtml(phase.rangeLabel)}</span>
-            <span>${escapeHtml(pluralize(focusMilestones.length, 'anchor milestone'))}</span>
+            <span>${escapeHtml(pluralize(focusMilestones.length, 'milestone'))}</span>
           </div>
         </div>
 
         <p class="focus-summary">${escapeHtml(firstSentence(phase.whyItMatters || phase.summary))}</p>
 
-        <div class="phase-summary-strip" aria-label="Selected phase summary">
-          <div class="phase-summary-stat">
-            <span class="phase-summary-stat__label">Date span</span>
-            <strong class="phase-summary-stat__value mono">${escapeHtml(phase.rangeLabel)}</strong>
-          </div>
-          <div class="phase-summary-stat">
-            <span class="phase-summary-stat__label">Key milestones</span>
-            <strong class="phase-summary-stat__value">${escapeHtml(String(focusMilestones.length))}</strong>
-          </div>
-          <div class="phase-summary-stat">
-            <span class="phase-summary-stat__label">Linked tasks</span>
-            <strong class="phase-summary-stat__value">${escapeHtml(String(phase.representativeTasks.length))}</strong>
-          </div>
-          <div class="phase-summary-stat">
-            <span class="phase-summary-stat__label">Risks / docs</span>
-            <strong class="phase-summary-stat__value">${escapeHtml(`${relatedRisks.length} / ${relatedDocuments.length}`)}</strong>
-          </div>
-        </div>
         ${renderContextActions()}
       </section>
 
       <section class="focus-card focus-card--secondary">
         <div class="focus-header">
-          <p class="section-kicker">Key milestones in this phase</p>
-          <h3>Choose one date to inspect</h3>
-          <p class="focus-summary">Each card below opens the evidence behind that milestone.</p>
+          <h3>Milestones in ${escapeHtml(phase.name)}</h3>
         </div>
-
         ${buildLinkedMomentButtons(focusMilestones)}
-
-        ${
-          selectedMilestone && selectedMilestone.phaseId === phase.id
-            ? `
-              <div class="focus-note" aria-live="polite">
-                <span class="focus-note__label">Selected milestone</span>
-                <strong>${escapeHtml(selectedMilestone.shortName)}</strong>
-                <p>${escapeHtml(`Evidence for ${selectedMilestone.dateLabel} is open below.`)}</p>
-              </div>
-            `
-            : ''
-        }
       </section>
     </div>
   `;
@@ -745,7 +709,7 @@ function buildMilestoneSupport(milestone) {
           <p class="milestone-slim__eyebrow">${escapeHtml(phase?.name || milestone.phaseName)} · ${escapeHtml(milestone.dateLabel)}</p>
           <h3 class="milestone-slim__title">${escapeHtml(milestone.shortName)}</h3>
         </div>
-        <span class="milestone-slim__pill milestone-slim__pill--${escapeHtml((milestone.confidenceLabel || 'unknown').toLowerCase().replace(/\s+/g, '-'))}">${escapeHtml(milestone.confidenceLabel)} confidence</span>
+        <span class="milestone-slim__pill milestone-slim__pill--${escapeHtml((milestone.confidenceLabel || 'unknown').toLowerCase().replace(/\s+/g, '-').replace(/-confidence$/, ''))}">${escapeHtml(milestone.confidenceLabel)}</span>
       </header>
 
       <p class="milestone-slim__why"><strong>Why this date matters:</strong> ${escapeHtml(milestone.whyItMatters)}</p>
@@ -821,19 +785,6 @@ function handleAction(target) {
     state.selection = null;
     state.support.open = false;
     syncActiveDriver(null);
-    renderApp();
-    scrollToId('stageHeading');
-    return;
-  }
-
-  if (action === 'home') {
-    state.sharedContext = {};
-    state.selection = getDefaultSelection();
-    state.support.open = state.selection?.type === 'milestone';
-    state.reveal.phaseMilestones = false;
-    state.reveal.artifacts = false;
-    state.reveal.sources = false;
-    syncActiveDriver(state.selection);
     renderApp();
     scrollToId('stageHeading');
     return;

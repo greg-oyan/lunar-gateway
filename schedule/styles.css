@@ -1796,47 +1796,6 @@ details > summary::-webkit-details-marker {
   }
 }
 
-/* Home button — universal reset control, anchored top-right of hero */
-.home-button {
-  position: absolute;
-  top: 14px;
-  right: 18px;
-  z-index: 5;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 999px;
-  background: rgba(10, 20, 30, 0.65);
-  color: rgba(255, 255, 255, 0.88);
-  font-size: 12px;
-  font-weight: 600;
-  font-family: inherit;
-  letter-spacing: 0.01em;
-  cursor: pointer;
-  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
-  backdrop-filter: blur(6px);
-}
-
-.home-button:hover {
-  background: rgba(30, 50, 70, 0.8);
-  border-color: rgba(103, 180, 255, 0.5);
-  color: rgba(255, 255, 255, 1);
-}
-
-.home-button:focus-visible {
-  outline: 2px solid rgba(103, 180, 255, 0.65);
-  outline-offset: 2px;
-}
-
-.home-button::before {
-  content: "←";
-  font-size: 13px;
-  line-height: 1;
-  font-weight: 700;
-}
-
 /* ── Cross-app collapsed card ───────────────────────── */
 .cross-app-collapsed {
   border: 1px solid rgba(255, 255, 255, 0.08);
