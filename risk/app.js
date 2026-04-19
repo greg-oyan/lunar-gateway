@@ -28,6 +28,14 @@ const state = {
 };
 
 const elements = {};
+const SOURCE_LABELS = {
+  simulation: 'Simulation',
+  wbs: 'WBS',
+  schedule: 'Schedule',
+  cost: 'Cost',
+  risk: 'Risk',
+  documents: 'Documents',
+};
 
 function normalizeText(value) {
   return String(value ?? '').trim().toLowerCase();
@@ -429,6 +437,43 @@ function renderSummary() {
     `Scoring: ${scoreFormulaText()}. ${bandThresholdText()}`;
 }
 
+function renderContextBanner() {
+  if (!elements.contextBannerHost) return;
+  if (!state.context || !hasSharedContext(state.sharedContext)) {
+    elements.contextBannerHost.innerHTML = '';
+    return;
+  }
+
+  const chips = [];
+  const sourceLabel = SOURCE_LABELS[state.sharedContext.from] || '';
+  if (sourceLabel) {
+    chips.push(`<span class="suite-context-chip"><strong>From</strong>${escapeHtml(sourceLabel)}</span>`);
+  }
+  if (state.context.wbsId) {
+    chips.push(`<span class="suite-context-chip"><strong>WBS</strong>${escapeHtml(state.context.wbsId)}</span>`);
+  }
+  if (state.context.milestoneId) {
+    chips.push(`<span class="suite-context-chip"><strong>Milestone</strong>${escapeHtml(state.context.milestoneId)}</span>`);
+  }
+  if (state.context.moduleKey) {
+    chips.push(`<span class="suite-context-chip"><strong>Module</strong>${escapeHtml(state.context.moduleKey)}</span>`);
+  }
+
+  elements.contextBannerHost.innerHTML = `
+    <section class="suite-context-banner">
+      <p class="suite-context-banner__eyebrow">Cross-App Context</p>
+      <h3 class="suite-context-banner__title">${escapeHtml(state.context.title || 'Risk context')}</h3>
+      <p class="suite-context-banner__body">${escapeHtml(state.context.body || 'Showing the risk slice tied to what you were viewing elsewhere in the suite.')}</p>
+      <div class="suite-context-banner__chips">
+        ${chips.join('')}
+      </div>
+      <div class="suite-context-actions">
+        <button class="suite-context-action" type="button" data-action="reset-view">Reset view</button>
+      </div>
+    </section>
+  `;
+}
+
 function renderFilters(allRisks) {
   const categories = Array.from(new Set(allRisks.map((risk) => risk.category).filter(Boolean))).sort();
   const statuses = Array.from(new Set(allRisks.map((risk) => risk.status).filter(Boolean))).sort();
@@ -705,12 +750,33 @@ function renderDetailPane() {
 }
 
 function render() {
+  renderContextBanner();
   renderActiveFilters();
   renderSummary();
   renderRiskList();
   renderDetailPane();
   syncUrlState();
   syncSuiteNavigation();
+}
+
+function resetView() {
+  state.searchQuery = '';
+  state.category = '';
+  state.status = '';
+  state.priorityBand = '';
+  state.sortBy = 'priority_desc';
+  state.sharedContext = {};
+  state.context = null;
+  state.selectedRiskId = null;
+
+  elements.searchInput.value = '';
+  elements.categoryFilter.value = '';
+  elements.statusFilter.value = '';
+  elements.priorityFilter.value = '';
+  elements.sortSelect.value = 'priority_desc';
+
+  updateVisibleRisks();
+  render();
 }
 
 function handleRiskListClick(event) {
@@ -753,26 +819,13 @@ function attachEvents() {
     render();
   });
 
-  elements.clearFiltersButton.addEventListener('click', () => {
-    state.searchQuery = '';
-    state.category = '';
-    state.status = '';
-    state.priorityBand = '';
-    state.sortBy = 'priority_desc';
-    state.sharedContext = {};
-    state.context = null;
-    state.selectedRiskId = null;
+  elements.clearFiltersButton.addEventListener('click', resetView);
 
-    elements.searchInput.value = '';
-    elements.categoryFilter.value = '';
-    elements.statusFilter.value = '';
-    elements.priorityFilter.value = '';
-    elements.sortSelect.value = 'priority_desc';
-
-    updateVisibleRisks();
-    render();
+  elements.contextBannerHost.addEventListener('click', (event) => {
+    if (event.target.closest('[data-action="reset-view"]')) {
+      resetView();
+    }
   });
-
   elements.riskList.addEventListener('click', handleRiskListClick);
 }
 
@@ -791,6 +844,7 @@ function cacheElements() {
   elements.categoryStat = document.getElementById('categoryStat');
   elements.summaryNarrative = document.getElementById('summaryNarrative');
   elements.summaryMethod = document.getElementById('summaryMethod');
+  elements.contextBannerHost = document.getElementById('contextBannerHost');
   elements.resultsLabel = document.getElementById('resultsLabel');
   elements.sortSelect = document.getElementById('sortSelect');
   elements.activeFilters = document.getElementById('activeFilters');

@@ -26,6 +26,14 @@ const state = {
 };
 
 const elements = {};
+const SOURCE_LABELS = {
+  simulation: 'Simulation',
+  wbs: 'WBS',
+  schedule: 'Schedule',
+  cost: 'Cost',
+  risk: 'Risk',
+  documents: 'Documents',
+};
 
 function normalizeText(value) {
   return String(value ?? '').trim().toLowerCase();
@@ -272,6 +280,46 @@ function renderActiveFilters() {
   elements.activeFilters.innerHTML = chips
     .map((label) => `<span class="filter-chip">${label}</span>`)
     .join('');
+}
+
+function renderContextBanner() {
+  if (!elements.contextBannerHost) return;
+  if (!state.context || !hasSharedContext(state.sharedContext)) {
+    elements.contextBannerHost.innerHTML = '';
+    return;
+  }
+
+  const chips = [];
+  const sourceLabel = SOURCE_LABELS[state.sharedContext.from] || '';
+  if (sourceLabel) {
+    chips.push(`<span class="suite-context-chip"><strong>From</strong>${escapeHtml(sourceLabel)}</span>`);
+  }
+  if (state.context.wbsId) {
+    chips.push(`<span class="suite-context-chip"><strong>WBS</strong>${escapeHtml(state.context.wbsId)}</span>`);
+  }
+  if (state.context.milestoneId) {
+    chips.push(`<span class="suite-context-chip"><strong>Milestone</strong>${escapeHtml(state.context.milestoneId)}</span>`);
+  }
+  if (state.context.riskId) {
+    chips.push(`<span class="suite-context-chip"><strong>Risk</strong>${escapeHtml(state.context.riskId)}</span>`);
+  }
+  if (state.context.moduleKey) {
+    chips.push(`<span class="suite-context-chip"><strong>Module</strong>${escapeHtml(state.context.moduleKey)}</span>`);
+  }
+
+  elements.contextBannerHost.innerHTML = `
+    <section class="suite-context-banner">
+      <p class="suite-context-banner__eyebrow">Cross-App Context</p>
+      <h3 class="suite-context-banner__title">${escapeHtml(state.context.title || 'Document context')}</h3>
+      <p class="suite-context-banner__body">${escapeHtml(state.context.body || 'Showing the source material tied to what you were viewing elsewhere in the suite.')}</p>
+      <div class="suite-context-banner__chips">
+        ${chips.join('')}
+      </div>
+      <div class="suite-context-actions">
+        <button class="suite-context-action" type="button" data-action="reset-view">Reset view</button>
+      </div>
+    </section>
+  `;
 }
 
 function renderList() {
@@ -536,11 +584,26 @@ function updateVisibleDocuments() {
 }
 
 function render() {
+  renderContextBanner();
   renderActiveFilters();
   renderList();
   renderDetail();
   syncUrlState();
   syncSuiteNavigation();
+}
+
+function resetView() {
+  state.searchQuery = '';
+  state.fileType = '';
+  state.category = '';
+  state.sharedContext = {};
+  state.context = null;
+  state.selectedDocumentId = null;
+  elements.searchInput.value = '';
+  elements.typeFilter.value = '';
+  elements.categoryFilter.value = '';
+  updateVisibleDocuments();
+  render();
 }
 
 function handleListClick(event) {
@@ -571,20 +634,13 @@ function attachEvents() {
     render();
   });
 
-  elements.clearFiltersButton.addEventListener('click', () => {
-    state.searchQuery = '';
-    state.fileType = '';
-    state.category = '';
-    state.sharedContext = {};
-    state.context = null;
-    state.selectedDocumentId = null;
-    elements.searchInput.value = '';
-    elements.typeFilter.value = '';
-    elements.categoryFilter.value = '';
-    updateVisibleDocuments();
-    render();
-  });
+  elements.clearFiltersButton.addEventListener('click', resetView);
 
+  elements.contextBannerHost.addEventListener('click', (event) => {
+    if (event.target.closest('[data-action="reset-view"]')) {
+      resetView();
+    }
+  });
 
   elements.documentList.addEventListener('click', handleListClick);
 }
@@ -601,6 +657,7 @@ function cacheElements() {
   elements.fileTypeCount = document.getElementById('fileTypeCount');
   elements.resultsLabel = document.getElementById('resultsLabel');
   elements.activeFilters = document.getElementById('activeFilters');
+  elements.contextBannerHost = document.getElementById('contextBannerHost');
   elements.listState = document.getElementById('listState');
   elements.documentList = document.getElementById('documentList');
   elements.detailPaneContent = document.getElementById('detailPaneContent');
