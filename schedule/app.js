@@ -601,12 +601,9 @@ function buildLinkedMomentButtons(items) {
 function buildFocusPhaseView(phase) {
   const selectedMilestone = getSelectedMilestone();
   const focusMilestones = phase.keyMilestoneIds.map((id) => state.milestonesById.get(id)).filter(Boolean);
-  const relatedRisks = uniqueById(focusMilestones.flatMap((item) => item.linkedRisks));
-  const relatedDocuments = uniqueById(focusMilestones.flatMap((item) => item.linkedDocuments));
 
   focusHeading.textContent = 'Selected phase';
-  focusSubtitle.textContent =
-    'Choose one key milestone in this phase to open the evidence behind that date.';
+  focusSubtitle.textContent = 'Choose a milestone to open the evidence behind that date.';
 
   return `
     <div class="focus-layout focus-layout--phase">
@@ -616,53 +613,20 @@ function buildFocusPhaseView(phase) {
           <h3>${escapeHtml(phase.name)}</h3>
           <div class="focus-meta">
             <span class="mono">${escapeHtml(phase.rangeLabel)}</span>
-            <span>${escapeHtml(pluralize(focusMilestones.length, 'anchor milestone'))}</span>
+            <span>${escapeHtml(pluralize(focusMilestones.length, 'milestone'))}</span>
           </div>
         </div>
 
         <p class="focus-summary">${escapeHtml(firstSentence(phase.whyItMatters || phase.summary))}</p>
 
-        <div class="phase-summary-strip" aria-label="Selected phase summary">
-          <div class="phase-summary-stat">
-            <span class="phase-summary-stat__label">Date span</span>
-            <strong class="phase-summary-stat__value mono">${escapeHtml(phase.rangeLabel)}</strong>
-          </div>
-          <div class="phase-summary-stat">
-            <span class="phase-summary-stat__label">Key milestones</span>
-            <strong class="phase-summary-stat__value">${escapeHtml(String(focusMilestones.length))}</strong>
-          </div>
-          <div class="phase-summary-stat">
-            <span class="phase-summary-stat__label">Linked tasks</span>
-            <strong class="phase-summary-stat__value">${escapeHtml(String(phase.representativeTasks.length))}</strong>
-          </div>
-          <div class="phase-summary-stat">
-            <span class="phase-summary-stat__label">Risks / docs</span>
-            <strong class="phase-summary-stat__value">${escapeHtml(`${relatedRisks.length} / ${relatedDocuments.length}`)}</strong>
-          </div>
-        </div>
         ${renderContextActions()}
       </section>
 
       <section class="focus-card focus-card--secondary">
         <div class="focus-header">
-          <p class="section-kicker">Key milestones in this phase</p>
-          <h3>Choose one date to inspect</h3>
-          <p class="focus-summary">Each card below opens the evidence behind that milestone.</p>
+          <h3>Milestones in ${escapeHtml(phase.name)}</h3>
         </div>
-
         ${buildLinkedMomentButtons(focusMilestones)}
-
-        ${
-          selectedMilestone && selectedMilestone.phaseId === phase.id
-            ? `
-              <div class="focus-note" aria-live="polite">
-                <span class="focus-note__label">Selected milestone</span>
-                <strong>${escapeHtml(selectedMilestone.shortName)}</strong>
-                <p>${escapeHtml(`Evidence for ${selectedMilestone.dateLabel} is open below.`)}</p>
-              </div>
-            `
-            : ''
-        }
       </section>
     </div>
   `;
@@ -695,279 +659,64 @@ function buildSupportList(items, builder) {
 function buildMilestoneSupport(milestone) {
   const phase = state.phasesById.get(milestone.phaseId);
   const driver = getMilestoneDrivers(milestone)[0] || getPhaseDrivers(milestone.phaseId)[0] || null;
-  const methodology = state.data.methodology;
-  const traceability = state.data.traceability;
-  const artifacts = state.reveal.artifacts ? traceability.artifacts : traceability.artifacts.slice(0, 3);
-  const sources = state.reveal.sources ? traceability.sources : traceability.sources.slice(0, 4);
+
+  // Plain-language explanation with fallback to whyItMatters
+  const explanation = milestone.plainLanguage || milestone.whyItMatters;
+  const hasPlainLanguage = Boolean(milestone.plainLanguage);
+
+  // Build inline evidence strings (not ID dumps)
+  const taskStory = milestone.task
+    ? `Anchored to task <strong>${escapeHtml(milestone.task.name)}</strong> (${escapeHtml(milestone.task.windowLabel)}, WBS ${escapeHtml(milestone.task.wbsId)}).`
+    : '';
+
+  const riskStory = milestone.linkedRisks.length
+    ? `<strong>${escapeHtml(milestone.linkedRisks.length)} risk${milestone.linkedRisks.length === 1 ? '' : 's'}</strong> tied to this date: ${milestone.linkedRisks.slice(0, 3).map(r => escapeHtml(r.title)).join('; ')}${milestone.linkedRisks.length > 3 ? '; …' : ''}.`
+    : '';
+
+  const docStory = milestone.linkedDocuments.length
+    ? `Backed by <strong>${escapeHtml(milestone.linkedDocuments.length)} document${milestone.linkedDocuments.length === 1 ? '' : 's'}</strong>: ${milestone.linkedDocuments.slice(0, 3).map(d => escapeHtml(d.name)).join('; ')}${milestone.linkedDocuments.length > 3 ? '; …' : ''}.`
+    : '';
+
+  const sourceStory = milestone.linkedSources.length
+    ? `Public source${milestone.linkedSources.length === 1 ? '' : 's'}: ${milestone.linkedSources.slice(0, 2).map(s => s.href ? `<a class="evidence-inline-link" href="${escapeHtml(s.href)}" target="_blank" rel="noreferrer">${escapeHtml(s.title)}</a>` : escapeHtml(s.title)).join('; ')}.`
+    : '';
+
+  const driverStory = driver
+    ? `Pacing driver: <strong>${escapeHtml(driver.name)}</strong> (${escapeHtml(driver.windowLabel)}).`
+    : '';
+
+  const evidenceParts = [taskStory, driverStory, riskStory, docStory, sourceStory].filter(Boolean);
 
   return `
-    <div class="support-shell">
-      <section class="support-card support-card--hero">
-        <div class="support-card__header">
-          <p class="support-card__eyebrow">Selected milestone</p>
-          <h3>${escapeHtml(milestone.shortName)}</h3>
-          <div class="focus-meta">
-            <span class="mono">${escapeHtml(milestone.dateLabel)}</span>
-            <span>${escapeHtml(phase?.name || milestone.phaseName)}</span>
-          </div>
-          <p class="support-card__summary">${escapeHtml(firstSentence(milestone.whyItMatters))}</p>
+    <div class="milestone-slim">
+      <header class="milestone-slim__header">
+        <div>
+          <p class="milestone-slim__eyebrow">${escapeHtml(phase?.name || milestone.phaseName)} · ${escapeHtml(milestone.dateLabel)}</p>
+          <h3 class="milestone-slim__title">${escapeHtml(milestone.shortName)}</h3>
+          <p class="milestone-slim__fullname">${escapeHtml(milestone.name)}</p>
         </div>
+        <span class="milestone-slim__pill milestone-slim__pill--${escapeHtml((milestone.confidenceLabel || 'unknown').toLowerCase().replace(/\s+/g, '-').replace(/-confidence$/, ''))}">${escapeHtml(milestone.confidenceLabel)}</span>
+      </header>
 
-        <div class="phase-summary-strip phase-summary-strip--compact" aria-label="Selected milestone summary">
-          <div class="phase-summary-stat">
-            <span class="phase-summary-stat__label">Date</span>
-            <strong class="phase-summary-stat__value mono">${escapeHtml(milestone.dateLabel)}</strong>
-          </div>
-          <div class="phase-summary-stat">
-            <span class="phase-summary-stat__label">Type</span>
-            <strong class="phase-summary-stat__value">${escapeHtml(milestone.typeLabel)}</strong>
-          </div>
-          <div class="phase-summary-stat">
-            <span class="phase-summary-stat__label">Source basis</span>
-            <strong class="phase-summary-stat__value">${escapeHtml(milestone.directnessLabel)}</strong>
-          </div>
-          <div class="phase-summary-stat">
-            <span class="phase-summary-stat__label">Confidence</span>
-            <strong class="phase-summary-stat__value">${escapeHtml(milestone.confidenceLabel)}</strong>
-          </div>
+      <p class="milestone-slim__why"><strong>What this is:</strong> ${escapeHtml(explanation)}</p>
+
+      ${evidenceParts.length ? `
+        <div class="milestone-slim__evidence-inline">
+          <p class="milestone-slim__evidence-label">Evidence behind this date</p>
+          <ul class="evidence-inline-list">
+            ${evidenceParts.map(part => `<li>${part}</li>`).join('')}
+          </ul>
         </div>
-        ${renderContextActions()}
-      </section>
+      ` : ''}
 
-      <div class="support-grid support-grid--primary">
-        <section class="support-card">
-          <div class="support-card__header">
-            <p class="support-card__eyebrow">Task behind this milestone</p>
-            <h3>${escapeHtml(milestone.task ? milestone.task.name : 'No direct task linked')}</h3>
-            <p class="support-card__summary">This is the clearest task-level schedule evidence connected to the selected date.</p>
-          </div>
-          ${
-            milestone.task
-              ? `
-                <div class="support-list">
-                  <div class="support-item">
-                    <span class="item-meta mono">${escapeHtml(milestone.task.id)} - ${escapeHtml(milestone.task.windowLabel)}</span>
-                    <strong>${escapeHtml(milestone.task.name)}</strong>
-                    <p class="support-item__copy">${escapeHtml(`WBS ${milestone.task.wbsId}`)}</p>
-                  </div>
-                </div>
-              `
-              : buildEmptyState('No direct task record', 'The current source set does not tie this milestone to one specific task line.')
-          }
-        </section>
+      ${hasPlainLanguage ? `
+        <details class="milestone-slim__technical">
+          <summary><span>Technical framing</span><span class="milestone-slim__chevron" aria-hidden="true">▾</span></summary>
+          <p>${escapeHtml(milestone.whyItMatters)}</p>
+        </details>
+      ` : ''}
 
-        <section class="support-card">
-          <div class="support-card__header">
-            <p class="support-card__eyebrow">Risks tied to this milestone</p>
-            <h3>${escapeHtml(pluralize(milestone.linkedRisks.length, 'risk'))}</h3>
-            <p class="support-card__summary">These are the clearest schedule-pressure items connected to the selected date.</p>
-          </div>
-          ${buildSupportList(
-            milestone.linkedRisks,
-            (risk) => `
-              <div class="support-item">
-                <span class="item-meta">${escapeHtml(`${risk.id} - ${risk.status}`)}</span>
-                <strong>${escapeHtml(risk.title)}</strong>
-                <p class="support-item__copy">${escapeHtml(`Risk score ${risk.score}`)}</p>
-                <div class="card-actions">
-                  <a class="artifact-card__link" href="${escapeHtml(buildSuiteHref('risk', { from: 'schedule', milestone: milestone.id, wbs: milestone.task?.wbsId || '', risk: risk.id }))}">
-                    Open in Risk
-                  </a>
-                </div>
-              </div>
-            `,
-          )}
-        </section>
-
-        <section class="support-card">
-          <div class="support-card__header">
-            <p class="support-card__eyebrow">Supporting documents</p>
-            <h3>${escapeHtml(pluralize(milestone.linkedDocuments.length, 'document'))}</h3>
-            <p class="support-card__summary">These documents explain or reinforce why this date exists in the schedule story.</p>
-          </div>
-          ${buildSupportList(
-            milestone.linkedDocuments,
-            (document) => `
-              <div class="support-item">
-                <span class="item-meta">${escapeHtml(`${document.id} - ${document.type}`)}</span>
-                <strong>${escapeHtml(document.name)}</strong>
-                <p class="support-item__copy">${escapeHtml(`${document.status} - ${document.evidenceRole}`)}</p>
-                <div class="card-actions">
-                  <a class="artifact-card__link" href="${escapeHtml(buildSuiteHref('documents', { from: 'schedule', milestone: milestone.id, wbs: milestone.task?.wbsId || '', doc: getSelectedContext().docId }))}">
-                    Open in Documents
-                  </a>
-                </div>
-              </div>
-            `,
-          )}
-        </section>
-
-        <section class="support-card">
-          <div class="support-card__header">
-            <p class="support-card__eyebrow">Source references</p>
-            <h3>${escapeHtml(pluralize(milestone.linkedSources.length, 'source'))}</h3>
-            <p class="support-card__summary">These are the named sources most directly linked to this date. Additional supporting files appear below.</p>
-          </div>
-          ${buildSupportList(
-            milestone.linkedSources,
-            (source) => `
-              <div class="support-item">
-                <span class="item-meta">${escapeHtml(`${source.id} - ${source.publisher}`)}</span>
-                <strong>${escapeHtml(source.title)}</strong>
-                <p class="support-item__copy">${escapeHtml(source.href ? 'External or linked source.' : 'Local source file in the schedule dataset.')}</p>
-                <div class="card-actions">
-                  <a class="artifact-card__link" href="${escapeHtml(buildSuiteHref('documents', { from: 'schedule', milestone: milestone.id, wbs: milestone.task?.wbsId || '', doc: getSelectedContext().docId }))}">
-                    Open in Documents
-                  </a>
-                  ${source.href ? `<a class="source-card__link" href="${escapeHtml(source.href)}" target="_blank" rel="noreferrer">Open raw source</a>` : ''}
-                </div>
-              </div>
-            `,
-          )}
-        </section>
-      </div>
-
-      <div class="support-grid support-grid--secondary">
-        <section class="support-card">
-          <div class="support-card__header">
-            <p class="support-card__eyebrow">What drives this date</p>
-            <h3>${escapeHtml(driver ? driver.name : 'No driver group linked')}</h3>
-            <p class="support-card__summary">This is the clearest timing-pressure branch connected to the selected milestone.</p>
-          </div>
-          ${
-            driver
-              ? `
-                <div class="support-list">
-                  <div class="support-item">
-                    <span class="item-meta">${escapeHtml(driver.windowLabel)}</span>
-                    <strong>${escapeHtml(driver.name)}</strong>
-                    <p class="support-item__copy">${escapeHtml(compactText(driver.summary, 20))}</p>
-                  </div>
-                </div>
-                <div class="phase-summary-strip phase-summary-strip--compact" aria-label="Timing pressure summary">
-                  <div class="phase-summary-stat">
-                    <span class="phase-summary-stat__label">Tasks</span>
-                    <strong class="phase-summary-stat__value">${escapeHtml(String(driver.representativeTasks.length))}</strong>
-                  </div>
-                  <div class="phase-summary-stat">
-                    <span class="phase-summary-stat__label">Milestones</span>
-                    <strong class="phase-summary-stat__value">${escapeHtml(String(driver.linkedMilestones.length))}</strong>
-                  </div>
-                  <div class="phase-summary-stat">
-                    <span class="phase-summary-stat__label">Risks</span>
-                    <strong class="phase-summary-stat__value">${escapeHtml(String(driver.linkedRisks.length))}</strong>
-                  </div>
-                </div>
-              `
-              : buildEmptyState('No linked timing driver', 'The current evidence model does not expose a stronger timing-pressure branch for this date.')
-          }
-        </section>
-
-        <section class="support-card">
-          <div class="support-card__header">
-            <p class="support-card__eyebrow">How this schedule was derived</p>
-            <h3>${escapeHtml(methodology.title)}</h3>
-            <p class="support-card__summary">${escapeHtml(compactText(methodology.summary, 24))}</p>
-          </div>
-          <div class="support-list">
-            ${methodology.cards
-              .slice(0, 3)
-              .map(
-                (card) => `
-                  <div class="support-item">
-                    <span class="item-meta">${escapeHtml(card.eyebrow)}</span>
-                    <strong>${escapeHtml(card.title)}</strong>
-                    <p class="support-item__copy">${escapeHtml(compactText(card.body, 18))}</p>
-                  </div>
-                `,
-              )
-              .join('')}
-          </div>
-        </section>
-      </div>
-
-      <section class="support-card support-card--span">
-        <div class="support-card__header">
-          <p class="support-card__eyebrow">Files behind this schedule view</p>
-          <h3>Files and sources supporting the schedule</h3>
-          <p class="support-card__summary">${escapeHtml(compactText(traceability.summary, 24))}</p>
-        </div>
-
-        <div class="artifact-list">
-          ${artifacts
-            .map(
-              (artifact) => `
-                <section class="artifact-card">
-                  <div class="artifact-card__row">
-                    <span class="item-meta">${escapeHtml(artifact.meta)}</span>
-                    <span class="${tagClass(artifact.tone)}">${escapeHtml(artifact.fileType)}</span>
-                  </div>
-                  <h3>${escapeHtml(artifact.title)}</h3>
-                  <p>${escapeHtml(compactText(artifact.description, 14))}</p>
-                  <div class="card-actions">
-                    <a class="artifact-card__link" href="${escapeHtml(artifact.href)}" target="_blank" rel="noreferrer">
-                      ${escapeHtml(artifact.linkLabel)}
-                    </a>
-                  </div>
-                </section>
-              `,
-            )
-            .join('')}
-        </div>
-
-        ${
-          traceability.artifacts.length > 3
-            ? `
-              <div class="card-actions">
-                <button class="trace-button" type="button" data-action="toggle-reveal" data-reveal="artifacts">
-                  ${state.reveal.artifacts ? 'Show fewer files' : `Show all ${traceability.artifacts.length} files`}
-                </button>
-              </div>
-            `
-            : ''
-        }
-
-        <div class="source-list">
-          ${sources
-            .map(
-              (source) => `
-                <section class="source-card">
-                  <div class="source-card__row">
-                    <span class="item-meta">${escapeHtml(`${source.id} - ${source.publisher}`)}</span>
-                    <span class="${tagClass(source.tone)}">${escapeHtml(source.sourceTypeLabel)}</span>
-                  </div>
-                  <h3>${escapeHtml(source.title)}</h3>
-                  <p>${escapeHtml(compactText(source.relevance, 14))}</p>
-                  <p>${escapeHtml(source.usageLabel)}</p>
-                  ${
-                    source.href
-                      ? `
-                        <div class="card-actions">
-                          <a class="source-card__link" href="${escapeHtml(source.href)}" target="_blank" rel="noreferrer">
-                            ${escapeHtml(source.linkLabel)}
-                          </a>
-                        </div>
-                      `
-                      : ''
-                  }
-                </section>
-              `,
-            )
-            .join('')}
-        </div>
-
-        ${
-          traceability.sources.length > 4
-            ? `
-              <div class="card-actions">
-                <button class="trace-button" type="button" data-action="toggle-reveal" data-reveal="sources">
-                  ${state.reveal.sources ? 'Show fewer sources' : `Show all ${traceability.sources.length} sources`}
-                </button>
-              </div>
-            `
-            : ''
-        }
-      </section>
+      ${renderContextActions()}
     </div>
   `;
 }

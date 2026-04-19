@@ -380,11 +380,12 @@ function renderDetailCard(documentRecord) {
       ${
         state.context?.title
           ? `
-            <section class="suite-context-card">
-              <p class="suite-context-card__eyebrow">Cross-App Context</p>
-              <h3 class="suite-context-card__title">${escapeHtml(state.context.title)}</h3>
-              <p class="suite-context-card__body">${escapeHtml(state.context.body || detailUseNote)}</p>
-              <div class="suite-context-actions">
+            <details class="cross-app-collapsed">
+              <summary class="cross-app-collapsed__summary">
+                <span>Open this document elsewhere</span>
+                <span class="cross-app-collapsed__chevron" aria-hidden="true">▾</span>
+              </summary>
+              <div class="cross-app-collapsed__actions">
                 ${buildSuiteAction('wbs', 'Open in WBS', {
                   from: 'documents',
                   wbs: state.context.wbsId || '',
@@ -409,7 +410,7 @@ function renderDetailCard(documentRecord) {
                   doc: documentRecord.id,
                 })}
               </div>
-            </section>
+            </details>
           `
           : ''
       }
@@ -583,6 +584,7 @@ function attachEvents() {
     updateVisibleDocuments();
     render();
   });
+
 
   elements.documentList.addEventListener('click', handleListClick);
 }

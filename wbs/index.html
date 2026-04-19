@@ -46,19 +46,14 @@
     <header class="intro">
       <div class="intro__copy">
         <p class="eyebrow">Gateway Program Map</p>
-        <h1 id="appTitle">Gateway WBS Explorer</h1>
+        <h1 id="appTitle">Work Breakdown Structure</h1>
         <p id="appSubtitle" class="intro__subtitle">
-          See how Gateway is organized, what each branch includes, and how the program rolls up from detailed work to the full mission architecture.
+          How Gateway is organized, from detailed work up to the full program.
         </p>
       </div>
 
       <div class="intro__guide">
-        <p class="guide__label">Program structure at a glance</p>
-        <ol class="intro__steps">
-          <li>Start with the major parts of the program on the left.</li>
-          <li>Use the center panel to understand what a selected branch does and why it matters.</li>
-          <li>Open cost, schedule, risk, or document detail for the selected branch when you need supporting context.</li>
-        </ol>
+        <p class="guide__label">At a glance</p>
 
         <div id="appSignals" class="intro__signals" aria-label="Program signals"></div>
       </div>
@@ -67,7 +62,6 @@
     <main id="workspace" class="workspace">
       <aside class="nav-zone" aria-label="WBS navigation">
         <div class="nav-zone__header">
-          <p class="section-kicker">Navigation</p>
           <h2>Program structure</h2>
           <p id="treeStatus" class="nav-zone__hint">Loading hierarchy...</p>
         </div>
@@ -94,11 +88,11 @@
         </div>
 
         <label class="search-field" for="searchInput">
-          <span class="search-field__label">Find a program part</span>
+          <span class="search-field__label">Search</span>
           <input
             id="searchInput"
             type="search"
-            placeholder="Search nodes, subsystems, risks, or documents"
+            placeholder="Branch name, ID, or keyword"
             autocomplete="off"
           />
         </label>
@@ -113,8 +107,7 @@
         <section id="structureView" class="structure-view" aria-label="WBS structure visualization" hidden>
           <div class="structure-view__summary">
             <p class="structure-view__intro">
-              Read from left to right: detailed work rolls up into major Gateway elements, then into the
-              overall program.
+              Detailed work on the left rolls up to the program on the right.
             </p>
             <div id="structureLevelSummary" class="structure-levels" aria-label="Hierarchy level summary"></div>
           </div>
@@ -130,8 +123,7 @@
       <section class="overview-zone" aria-label="Selected node overview">
         <div id="overviewContent" class="overview-content">
           <section class="loading-state">
-            <h2>Loading program structure</h2>
-            <p>WBS data will appear here once the local dataset is available.</p>
+            <h2>Loading…</h2>
           </section>
         </div>
       </section>

@@ -124,6 +124,7 @@ input:focus-visible {
 }
 
 .intro {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.9fr);
   gap: 20px;
@@ -787,33 +788,6 @@ input:focus-visible {
   letter-spacing: -0.04em;
 }
 
-.overview-hero__body {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 22px;
-}
-
-.overview-blurb {
-  padding: 18px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: rgba(12, 24, 35, 0.82);
-}
-
-.overview-blurb__label {
-  margin: 0 0 8px;
-  font-size: 0.76rem;
-  color: var(--ink-soft);
-}
-
-.overview-blurb__text {
-  margin: 0;
-  font-size: 1.02rem;
-  line-height: 1.75;
-  color: var(--ink);
-}
-
 .lens-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1254,7 +1228,6 @@ mark {
   .nav-zone__actions,
   .view-switch,
   .focus-shell__header-row,
-  .overview-hero__body,
   .preview-takeaways,
   .lens-grid,
   .structure-levels,
@@ -1285,4 +1258,109 @@ mark {
   .lens-card {
     min-height: 140px;
   }
+}
+
+/* Why-it-matters progressive disclosure */
+.overview-hero__summary {
+  margin: 12px 0 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 72ch;
+}
+
+.overview-why {
+  margin-top: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  background: rgba(13, 24, 36, 0.5);
+  max-width: 72ch;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.overview-why:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.overview-why[open] {
+  border-color: rgba(103, 180, 255, 0.35);
+  background: rgba(13, 24, 36, 0.85);
+}
+
+.overview-why__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.overview-why__summary::-webkit-details-marker {
+  display: none;
+}
+
+.overview-why__chevron {
+  color: rgba(255, 255, 255, 0.5);
+  transition: transform 160ms ease;
+}
+
+.overview-why[open] .overview-why__chevron {
+  transform: rotate(180deg);
+}
+
+.overview-why__text {
+  margin: 0;
+  padding: 0 14px 14px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+/* Connected Views (cross-app) — compact progressive disclosure */
+.connected-views {
+  margin-top: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(13, 24, 36, 0.5);
+}
+
+.connected-views[open] {
+  border-color: rgba(103, 180, 255, 0.35);
+  background: rgba(13, 24, 36, 0.85);
+}
+
+.connected-views__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.connected-views__summary::-webkit-details-marker {
+  display: none;
+}
+
+.connected-views__chevron {
+  color: rgba(255, 255, 255, 0.5);
+  transition: transform 160ms ease;
+}
+
+.connected-views[open] .connected-views__chevron {
+  transform: rotate(180deg);
+}
+
+.connected-views__actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+  padding: 0 16px 16px;
 }

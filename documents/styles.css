@@ -133,6 +133,7 @@ code {
 }
 
 .topbar {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(360px, 0.9fr);
   gap: 28px;
@@ -672,4 +673,46 @@ code {
   .detail-card__hero-actions {
     justify-items: start;
   }
+}
+
+/* ── Cross-app collapsed card ───────────────────────── */
+.cross-app-collapsed {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.cross-app-collapsed__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  list-style: none;
+  transition: background 0.15s ease;
+}
+
+.cross-app-collapsed__summary:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.cross-app-collapsed__summary::-webkit-details-marker { display: none; }
+
+.cross-app-collapsed__chevron {
+  transition: transform 0.2s ease;
+  font-size: 0.75rem;
+}
+
+.cross-app-collapsed[open] .cross-app-collapsed__chevron {
+  transform: rotate(180deg);
+}
+
+.cross-app-collapsed__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem 1rem;
 }

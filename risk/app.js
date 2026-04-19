@@ -278,40 +278,6 @@ function buildConsequenceCue(risk) {
   return description;
 }
 
-function buildSeverityReason(risk) {
-  const impact = Number(risk.impact);
-  const likelihood = Number(risk.likelihood);
-  const band = priorityBand(Number(risk.priority));
-  const status = normalizeText(risk.status);
-
-  const impactReason =
-    impact >= 5
-      ? 'the consequence reaches a mission-defining outcome'
-      : impact >= 4
-        ? 'the consequence can force major program replanning'
-        : 'the consequence is still material to mission execution';
-
-  const likelihoodReason =
-    likelihood >= 4
-      ? 'the current posture says it is relatively likely to surface'
-      : likelihood >= 3
-        ? 'the exposure remains credible under current assumptions'
-        : 'the trigger is less likely, but the downside is still significant';
-
-  const statusReason = status.startsWith('open')
-    ? 'It remains open rather than retired.'
-    : 'It remains on the watch list and still needs active attention.';
-
-  const bandReason =
-    band === 'critical'
-      ? 'This sits at the top of the current risk stack.'
-      : band === 'high'
-        ? 'This is still one of the risks shaping program decisions.'
-        : 'This is not the highest item, but it still carries visible consequence.';
-
-  return `${bandReason} It matters because ${impactReason}, and ${likelihoodReason}. ${statusReason}`;
-}
-
 function renderRiskScale(label, value, band) {
   const numericValue = Math.max(0, Math.min(5, Number(value) || 0));
   const cells = Array.from({ length: 5 }, (_, index) => {
@@ -583,6 +549,24 @@ function renderDetailEmptyState(eyebrow, title, body) {
   `;
 }
 
+function likelihoodMeaning(score) {
+  const s = Number(score);
+  if (s >= 5) return 'Very likely — expected to occur based on current evidence or trends';
+  if (s >= 4) return 'Likely — probable under current program posture';
+  if (s >= 3) return 'Possible — credible exposure under current assumptions';
+  if (s >= 2) return 'Unlikely — requires specific conditions to materialize';
+  return 'Remote — theoretically possible but low probability';
+}
+
+function impactMeaning(score) {
+  const s = Number(score);
+  if (s >= 5) return 'Mission-defining — compromises the core mission objective';
+  if (s >= 4) return 'Major — forces significant replanning of cost, schedule, or scope';
+  if (s >= 3) return 'Material — meaningful effect on program execution';
+  if (s >= 2) return 'Moderate — absorbable with management attention';
+  return 'Minor — limited consequence to program outcome';
+}
+
 function renderRiskDetail(risk) {
   const band = priorityBand(Number(risk.priority));
   const categoryTone = categoryBand(risk.category);
@@ -591,7 +575,7 @@ function renderRiskDetail(risk) {
   const score = Number(risk.priority) || 0;
   const summary =
     `${priorityLabel(risk.priority)} ${risk.category.toLowerCase()} risk owned by ${risk.owner}. The current posture is ${statusLabel(risk.status).toLowerCase()}.`;
-  const severityReason = buildSeverityReason(risk);
+  const plainLanguage = risk.plainLanguage || risk.description;
   const driverTags = (Array.isArray(risk.tags) ? risk.tags : []).slice(0, 4);
   const riskContext = state.crosswalk?.risk?.byId?.[risk.id];
 
@@ -604,47 +588,73 @@ function renderRiskDetail(risk) {
             <span class="risk-code">${escapeHtml(risk.id)}</span>
           </div>
           <h2>${escapeHtml(risk.title)}</h2>
-          <p class="risk-card__summary">${escapeHtml(summary)}</p>
         </div>
         <aside class="risk-signature risk-signature--${band}">
-          <p class="risk-signature__eyebrow">Risk Signature</p>
-          <div class="risk-signature__score">
-            <span class="risk-signature__score-value">${escapeHtml(risk.priority)}</span>
-            <div class="risk-signature__score-copy">
-              <strong>${priorityLabel(risk.priority)}</strong>
-              <span>${escapeHtml(risk.status)}</span>
-            </div>
-          </div>
-          <div class="risk-signature__profile">
-            ${renderRiskScale('Likelihood', risk.likelihood, band)}
-            ${renderRiskScale('Impact', risk.impact, band)}
+          <span class="risk-signature__score-value">${escapeHtml(risk.priority)}</span>
+          <div class="risk-signature__score-copy">
+            <strong>${priorityLabel(risk.priority)}</strong>
+            <span>L ${escapeHtml(risk.likelihood)} · I ${escapeHtml(risk.impact)}</span>
           </div>
         </aside>
       </header>
 
-      <section class="suite-context-card">
-        <p class="suite-context-card__eyebrow">Program Mapping</p>
-        <h3 class="suite-context-card__title">Where this risk sits in the suite</h3>
-        <p class="suite-context-card__body">${escapeHtml(riskContext?.reason || state.context?.body || 'This risk remains linked to the strongest available WBS, schedule, and document context in the current crosswalk.')}</p>
-        <div class="suite-context-card__grid">
-          <div class="suite-context-stat">
-            <span class="suite-context-stat__label">WBS</span>
-            <span class="suite-context-stat__value">${escapeHtml(riskContext?.primaryWbsId || state.context?.wbsId || 'No direct WBS branch')}</span>
-          </div>
-          <div class="suite-context-stat">
-            <span class="suite-context-stat__label">Schedule</span>
-            <span class="suite-context-stat__value">${escapeHtml(riskContext?.primaryMilestoneId || state.context?.milestoneId || 'No direct milestone')}</span>
-          </div>
-          <div class="suite-context-stat">
-            <span class="suite-context-stat__label">Documents</span>
-            <span class="suite-context-stat__value">${escapeHtml(String(riskContext?.documents.sourceDocIds?.length || 0))}</span>
-          </div>
-          <div class="suite-context-stat">
-            <span class="suite-context-stat__label">Module</span>
-            <span class="suite-context-stat__value">${escapeHtml(riskContext?.simulation.moduleKeys?.[0] || state.context?.moduleKey || 'Not mapped')}</span>
+      <section class="risk-story">
+        <p class="risk-story__lede"><strong>In plain terms:</strong> ${escapeHtml(plainLanguage)}</p>
+        ${risk.plainLanguage ? `<details class="risk-story__technical">
+          <summary><span>Technical framing</span><span class="risk-disclosure__chevron" aria-hidden="true">▾</span></summary>
+          <p class="risk-story__what">${escapeHtml(risk.description)}</p>
+        </details>` : ''}
+      </section>
+
+      <section class="risk-status-line">
+        <span class="risk-status-line__item"><span class="risk-status-line__label">Status</span> ${escapeHtml(risk.status)}</span>
+        <span class="risk-status-line__sep">·</span>
+        <span class="risk-status-line__item"><span class="risk-status-line__label">Owner</span> ${escapeHtml(risk.owner)}</span>
+        ${driverTags.length ? `
+          <span class="risk-status-line__sep">·</span>
+          <span class="risk-status-line__item">
+            ${driverTags.map(t => `<span class="tag-chip tag-chip--inline">${escapeHtml(t)}</span>`).join(' ')}
+          </span>
+        ` : ''}
+      </section>
+
+      <details class="risk-disclosure">
+        <summary>
+          <span>Mitigation and current response</span>
+          <span class="risk-disclosure__chevron" aria-hidden="true">▾</span>
+        </summary>
+        <p class="risk-disclosure__body">${escapeHtml(risk.mitigation)}</p>
+      </details>
+
+      <details class="risk-disclosure">
+        <summary>
+          <span>How this score is computed</span>
+          <span class="risk-disclosure__chevron" aria-hidden="true">▾</span>
+        </summary>
+        <div class="risk-disclosure__body">
+          <div class="score-breakdown">
+            <div class="score-breakdown__row">
+              <span class="score-breakdown__label">Likelihood (${escapeHtml(likelihood)}/5)</span>
+              <span class="score-breakdown__meaning">${escapeHtml(likelihoodMeaning(likelihood))}</span>
+            </div>
+            <div class="score-breakdown__row">
+              <span class="score-breakdown__label">Impact (${escapeHtml(impact)}/5)</span>
+              <span class="score-breakdown__meaning">${escapeHtml(impactMeaning(impact))}</span>
+            </div>
+            <div class="score-breakdown__result">
+              <span>${escapeHtml(likelihood)} × ${escapeHtml(impact)} = <strong>${escapeHtml(score)}</strong></span>
+              <span class="score-breakdown__band"><strong>${priorityLabel(score)}</strong> band (${escapeHtml(bandRangeText(band))})</span>
+            </div>
           </div>
         </div>
-        <div class="suite-context-actions">
+      </details>
+
+      <details class="cross-app-collapsed">
+        <summary class="cross-app-collapsed__summary">
+          <span>Open this risk elsewhere</span>
+          <span class="cross-app-collapsed__chevron" aria-hidden="true">▾</span>
+        </summary>
+        <div class="cross-app-collapsed__actions">
           ${buildSuiteAction('wbs', 'Open in WBS', {
             from: 'risk',
             wbs: riskContext?.primaryWbsId || state.context?.wbsId || '',
@@ -669,120 +679,7 @@ function renderRiskDetail(risk) {
             view: 'module',
           })}
         </div>
-      </section>
-
-      <section class="risk-signal-grid" aria-label="Risk signal">
-        <div class="risk-signal-card">
-          <p class="detail-section__eyebrow">Why This Is Serious</p>
-          <p class="risk-signal-card__body">${escapeHtml(severityReason)}</p>
-        </div>
-        <div class="risk-signal-card">
-          <p class="detail-section__eyebrow">Risk Drivers</p>
-          <div class="tag-row">
-            ${driverTags.map((tag) => `<span class="tag-chip">${escapeHtml(tag)}</span>`).join('')}
-          </div>
-        </div>
-      </section>
-
-      <section class="scoring-logic" aria-label="Scoring logic">
-        <div class="scoring-logic__header">
-          <div>
-            <p class="detail-section__eyebrow">Scoring Logic</p>
-            <h3>How this score is computed</h3>
-          </div>
-          <p class="scoring-logic__note">
-            Priority score is calculated directly from the visible likelihood and impact values. The app does not imply a more complex model than the source data supports.
-          </p>
-        </div>
-
-        <div class="scoring-logic__grid">
-          <div class="scoring-card scoring-card--input">
-            <span class="scoring-card__label">Input</span>
-            <strong>Likelihood</strong>
-            <span class="scoring-card__value">${escapeHtml(likelihood)} / 5</span>
-          </div>
-          <div class="scoring-card scoring-card--input">
-            <span class="scoring-card__label">Input</span>
-            <strong>Impact</strong>
-            <span class="scoring-card__value">${escapeHtml(impact)} / 5</span>
-          </div>
-          <div class="scoring-card scoring-card--derived">
-            <span class="scoring-card__label">Derived</span>
-            <strong>Priority Score</strong>
-            <span class="scoring-card__value">${escapeHtml(score)}</span>
-          </div>
-          <div class="scoring-card scoring-card--band">
-            <span class="scoring-card__label">Assigned Band</span>
-            <strong>${priorityLabel(score)}</strong>
-            <span class="scoring-card__value">${escapeHtml(bandRangeText(band))}</span>
-          </div>
-        </div>
-
-        <div class="scoring-logic__formula" aria-label="Score formula">
-          <span class="scoring-logic__token">Likelihood ${escapeHtml(likelihood)}</span>
-          <span class="scoring-logic__operator">x</span>
-          <span class="scoring-logic__token">Impact ${escapeHtml(impact)}</span>
-          <span class="scoring-logic__operator">=</span>
-          <strong class="scoring-logic__result">Score ${escapeHtml(score)}</strong>
-        </div>
-
-        <p class="scoring-logic__thresholds">${escapeHtml(bandThresholdText())}</p>
-      </section>
-
-      <section class="risk-card__meta-grid" aria-label="Risk posture">
-        <div class="risk-meta-card">
-          <p class="risk-meta-card__label">Likelihood</p>
-          <p class="risk-meta-card__value risk-meta-card__value--mono">${escapeHtml(risk.likelihood)} / 5</p>
-        </div>
-        <div class="risk-meta-card">
-          <p class="risk-meta-card__label">Impact</p>
-          <p class="risk-meta-card__value risk-meta-card__value--mono">${escapeHtml(risk.impact)} / 5</p>
-        </div>
-        <div class="risk-meta-card">
-          <p class="risk-meta-card__label">Status</p>
-          <p class="risk-meta-card__value">${escapeHtml(risk.status)}</p>
-        </div>
-        <div class="risk-meta-card">
-          <p class="risk-meta-card__label">Owner</p>
-          <p class="risk-meta-card__value">${escapeHtml(risk.owner)}</p>
-        </div>
-        <div class="risk-meta-card">
-          <p class="risk-meta-card__label">Category</p>
-          <p class="risk-meta-card__value">${escapeHtml(risk.category)}</p>
-        </div>
-        <div class="risk-meta-card">
-          <p class="risk-meta-card__label">Risk ID</p>
-          <p class="risk-meta-card__value risk-meta-card__value--mono">${escapeHtml(risk.id)}</p>
-        </div>
-      </section>
-
-      <section class="detail-section">
-        <div class="detail-section__header">
-          <p class="detail-section__eyebrow">What This Risk Is</p>
-          <h3>Program meaning</h3>
-        </div>
-        <p class="detail-section__body">${escapeHtml(risk.description)}</p>
-      </section>
-
-      <section class="detail-section">
-        <div class="detail-section__header">
-          <p class="detail-section__eyebrow">Mitigation</p>
-          <h3>Current response and ownership</h3>
-        </div>
-        <p class="detail-section__body">${escapeHtml(risk.mitigation)}</p>
-      </section>
-
-      <section class="detail-section">
-        <div class="detail-section__header">
-          <p class="detail-section__eyebrow">Tags</p>
-          <h3>Related handles</h3>
-        </div>
-        <div class="tag-row">
-          ${(Array.isArray(risk.tags) ? risk.tags : [])
-            .map((tag) => `<span class="tag-chip">${escapeHtml(tag)}</span>`)
-            .join('')}
-        </div>
-      </section>
+      </details>
     </article>
   `;
 }
