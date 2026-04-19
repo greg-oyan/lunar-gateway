@@ -788,33 +788,6 @@ input:focus-visible {
   letter-spacing: -0.04em;
 }
 
-.overview-hero__body {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 22px;
-}
-
-.overview-blurb {
-  padding: 18px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: rgba(12, 24, 35, 0.82);
-}
-
-.overview-blurb__label {
-  margin: 0 0 8px;
-  font-size: 0.76rem;
-  color: var(--ink-soft);
-}
-
-.overview-blurb__text {
-  margin: 0;
-  font-size: 1.02rem;
-  line-height: 1.75;
-  color: var(--ink);
-}
-
 .lens-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1255,7 +1228,6 @@ mark {
   .nav-zone__actions,
   .view-switch,
   .focus-shell__header-row,
-  .overview-hero__body,
   .preview-takeaways,
   .lens-grid,
   .structure-levels,

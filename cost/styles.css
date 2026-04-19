@@ -161,6 +161,7 @@ a {
   display: grid;
   gap: 12px;
   align-content: start;
+  padding-right: 96px;
 }
 
 .eyebrow,
