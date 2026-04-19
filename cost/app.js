@@ -9,6 +9,7 @@
 } from '../suite-assets/suite-context.js';
 
 const CROSSWALK_URL = '../suite-assets/data/gateway-crosswalk.json';
+const WBS_DATA_URL = '../wbs/data/gateway-wbs.json';
 
 const state = {
   data: null,
@@ -24,6 +25,8 @@ const state = {
   methodsById: new Map(),
   crosswalk: null,
   sharedContext: {},
+  wbsNodesById: null,
+  wbsNodesPromise: null,
 };
 
 const elements = {
@@ -166,6 +169,10 @@ function formatCompactCurrency(value) {
   });
 }
 
+function formatMillionCurrency(value) {
+  return formatCompactCurrency(Number(value || 0) * 1000000);
+}
+
 function formatPercent(value) {
   return `${Math.round((Number(value || 0) * 1000)) / 10}%`;
 }
@@ -192,6 +199,26 @@ function getTopLevelWbsId(wbsId) {
   if (!parts.length) return '';
   if (parts.length < 2) return parts[0];
   return `${parts[0]}.${parts[1]}`;
+}
+
+async function ensureWbsNodesById() {
+  if (state.wbsNodesById) return state.wbsNodesById;
+  if (!state.wbsNodesPromise) {
+    state.wbsNodesPromise = fetch(WBS_DATA_URL)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        state.wbsNodesById = new Map((data?.nodes || []).map((node) => [node.id, node]));
+        return state.wbsNodesById;
+      })
+      .catch(() => {
+        state.wbsNodesById = new Map();
+        return state.wbsNodesById;
+      })
+      .finally(() => {
+        state.wbsNodesPromise = null;
+      });
+  }
+  return state.wbsNodesPromise;
 }
 
 function getCategoryYearValue(category, fy) {
@@ -392,6 +419,12 @@ function syncUrlState() {
 function buildCurrentContext(anchor = getCurrentAnchor()) {
   const anchorContext = getAnchorContext(anchor?.id);
   const sharedContext = state.sharedContext || {};
+  const selectedWbsNode = sharedContext.wbs ? state.wbsNodesById?.get(sharedContext.wbs) : null;
+  const selectedWbsCostM = Number.isFinite(Number(selectedWbsNode?.related?.cost?.totalBaseCost))
+    ? Number(selectedWbsNode.related.cost.totalBaseCost)
+    : null;
+  const selectedWbsLabel = selectedWbsCostM !== null ? selectedWbsNode?.name || selectedWbsNode?.id || '' : '';
+  const selectedWbsCostDisplay = selectedWbsCostM !== null ? formatMillionCurrency(selectedWbsCostM) : '';
   const candidateWbsId =
     sharedContext.wbs && anchor?.groupIds?.includes(getTopLevelWbsId(sharedContext.wbs))
       ? sharedContext.wbs
@@ -416,15 +449,20 @@ function buildCurrentContext(anchor = getCurrentAnchor()) {
   const title = candidateWbsId
     ? `Cost area for WBS ${candidateWbsId}`
     : `Cost area: ${anchor?.label || 'Gateway'}`;
-  const body = candidateWbsId && wbsContext
-    ? `${anchor?.label || 'This cost area'} is the best-matching roll-up for WBS ${candidateWbsId}.`
-    : anchorContext?.reason || 'The best-matching cost roll-up for what you were viewing.';
+  const body = selectedWbsCostDisplay && selectedWbsLabel
+    ? `${selectedWbsLabel} (${selectedWbsCostDisplay}) is shown here within the broader ${anchor?.label || 'Gateway'} roll-up.`
+    : candidateWbsId && wbsContext
+      ? `${anchor?.label || 'This cost area'} is the best-matching roll-up for WBS ${candidateWbsId}.`
+      : anchorContext?.reason || 'The best-matching cost roll-up for what you were viewing.';
 
   return {
     anchor,
     anchorContext,
     wbsId: candidateWbsId,
     wbsName: candidateWbsId ? state.categoriesById.get(candidateWbsId)?.name || '' : '',
+    selectedWbsLabel,
+    selectedWbsCostM,
+    selectedWbsCostDisplay,
     milestoneId,
     riskId,
     moduleKey,
@@ -455,6 +493,7 @@ function renderContextBanner(anchor = getCurrentAnchor()) {
       <div class="suite-context-banner__chips">
         <span class="suite-context-chip"><strong>Cost area</strong>${escapeHtml(context.anchor.label)}</span>
         ${context.wbsId ? `<span class="suite-context-chip"><strong>WBS</strong>${escapeHtml(context.wbsId)}</span>` : ''}
+        ${context.selectedWbsCostDisplay ? `<span class="suite-context-chip"><strong>Selected cost</strong>${escapeHtml(context.selectedWbsCostDisplay)}</span>` : ''}
         ${context.milestoneId ? `<span class="suite-context-chip"><strong>Schedule</strong>${escapeHtml(context.milestoneId)}</span>` : ''}
         ${context.riskId ? `<span class="suite-context-chip"><strong>Risk</strong>${escapeHtml(context.riskId)}</span>` : ''}
       </div>
@@ -1433,6 +1472,9 @@ async function loadDataset() {
     state.data = data;
     state.crosswalk = crosswalk;
     state.sharedContext = readSharedContext();
+    if (state.sharedContext.wbs) {
+      await ensureWbsNodesById();
+    }
     state.categoriesById = new Map(data.categories.map((category) => [category.id, category]));
     state.yearsById = new Map(data.years.map((year) => [year.fy, year]));
     state.methodsById = new Map(data.methodology.cards.map((card) => [card.id, card]));
