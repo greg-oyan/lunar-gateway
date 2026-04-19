@@ -1440,11 +1440,6 @@ treeElement.addEventListener('click', (event) => {
 });
 
 overviewContent.addEventListener('click', (event) => {
-  const homeControl = event.target.closest('[data-action="home"]');
-  if (homeControl) {
-    resetView();
-    return;
-  }
   const resetControl = event.target.closest('[data-action="reset-view"]');
   if (resetControl) {
     resetView();

@@ -1389,10 +1389,6 @@ function render() {
 
 function handleClick(event) {
   const actionButton = event.target.closest('[data-action]');
-  if (actionButton?.dataset.action === 'home') {
-    resetView();
-    return;
-  }
   if (actionButton?.dataset.action === 'reset-view') {
     resetView();
     return;

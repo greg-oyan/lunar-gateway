@@ -1878,3 +1878,185 @@ details > summary::-webkit-details-marker {
   gap: 0.5rem;
   padding: 0.75rem 1rem 1rem;
 }
+
+/* Slim milestone card — replaces the 7-pane support tree */
+.milestone-slim {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px 26px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: rgba(13, 24, 36, 0.85);
+}
+
+.milestone-slim__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.milestone-slim__eyebrow {
+  margin: 0 0 6px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(103, 180, 255, 0.85);
+  font-weight: 600;
+}
+
+.milestone-slim__title {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.97);
+}
+
+.milestone-slim__pill {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  white-space: nowrap;
+}
+
+.milestone-slim__pill--high {
+  background: rgba(83, 200, 130, 0.16);
+  color: rgba(140, 240, 180, 0.95);
+  border-color: rgba(83, 200, 130, 0.45);
+}
+
+.milestone-slim__pill--medium {
+  background: rgba(216, 168, 64, 0.16);
+  color: rgba(240, 200, 110, 0.95);
+  border-color: rgba(216, 168, 64, 0.45);
+}
+
+.milestone-slim__pill--low {
+  background: rgba(216, 90, 48, 0.16);
+  color: rgba(240, 150, 110, 0.95);
+  border-color: rgba(216, 90, 48, 0.45);
+}
+
+.milestone-slim__why {
+  margin: 0;
+  padding: 14px 16px;
+  border-left: 3px solid rgba(103, 180, 255, 0.55);
+  background: rgba(103, 180, 255, 0.06);
+  border-radius: 0 8px 8px 0;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+.milestone-slim__why strong {
+  color: rgba(255, 255, 255, 1);
+  font-weight: 700;
+}
+
+.milestone-slim__evidence {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  background: rgba(8, 16, 24, 0.6);
+}
+
+.milestone-slim__evidence[open] {
+  border-color: rgba(103, 180, 255, 0.35);
+  background: rgba(8, 16, 24, 0.9);
+}
+
+.milestone-slim__evidence > summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.milestone-slim__evidence > summary::-webkit-details-marker {
+  display: none;
+}
+
+.milestone-slim__chevron {
+  transition: transform 160ms ease;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.milestone-slim__evidence[open] .milestone-slim__chevron {
+  transform: rotate(180deg);
+}
+
+.milestone-slim__evidence-body {
+  padding: 4px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.evidence-block {
+  padding: 10px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.evidence-block:first-child {
+  border-top: none;
+  padding-top: 4px;
+}
+
+.evidence-block__label {
+  margin: 0 0 6px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 600;
+}
+
+.evidence-block__value {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.55;
+  font-size: 14px;
+}
+
+.evidence-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.evidence-list li {
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.evidence-list__meta {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 13px;
+}
+
+.evidence-list__link {
+  color: rgba(103, 180, 255, 0.95);
+  text-decoration: underline;
+  margin-left: 4px;
+}
+
+.evidence-empty {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.55);
+  font-style: italic;
+}

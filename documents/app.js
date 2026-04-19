@@ -585,22 +585,6 @@ function attachEvents() {
     render();
   });
 
-  const homeButton = document.querySelector('[data-action="home"]');
-  if (homeButton) {
-    homeButton.addEventListener('click', () => {
-      state.sharedContext = {};
-      state.selectedDocumentId = null;
-      state.searchQuery = '';
-      state.fileType = '';
-      state.category = '';
-      state.context = null;
-      elements.searchInput.value = '';
-      elements.typeFilter.value = '';
-      elements.categoryFilter.value = '';
-      updateVisibleDocuments();
-      render();
-    });
-  }
 
   elements.documentList.addEventListener('click', handleListClick);
 }

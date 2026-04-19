@@ -604,23 +604,52 @@ function renderRiskDetail(risk) {
             <span class="risk-code">${escapeHtml(risk.id)}</span>
           </div>
           <h2>${escapeHtml(risk.title)}</h2>
-          <p class="risk-card__summary">${escapeHtml(summary)}</p>
         </div>
         <aside class="risk-signature risk-signature--${band}">
-          <p class="risk-signature__eyebrow">Risk Signature</p>
-          <div class="risk-signature__score">
-            <span class="risk-signature__score-value">${escapeHtml(risk.priority)}</span>
-            <div class="risk-signature__score-copy">
-              <strong>${priorityLabel(risk.priority)}</strong>
-              <span>${escapeHtml(risk.status)}</span>
-            </div>
-          </div>
-          <div class="risk-signature__profile">
-            ${renderRiskScale('Likelihood', risk.likelihood, band)}
-            ${renderRiskScale('Impact', risk.impact, band)}
+          <span class="risk-signature__score-value">${escapeHtml(risk.priority)}</span>
+          <div class="risk-signature__score-copy">
+            <strong>${priorityLabel(risk.priority)}</strong>
+            <span>L ${escapeHtml(risk.likelihood)} · I ${escapeHtml(risk.impact)}</span>
           </div>
         </aside>
       </header>
+
+      <section class="risk-story">
+        <p class="risk-story__lede"><strong>Why this matters:</strong> ${escapeHtml(severityReason)}</p>
+        <p class="risk-story__what">${escapeHtml(risk.description)}</p>
+      </section>
+
+      <section class="risk-status-line">
+        <span class="risk-status-line__item"><span class="risk-status-line__label">Status</span> ${escapeHtml(risk.status)}</span>
+        <span class="risk-status-line__sep">·</span>
+        <span class="risk-status-line__item"><span class="risk-status-line__label">Owner</span> ${escapeHtml(risk.owner)}</span>
+        ${driverTags.length ? `
+          <span class="risk-status-line__sep">·</span>
+          <span class="risk-status-line__item">
+            ${driverTags.map(t => `<span class="tag-chip tag-chip--inline">${escapeHtml(t)}</span>`).join(' ')}
+          </span>
+        ` : ''}
+      </section>
+
+      <details class="risk-disclosure">
+        <summary>
+          <span>Mitigation and current response</span>
+          <span class="risk-disclosure__chevron" aria-hidden="true">▾</span>
+        </summary>
+        <p class="risk-disclosure__body">${escapeHtml(risk.mitigation)}</p>
+      </details>
+
+      <details class="risk-disclosure">
+        <summary>
+          <span>How this score is computed</span>
+          <span class="risk-disclosure__chevron" aria-hidden="true">▾</span>
+        </summary>
+        <p class="risk-disclosure__body">
+          Priority score = Likelihood (${escapeHtml(likelihood)}) × Impact (${escapeHtml(impact)}) = ${escapeHtml(score)}.
+          Score ${escapeHtml(score)} falls in the <strong>${priorityLabel(score)}</strong> band (${escapeHtml(bandRangeText(band))}).
+          ${escapeHtml(bandThresholdText())}
+        </p>
+      </details>
 
       <details class="cross-app-collapsed">
         <summary class="cross-app-collapsed__summary">
@@ -653,119 +682,6 @@ function renderRiskDetail(risk) {
           })}
         </div>
       </details>
-
-      <section class="risk-signal-grid" aria-label="Risk signal">
-        <div class="risk-signal-card">
-          <p class="detail-section__eyebrow">Why This Is Serious</p>
-          <p class="risk-signal-card__body">${escapeHtml(severityReason)}</p>
-        </div>
-        <div class="risk-signal-card">
-          <p class="detail-section__eyebrow">Risk Drivers</p>
-          <div class="tag-row">
-            ${driverTags.map((tag) => `<span class="tag-chip">${escapeHtml(tag)}</span>`).join('')}
-          </div>
-        </div>
-      </section>
-
-      <section class="scoring-logic" aria-label="Scoring logic">
-        <div class="scoring-logic__header">
-          <div>
-            <p class="detail-section__eyebrow">Scoring Logic</p>
-            <h3>How this score is computed</h3>
-          </div>
-          <p class="scoring-logic__note">
-            Priority score is calculated directly from the visible likelihood and impact values. The app does not imply a more complex model than the source data supports.
-          </p>
-        </div>
-
-        <div class="scoring-logic__grid">
-          <div class="scoring-card scoring-card--input">
-            <span class="scoring-card__label">Input</span>
-            <strong>Likelihood</strong>
-            <span class="scoring-card__value">${escapeHtml(likelihood)} / 5</span>
-          </div>
-          <div class="scoring-card scoring-card--input">
-            <span class="scoring-card__label">Input</span>
-            <strong>Impact</strong>
-            <span class="scoring-card__value">${escapeHtml(impact)} / 5</span>
-          </div>
-          <div class="scoring-card scoring-card--derived">
-            <span class="scoring-card__label">Derived</span>
-            <strong>Priority Score</strong>
-            <span class="scoring-card__value">${escapeHtml(score)}</span>
-          </div>
-          <div class="scoring-card scoring-card--band">
-            <span class="scoring-card__label">Assigned Band</span>
-            <strong>${priorityLabel(score)}</strong>
-            <span class="scoring-card__value">${escapeHtml(bandRangeText(band))}</span>
-          </div>
-        </div>
-
-        <div class="scoring-logic__formula" aria-label="Score formula">
-          <span class="scoring-logic__token">Likelihood ${escapeHtml(likelihood)}</span>
-          <span class="scoring-logic__operator">x</span>
-          <span class="scoring-logic__token">Impact ${escapeHtml(impact)}</span>
-          <span class="scoring-logic__operator">=</span>
-          <strong class="scoring-logic__result">Score ${escapeHtml(score)}</strong>
-        </div>
-
-        <p class="scoring-logic__thresholds">${escapeHtml(bandThresholdText())}</p>
-      </section>
-
-      <section class="risk-card__meta-grid" aria-label="Risk posture">
-        <div class="risk-meta-card">
-          <p class="risk-meta-card__label">Likelihood</p>
-          <p class="risk-meta-card__value risk-meta-card__value--mono">${escapeHtml(risk.likelihood)} / 5</p>
-        </div>
-        <div class="risk-meta-card">
-          <p class="risk-meta-card__label">Impact</p>
-          <p class="risk-meta-card__value risk-meta-card__value--mono">${escapeHtml(risk.impact)} / 5</p>
-        </div>
-        <div class="risk-meta-card">
-          <p class="risk-meta-card__label">Status</p>
-          <p class="risk-meta-card__value">${escapeHtml(risk.status)}</p>
-        </div>
-        <div class="risk-meta-card">
-          <p class="risk-meta-card__label">Owner</p>
-          <p class="risk-meta-card__value">${escapeHtml(risk.owner)}</p>
-        </div>
-        <div class="risk-meta-card">
-          <p class="risk-meta-card__label">Category</p>
-          <p class="risk-meta-card__value">${escapeHtml(risk.category)}</p>
-        </div>
-        <div class="risk-meta-card">
-          <p class="risk-meta-card__label">Risk ID</p>
-          <p class="risk-meta-card__value risk-meta-card__value--mono">${escapeHtml(risk.id)}</p>
-        </div>
-      </section>
-
-      <section class="detail-section">
-        <div class="detail-section__header">
-          <p class="detail-section__eyebrow">What This Risk Is</p>
-          <h3>Program meaning</h3>
-        </div>
-        <p class="detail-section__body">${escapeHtml(risk.description)}</p>
-      </section>
-
-      <section class="detail-section">
-        <div class="detail-section__header">
-          <p class="detail-section__eyebrow">Mitigation</p>
-          <h3>Current response and ownership</h3>
-        </div>
-        <p class="detail-section__body">${escapeHtml(risk.mitigation)}</p>
-      </section>
-
-      <section class="detail-section">
-        <div class="detail-section__header">
-          <p class="detail-section__eyebrow">Tags</p>
-          <h3>Related handles</h3>
-        </div>
-        <div class="tag-row">
-          ${(Array.isArray(risk.tags) ? risk.tags : [])
-            .map((tag) => `<span class="tag-chip">${escapeHtml(tag)}</span>`)
-            .join('')}
-        </div>
-      </section>
     </article>
   `;
 }
