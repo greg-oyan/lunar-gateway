@@ -278,40 +278,6 @@ function buildConsequenceCue(risk) {
   return description;
 }
 
-function buildSeverityReason(risk) {
-  const impact = Number(risk.impact);
-  const likelihood = Number(risk.likelihood);
-  const band = priorityBand(Number(risk.priority));
-  const status = normalizeText(risk.status);
-
-  const impactReason =
-    impact >= 5
-      ? 'the consequence reaches a mission-defining outcome'
-      : impact >= 4
-        ? 'the consequence can force major program replanning'
-        : 'the consequence is still material to mission execution';
-
-  const likelihoodReason =
-    likelihood >= 4
-      ? 'the current posture says it is relatively likely to surface'
-      : likelihood >= 3
-        ? 'the exposure remains credible under current assumptions'
-        : 'the trigger is less likely, but the downside is still significant';
-
-  const statusReason = status.startsWith('open')
-    ? 'It remains open rather than retired.'
-    : 'It remains on the watch list and still needs active attention.';
-
-  const bandReason =
-    band === 'critical'
-      ? 'This sits at the top of the current risk stack.'
-      : band === 'high'
-        ? 'This is still one of the risks shaping program decisions.'
-        : 'This is not the highest item, but it still carries visible consequence.';
-
-  return `${bandReason} It matters because ${impactReason}, and ${likelihoodReason}. ${statusReason}`;
-}
-
 function renderRiskScale(label, value, band) {
   const numericValue = Math.max(0, Math.min(5, Number(value) || 0));
   const cells = Array.from({ length: 5 }, (_, index) => {
@@ -583,6 +549,24 @@ function renderDetailEmptyState(eyebrow, title, body) {
   `;
 }
 
+function likelihoodMeaning(score) {
+  const s = Number(score);
+  if (s >= 5) return 'Very likely — expected to occur based on current evidence or trends';
+  if (s >= 4) return 'Likely — probable under current program posture';
+  if (s >= 3) return 'Possible — credible exposure under current assumptions';
+  if (s >= 2) return 'Unlikely — requires specific conditions to materialize';
+  return 'Remote — theoretically possible but low probability';
+}
+
+function impactMeaning(score) {
+  const s = Number(score);
+  if (s >= 5) return 'Mission-defining — compromises the core mission objective';
+  if (s >= 4) return 'Major — forces significant replanning of cost, schedule, or scope';
+  if (s >= 3) return 'Material — meaningful effect on program execution';
+  if (s >= 2) return 'Moderate — absorbable with management attention';
+  return 'Minor — limited consequence to program outcome';
+}
+
 function renderRiskDetail(risk) {
   const band = priorityBand(Number(risk.priority));
   const categoryTone = categoryBand(risk.category);
@@ -591,7 +575,7 @@ function renderRiskDetail(risk) {
   const score = Number(risk.priority) || 0;
   const summary =
     `${priorityLabel(risk.priority)} ${risk.category.toLowerCase()} risk owned by ${risk.owner}. The current posture is ${statusLabel(risk.status).toLowerCase()}.`;
-  const severityReason = buildSeverityReason(risk);
+  const plainLanguage = risk.plainLanguage || risk.description;
   const driverTags = (Array.isArray(risk.tags) ? risk.tags : []).slice(0, 4);
   const riskContext = state.crosswalk?.risk?.byId?.[risk.id];
 
@@ -615,8 +599,11 @@ function renderRiskDetail(risk) {
       </header>
 
       <section class="risk-story">
-        <p class="risk-story__lede"><strong>Why this matters:</strong> ${escapeHtml(severityReason)}</p>
-        <p class="risk-story__what">${escapeHtml(risk.description)}</p>
+        <p class="risk-story__lede"><strong>In plain terms:</strong> ${escapeHtml(plainLanguage)}</p>
+        ${risk.plainLanguage ? `<details class="risk-story__technical">
+          <summary><span>Technical framing</span><span class="risk-disclosure__chevron" aria-hidden="true">▾</span></summary>
+          <p class="risk-story__what">${escapeHtml(risk.description)}</p>
+        </details>` : ''}
       </section>
 
       <section class="risk-status-line">
@@ -644,11 +631,22 @@ function renderRiskDetail(risk) {
           <span>How this score is computed</span>
           <span class="risk-disclosure__chevron" aria-hidden="true">▾</span>
         </summary>
-        <p class="risk-disclosure__body">
-          Priority score = Likelihood (${escapeHtml(likelihood)}) × Impact (${escapeHtml(impact)}) = ${escapeHtml(score)}.
-          Score ${escapeHtml(score)} falls in the <strong>${priorityLabel(score)}</strong> band (${escapeHtml(bandRangeText(band))}).
-          ${escapeHtml(bandThresholdText())}
-        </p>
+        <div class="risk-disclosure__body">
+          <div class="score-breakdown">
+            <div class="score-breakdown__row">
+              <span class="score-breakdown__label">Likelihood (${escapeHtml(likelihood)}/5)</span>
+              <span class="score-breakdown__meaning">${escapeHtml(likelihoodMeaning(likelihood))}</span>
+            </div>
+            <div class="score-breakdown__row">
+              <span class="score-breakdown__label">Impact (${escapeHtml(impact)}/5)</span>
+              <span class="score-breakdown__meaning">${escapeHtml(impactMeaning(impact))}</span>
+            </div>
+            <div class="score-breakdown__result">
+              <span>${escapeHtml(likelihood)} × ${escapeHtml(impact)} = <strong>${escapeHtml(score)}</strong></span>
+              <span class="score-breakdown__band"><strong>${priorityLabel(score)}</strong> band (${escapeHtml(bandRangeText(band))})</span>
+            </div>
+          </div>
+        </div>
       </details>
 
       <details class="cross-app-collapsed">

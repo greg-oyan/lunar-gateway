@@ -14,7 +14,8 @@
       "mitigation": "Run a NASA-led mass-reduction tiger team, keep the Maxar and Northrop design-to-mass working group active, evaluate hardware deferral options, and maintain a Falcon Heavy expendable trade with a quantified HALO mass-reduction target.",
       "status": "Open - Active Mitigation",
       "description": "PPE and HALO combined launch mass may exceed Falcon Heavy performance for the NRHO mission profile, leaving little or no usable margin for the first flight stack.",
-      "tags": ["mass", "launch stack", "Falcon Heavy", "HALO", "PPE"]
+      "tags": ["mass", "launch stack", "Falcon Heavy", "HALO", "PPE"],
+      "plainLanguage": "The first two Gateway modules (PPE and HALO) launch stacked together on one Falcon Heavy rocket. Their combined mass might exceed what Falcon Heavy can lift to lunar orbit. If that happens, NASA needs a more expensive rocket or a last-minute redesign — both cost billions and years."
     },
     {
       "id": "R-002",
@@ -27,7 +28,8 @@
       "mitigation": "Advance thruster augmentation trades, constrain docking cases operationally, update PPE requirements for revised HLS mass values, and keep the Gateway-HLS interface control revision active.",
       "status": "Open - Under Analysis",
       "description": "When a very large docked HLS configuration is assumed, PPE may not have enough control authority to maintain safe attitude and structural loads.",
-      "tags": ["controllability", "HLS", "interface", "docked operations", "PPE"]
+      "tags": ["controllability", "HLS", "interface", "docked operations", "PPE"],
+      "plainLanguage": "When a fully-loaded SpaceX Starship docks with Gateway, the combined mass is enormous. PPE, the small propulsion module, might not have enough thruster authority to keep Gateway safely oriented under those loads. Picture a tugboat trying to hold a supertanker steady."
     },
     {
       "id": "R-003",
@@ -40,7 +42,8 @@
       "mitigation": "Maintain contractor financial health reviews, track cost-at-completion, contain non-recurring engineering growth, and preserve bilateral modification authority where government-caused scope growth appears.",
       "status": "Open - Monitoring",
       "description": "HALO has already absorbed significant contractor charges, and further growth or rework could create additional program cost pressure and downstream execution strain.",
-      "tags": ["HALO", "contract", "cost growth", "Northrop Grumman", "oversight"]
+      "tags": ["HALO", "contract", "cost growth", "Northrop Grumman", "oversight"],
+      "plainLanguage": "HALO, the habitat module, is under a fixed-price contract that's already cost the contractor more than expected. If costs keep growing, it creates financial pressure and could force scope cuts, delays, or contract renegotiation."
     },
     {
       "id": "R-004",
@@ -53,7 +56,8 @@
       "mitigation": "Hold launch-date protections in the contract, identify backup windows, coordinate closely with SpaceX manifest planning, and keep launch readiness and mission integration milestones tightly synchronized.",
       "status": "Open",
       "description": "NRHO launch opportunities are geometry-constrained, and a Falcon Heavy manifest slip could push Gateway into a later window with follow-on Artemis schedule consequences.",
-      "tags": ["launch window", "manifest", "Falcon Heavy", "schedule", "NRHO"]
+      "tags": ["launch window", "manifest", "Falcon Heavy", "schedule", "NRHO"],
+      "plainLanguage": "Gateway has to launch during specific orbital geometry windows. If Falcon Heavy's manifest slips for another mission, Gateway waits months for the next valid window — and every downstream Artemis mission slides with it."
     },
     {
       "id": "R-006",
@@ -66,7 +70,8 @@
       "mitigation": "Use integrated schedule interface management with ESA, review key I-HAB milestones monthly, preserve a backup commercial launch contingency, and track SLS Block 1B readiness in parallel.",
       "status": "Open",
       "description": "If I-HAB slips at design, manufacturing, or integration milestones, Artemis IV may be delayed or forced to fly without the planned habitation expansion element.",
-      "tags": ["I-HAB", "Artemis IV", "ESA", "co-manifest", "schedule"]
+      "tags": ["I-HAB", "Artemis IV", "ESA", "co-manifest", "schedule"],
+      "plainLanguage": "I-HAB is a European habitation module that rides to Gateway on the same rocket as Artemis IV. If I-HAB isn't ready in time, either Artemis IV delays or it launches without the habitation expansion — cutting crew capacity on the first extended stay."
     },
     {
       "id": "R-007",
@@ -79,7 +84,8 @@
       "mitigation": "Preserve crewed-mission scheduling priority, continue relay-asset trades, coordinate supplemental tracking support, and rely on later ESPRIT communications augmentation where practical.",
       "status": "Open",
       "description": "Deep Space Network time is shared across missions, so Gateway crewed operations could face communications shortfalls during peak network demand periods.",
-      "tags": ["DSN", "communications", "crewed operations", "ESPRIT", "network capacity"]
+      "tags": ["DSN", "communications", "crewed operations", "ESPRIT", "network capacity"],
+      "plainLanguage": "The Deep Space Network (DSN) is NASA's antenna array that talks to everything beyond Earth orbit. It's already overbooked. When crew is on Gateway, they'll be fighting for antenna time with Mars rovers, Voyager, and every other deep-space mission."
     },
     {
       "id": "R-010",
@@ -92,7 +98,8 @@
       "mitigation": "Use implementing arrangements to reinforce commitment, sustain agency-head diplomatic engagement, and preserve modular operating options if partner-delivered scope arrives later than planned.",
       "status": "Open",
       "description": "Budget pressure on ESA, JAXA, or CSA could delay or reduce partner-provided hardware that the full Gateway capability story depends on.",
-      "tags": ["international partners", "budget", "ESA", "JAXA", "CSA"]
+      "tags": ["international partners", "budget", "ESA", "JAXA", "CSA"],
+      "plainLanguage": "Gateway depends on hardware from ESA (Europe), JAXA (Japan), and CSA (Canada). If any of those space agencies get budget cut domestically, the hardware they owe either arrives late or arrives reduced in capability."
     },
     {
       "id": "R-012",
@@ -105,7 +112,8 @@
       "mitigation": "Keep NASA technical mentor support active, increase milestone oversight, rely on Thales Alenia technical experience, and preserve fallback EVA concepts if the airlock arrives late.",
       "status": "Open",
       "description": "Because the UAE airlock effort depends on a first-time human-spaceflight hardware provider, maturity and workforce challenges could delay EVA capability on Gateway.",
-      "tags": ["UAE airlock", "MBRSC", "EVA", "schedule", "partner development"]
+      "tags": ["UAE airlock", "MBRSC", "EVA", "schedule", "partner development"],
+      "plainLanguage": "The UAE is building Gateway's airlock — their first human-spaceflight hardware ever. Aerospace hardware is brutal on first-time providers; workforce and supply-chain issues routinely delay these programs by years, which would delay all extravehicular activity (spacewalks) on Gateway."
     },
     {
       "id": "R-013",
@@ -118,7 +126,8 @@
       "mitigation": "Keep Gateway and SLS integration planning coupled, preserve Artemis IV schedule margin, and maintain commercial-delivery fallback assessments for I-HAB.",
       "status": "Open",
       "description": "Gateway assembly assumptions depend on SLS Block 1B availability for Artemis IV, so late upper-stage readiness would force a different assembly sequence.",
-      "tags": ["SLS Block 1B", "Artemis IV", "I-HAB", "launch vehicle", "assembly sequence"]
+      "tags": ["SLS Block 1B", "Artemis IV", "I-HAB", "launch vehicle", "assembly sequence"],
+      "plainLanguage": "Artemis IV uses SLS Block 1B, an upgraded version of NASA's heavy-lift rocket. The upgrade is behind schedule. If Block 1B isn't ready, Gateway assembly has to be re-sequenced — possibly launching modules on different rockets in a different order, which cascades schedule and cost impacts."
     },
     {
       "id": "R-015",
@@ -131,7 +140,8 @@
       "mitigation": "Maintain storm-shelter provisions, add later habitat shielding, constrain crew duration by solar conditions, and preserve personal dosimetry plus ongoing human-health research support.",
       "status": "Open",
       "description": "Cis-lunar operations expose crews to more radiation than ISS, creating real limits on visit duration, cumulative exposure, and mission flexibility.",
-      "tags": ["radiation", "crew safety", "HALO", "I-HAB", "human health"]
+      "tags": ["radiation", "crew safety", "HALO", "I-HAB", "human health"],
+      "plainLanguage": "Astronauts on Gateway absorb more cosmic radiation than on the ISS because Gateway is beyond Earth's magnetic field. This creates hard limits on how long crew can stay, how many missions they can fly over a career, and how flexible mission planning can be."
     },
     {
       "id": "R-016",
@@ -144,7 +154,8 @@
       "mitigation": "Advance refueling-system maturation, run subscale transfer demonstrations, borrow servicing-program heritage where possible, and preserve an operational option to defer refueling if the demonstration path slips.",
       "status": "Open",
       "description": "ESPRIT refueling depends on on-orbit xenon transfer capability that is not yet proven at the full operational scale required for Gateway.",
-      "tags": ["xenon", "refueling", "ESPRIT", "TRL", "technology maturation"]
+      "tags": ["xenon", "refueling", "ESPRIT", "TRL", "technology maturation"],
+      "plainLanguage": "ESPRIT, Gateway's refueling module, needs to transfer xenon gas between spacecraft in orbit. This has never been done at Gateway's scale. If the technology isn't ready when ESPRIT arrives, Gateway's fuel-top-up capability is stuck."
     },
     {
       "id": "R-018",
@@ -157,7 +168,8 @@
       "mitigation": "Harden autonomous fault management for blackout cases, constrain crew operations through flight rules, and treat later communications augmentation as a risk reducer rather than a default assumption.",
       "status": "Open",
       "description": "NRHO geometry introduces periodic communications blackouts, so crew safety depends on Gateway autonomy and careful mission planning during those windows.",
-      "tags": ["NRHO", "communications", "blackout", "autonomy", "crew safety"]
+      "tags": ["NRHO", "communications", "blackout", "autonomy", "crew safety"],
+      "plainLanguage": "Gateway's orbit takes it behind the Moon periodically, creating communication blackouts with Earth. During blackouts, the crew is on their own — Gateway's autonomous systems have to handle anything that goes wrong without ground support."
     },
     {
       "id": "R-020",
@@ -170,7 +182,8 @@
       "mitigation": "Use test-readiness reviews, pre-test prediction work, explicit schedule margin, rapid anomaly-resolution teams, and spare-hardware planning for long-lead items.",
       "status": "Open",
       "description": "Unexpected acoustic or thermal-vacuum failures could trigger redesign or hardware replacement at a point where schedule recovery margin is already thin.",
-      "tags": ["test", "thermal vacuum", "acoustic", "rework", "schedule margin"]
+      "tags": ["test", "thermal vacuum", "acoustic", "rework", "schedule margin"],
+      "plainLanguage": "Before launch, Gateway hardware goes through punishing acoustic and thermal-vacuum tests to simulate launch and space conditions. If anything fails those tests, the fix is either rework (months of delay) or replacement (much longer). There's no easy recovery at that stage."
     },
     {
       "id": "R-021",
@@ -183,7 +196,8 @@
       "mitigation": "Lean on international agreements, broad congressional constituency, modular architecture, and the visible Artemis role of Gateway to preserve continuity through policy shifts.",
       "status": "Open - Strategic Risk",
       "description": "Administration change, appropriations pressure, or larger Artemis restructuring could significantly reshape or cancel Gateway despite current commitments.",
-      "tags": ["strategic", "appropriations", "policy", "program continuity", "Artemis"]
+      "tags": ["strategic", "appropriations", "policy", "program continuity", "Artemis"],
+      "plainLanguage": "The Gateway program itself could be cancelled or radically restructured — by an incoming administration, by Congressional appropriations fights, or by a larger Artemis program shakeup. This is a political risk, not a technical one, but it's the risk that could end everything regardless of engineering progress."
     },
     {
       "id": "R-022",
@@ -196,7 +210,8 @@
       "mitigation": "Preserve safe-haven requirements, retain Orion extended-duration provisions, keep emergency procedures current, and design HALO for sustained autonomous support during contingency cases.",
       "status": "Open",
       "description": "If a crewed contingency requires rapid departure and Orion capability is degraded, Gateway must safely sustain the crew while rescue options remain limited.",
-      "tags": ["crew rescue", "safe haven", "Orion", "HALO", "contingency"]
+      "tags": ["crew rescue", "safe haven", "Orion", "HALO", "contingency"],
+      "plainLanguage": "If something goes wrong while crew is on Gateway and they need to evacuate quickly, Gateway must keep them alive until rescue arrives. But Gateway is not Earth orbit — a rescue mission takes days to weeks to reach lunar space, not hours."
     }
   ]
 }

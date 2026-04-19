@@ -659,48 +659,33 @@ function buildSupportList(items, builder) {
 function buildMilestoneSupport(milestone) {
   const phase = state.phasesById.get(milestone.phaseId);
   const driver = getMilestoneDrivers(milestone)[0] || getPhaseDrivers(milestone.phaseId)[0] || null;
-  const traceability = state.data.traceability;
-  const artifacts = state.reveal.artifacts ? traceability.artifacts : traceability.artifacts.slice(0, 3);
-  const sources = state.reveal.sources ? traceability.sources : traceability.sources.slice(0, 4);
 
-  const evidenceBody = `
-    ${milestone.task ? `
-      <div class="evidence-block">
-        <p class="evidence-block__label">Task behind this date</p>
-        <p class="evidence-block__value"><span class="mono">${escapeHtml(milestone.task.id)}</span> · ${escapeHtml(milestone.task.name)} · WBS ${escapeHtml(milestone.task.wbsId)}</p>
-      </div>
-    ` : ''}
-    ${milestone.linkedRisks.length ? `
-      <div class="evidence-block">
-        <p class="evidence-block__label">Risks tied to this milestone</p>
-        <ul class="evidence-list">
-          ${milestone.linkedRisks.map(r => `<li><span class="mono">${escapeHtml(r.id)}</span> · ${escapeHtml(r.title)} <span class="evidence-list__meta">(score ${escapeHtml(r.score)}, ${escapeHtml(r.status)})</span></li>`).join('')}
-        </ul>
-      </div>
-    ` : ''}
-    ${milestone.linkedDocuments.length ? `
-      <div class="evidence-block">
-        <p class="evidence-block__label">Supporting documents</p>
-        <ul class="evidence-list">
-          ${milestone.linkedDocuments.map(d => `<li><span class="mono">${escapeHtml(d.id)}</span> · ${escapeHtml(d.name)}</li>`).join('')}
-        </ul>
-      </div>
-    ` : ''}
-    ${milestone.linkedSources.length ? `
-      <div class="evidence-block">
-        <p class="evidence-block__label">Source references</p>
-        <ul class="evidence-list">
-          ${milestone.linkedSources.map(s => `<li><span class="mono">${escapeHtml(s.id)}</span> · ${escapeHtml(s.title)}${s.href ? ` <a class="evidence-list__link" href="${escapeHtml(s.href)}" target="_blank" rel="noreferrer">open</a>` : ''}</li>`).join('')}
-        </ul>
-      </div>
-    ` : ''}
-    ${driver ? `
-      <div class="evidence-block">
-        <p class="evidence-block__label">What drives this date</p>
-        <p class="evidence-block__value">${escapeHtml(driver.name)} <span class="evidence-list__meta">(${escapeHtml(driver.windowLabel)})</span></p>
-      </div>
-    ` : ''}
-  `;
+  // Plain-language explanation with fallback to whyItMatters
+  const explanation = milestone.plainLanguage || milestone.whyItMatters;
+  const hasPlainLanguage = Boolean(milestone.plainLanguage);
+
+  // Build inline evidence strings (not ID dumps)
+  const taskStory = milestone.task
+    ? `Anchored to task <strong>${escapeHtml(milestone.task.name)}</strong> (${escapeHtml(milestone.task.windowLabel)}, WBS ${escapeHtml(milestone.task.wbsId)}).`
+    : '';
+
+  const riskStory = milestone.linkedRisks.length
+    ? `<strong>${escapeHtml(milestone.linkedRisks.length)} risk${milestone.linkedRisks.length === 1 ? '' : 's'}</strong> tied to this date: ${milestone.linkedRisks.slice(0, 3).map(r => escapeHtml(r.title)).join('; ')}${milestone.linkedRisks.length > 3 ? '; …' : ''}.`
+    : '';
+
+  const docStory = milestone.linkedDocuments.length
+    ? `Backed by <strong>${escapeHtml(milestone.linkedDocuments.length)} document${milestone.linkedDocuments.length === 1 ? '' : 's'}</strong>: ${milestone.linkedDocuments.slice(0, 3).map(d => escapeHtml(d.name)).join('; ')}${milestone.linkedDocuments.length > 3 ? '; …' : ''}.`
+    : '';
+
+  const sourceStory = milestone.linkedSources.length
+    ? `Public source${milestone.linkedSources.length === 1 ? '' : 's'}: ${milestone.linkedSources.slice(0, 2).map(s => s.href ? `<a class="evidence-inline-link" href="${escapeHtml(s.href)}" target="_blank" rel="noreferrer">${escapeHtml(s.title)}</a>` : escapeHtml(s.title)).join('; ')}.`
+    : '';
+
+  const driverStory = driver
+    ? `Pacing driver: <strong>${escapeHtml(driver.name)}</strong> (${escapeHtml(driver.windowLabel)}).`
+    : '';
+
+  const evidenceParts = [taskStory, driverStory, riskStory, docStory, sourceStory].filter(Boolean);
 
   return `
     <div class="milestone-slim">
@@ -708,21 +693,28 @@ function buildMilestoneSupport(milestone) {
         <div>
           <p class="milestone-slim__eyebrow">${escapeHtml(phase?.name || milestone.phaseName)} · ${escapeHtml(milestone.dateLabel)}</p>
           <h3 class="milestone-slim__title">${escapeHtml(milestone.shortName)}</h3>
+          <p class="milestone-slim__fullname">${escapeHtml(milestone.name)}</p>
         </div>
         <span class="milestone-slim__pill milestone-slim__pill--${escapeHtml((milestone.confidenceLabel || 'unknown').toLowerCase().replace(/\s+/g, '-').replace(/-confidence$/, ''))}">${escapeHtml(milestone.confidenceLabel)}</span>
       </header>
 
-      <p class="milestone-slim__why"><strong>Why this date matters:</strong> ${escapeHtml(milestone.whyItMatters)}</p>
+      <p class="milestone-slim__why"><strong>What this is:</strong> ${escapeHtml(explanation)}</p>
 
-      <details class="milestone-slim__evidence">
-        <summary>
-          <span>Evidence behind this date</span>
-          <span class="milestone-slim__chevron" aria-hidden="true">▾</span>
-        </summary>
-        <div class="milestone-slim__evidence-body">
-          ${evidenceBody || '<p class="evidence-empty">No additional evidence is linked to this milestone in the current dataset.</p>'}
+      ${evidenceParts.length ? `
+        <div class="milestone-slim__evidence-inline">
+          <p class="milestone-slim__evidence-label">Evidence behind this date</p>
+          <ul class="evidence-inline-list">
+            ${evidenceParts.map(part => `<li>${part}</li>`).join('')}
+          </ul>
         </div>
-      </details>
+      ` : ''}
+
+      ${hasPlainLanguage ? `
+        <details class="milestone-slim__technical">
+          <summary><span>Technical framing</span><span class="milestone-slim__chevron" aria-hidden="true">▾</span></summary>
+          <p>${escapeHtml(milestone.whyItMatters)}</p>
+        </details>
+      ` : ''}
 
       ${renderContextActions()}
     </div>

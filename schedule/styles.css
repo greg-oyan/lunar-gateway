@@ -2019,3 +2019,93 @@ details > summary::-webkit-details-marker {
   color: rgba(255, 255, 255, 0.55);
   font-style: italic;
 }
+
+/* Milestone full name (detailed contract / review title) */
+.milestone-slim__fullname {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+/* Inline evidence block — plain-English sentences, not ID dump */
+.milestone-slim__evidence-inline {
+  padding: 16px 18px;
+  border-radius: 10px;
+  background: rgba(8, 16, 24, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.milestone-slim__evidence-label {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(103, 180, 255, 0.85);
+}
+
+.evidence-inline-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.evidence-inline-list li {
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.evidence-inline-list li strong {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
+}
+
+.evidence-inline-link {
+  color: rgba(103, 180, 255, 0.95);
+  text-decoration: underline;
+}
+
+/* Technical framing disclosure (fallback whyItMatters boilerplate) */
+.milestone-slim__technical {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(8, 16, 24, 0.4);
+}
+
+.milestone-slim__technical[open] {
+  border-color: rgba(103, 180, 255, 0.3);
+  background: rgba(8, 16, 24, 0.75);
+}
+
+.milestone-slim__technical > summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.65);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.milestone-slim__technical > summary::-webkit-details-marker {
+  display: none;
+}
+
+.milestone-slim__technical > p {
+  margin: 0;
+  padding: 0 14px 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.72);
+  font-style: italic;
+}

@@ -131,7 +131,8 @@
           "publisher": "NASA JSC",
           "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
         }
-      ]
+      ],
+      "plainLanguage": "This is the day NASA officially started the Gateway program internally — before any contracts, before any hardware. The clock started here."
     },
     {
       "id": "M-003",
@@ -208,7 +209,8 @@
           "publisher": "Propulsion",
           "href": null
         }
-      ]
+      ],
+      "plainLanguage": "NASA awarded Maxar Technologies a $375M fixed-price contract to build PPE, the power and propulsion module. This is where Gateway stopped being a planning document and became real money with real deliverables."
     },
     {
       "id": "M-002",
@@ -273,7 +275,8 @@
           "publisher": "NASA JSC",
           "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
         }
-      ]
+      ],
+      "plainLanguage": "System Requirements Review — NASA formally checked that the Gateway requirements made engineering sense. Passing this review is what lets design work on hardware actually begin."
     },
     {
       "id": "M-004",
@@ -338,7 +341,8 @@
           "publisher": "NASA JSC",
           "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
         }
-      ]
+      ],
+      "plainLanguage": "System Definition Review — NASA signed off on Gateway's overall architecture. This locks in how the pieces fit together and what each contractor is responsible for."
     },
     {
       "id": "M-005",
@@ -415,7 +419,8 @@
           "publisher": "NASA",
           "href": "https://www.nasa.gov/news-release/nasa-awards-northrop-grumman-artemis-contract-for-gateway-crew-cabin/"
         }
-      ]
+      ],
+      "plainLanguage": "Northrop Grumman got the contract to design and build HALO, the habitat module. Combined with the PPE award, NASA now has contracts covering both of the first two Gateway modules."
     },
     {
       "id": "M-006",
@@ -472,7 +477,8 @@
           "publisher": "NASA",
           "href": "https://www.nasa.gov/news-release/nasa-awards-contract-to-launch-initial-elements-for-lunar-outpost/"
         }
-      ]
+      ],
+      "plainLanguage": "NASA selected SpaceX's Falcon Heavy to launch PPE and HALO together. First time a non-NASA rocket is used to launch a major NASA human-spaceflight element."
     },
     {
       "id": "M-007",
@@ -980,7 +986,8 @@
           "publisher": "NASA JSC",
           "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
         }
-      ]
+      ],
+      "plainLanguage": "The HALO pressure vessel — the sealed metal shell astronauts will live inside — arrives at Northrop Grumman's facility in Arizona for outfitting. This is the physical handoff from one contractor to the next."
     },
     {
       "id": "M-013",
@@ -1057,7 +1064,8 @@
           "publisher": "NASA JSC",
           "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
         }
-      ]
+      ],
+      "plainLanguage": "PPE (the propulsion module) finishes fabrication at Maxar and is ready to be shipped to integration. From here it goes to join HALO for the combined flight stack."
     },
     {
       "id": "M-015",
@@ -1134,7 +1142,8 @@
           "publisher": "NASA JSC",
           "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
         }
-      ]
+      ],
+      "plainLanguage": "PPE arrives at Northrop Grumman for integration with HALO. The two separate modules are about to become one stacked spacecraft."
     },
     {
       "id": "M-016",
@@ -1276,7 +1285,8 @@
           "publisher": "NASA JSC",
           "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
         }
-      ]
+      ],
+      "plainLanguage": "PPE and HALO are physically joined into a single stack. Every electrical, mechanical, and fluid interface between the two modules has to work as one system from this day forward."
     },
     {
       "id": "M-018",
@@ -1346,7 +1356,8 @@
           "publisher": "NASA JSC",
           "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
         }
-      ]
+      ],
+      "plainLanguage": "The combined PPE-HALO stack is tested as one spacecraft for the first time — power, thermal, data, propulsion, all operating together. Last chance to find integration issues before environmental testing."
     },
     {
       "id": "M-019",
@@ -1410,7 +1421,8 @@
           "publisher": "NASA JSC",
           "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
         }
-      ]
+      ],
+      "plainLanguage": "PPE-HALO gets shaken and blasted with launch-intensity acoustic energy to confirm it can survive being launched. Any failure here means rework."
     },
     {
       "id": "M-020",
@@ -1474,7 +1486,8 @@
           "publisher": "NASA JSC",
           "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
         }
-      ]
+      ],
+      "plainLanguage": "PPE-HALO is put in a vacuum chamber and cycled through lunar-orbit temperature extremes. This proves the spacecraft will actually work in space, not just in a factory."
     },
     {
       "id": "M-021",
@@ -1614,7 +1627,8 @@
           "publisher": "NASA JSC",
           "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
         }
-      ]
+      ],
+      "plainLanguage": "NASA's final go/no-go review before PPE-HALO launches. Every technical and programmatic issue has to be closed out here."
     },
     {
       "id": "M-022",
@@ -1747,7 +1761,8 @@
           "publisher": "NASA JSC",
           "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
         }
-      ]
+      ],
+      "plainLanguage": "Gateway's first two modules launch on Falcon Heavy. After ten years of design and contracts, this is the moment Gateway physically exists in space."
     },
     {
       "id": "M-025",
@@ -1824,7 +1839,8 @@
           "publisher": "NASA JSC",
           "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
         }
-      ]
+      ],
+      "plainLanguage": "For 12 months, PPE flies alone using its electric propulsion system to prove the thruster technology works at full scale before crew operations begin."
     },
     {
       "id": "M-026",
@@ -1901,7 +1917,8 @@
           "publisher": "NASA JSC",
           "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
         }
-      ]
+      ],
+      "plainLanguage": "PPE-HALO reaches Near-Rectilinear Halo Orbit — the highly elliptical orbit around the Moon where Gateway actually operates. This is where Gateway arrives at its real destination."
     },
     {
       "id": "M-027",
@@ -1978,7 +1995,8 @@
           "publisher": "NASA JSC",
           "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
         }
-      ]
+      ],
+      "plainLanguage": "All of Gateway's systems are verified working on orbit. HALO is now cleared to receive crew for the first time."
     },
     {
       "id": "M-028",
@@ -2055,7 +2073,8 @@
           "publisher": "NASA JSC",
           "href": "../Contract_Cost_Schedule%20Documents/data/gateway_master_schedule.csv"
         }
-      ]
+      ],
+      "plainLanguage": "Final review before Artemis IV launches, carrying the first crew to visit Gateway. Everything about Gateway readiness has to be signed off."
     },
     {
       "id": "M-029",
