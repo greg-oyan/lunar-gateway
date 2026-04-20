@@ -9,7 +9,6 @@
 } from '../suite-assets/suite-context.js';
 
 const CROSSWALK_URL = '../suite-assets/data/gateway-crosswalk.json';
-const WBS_DATA_URL = '../wbs/data/gateway-wbs.json';
 
 const state = {
   data: null,
@@ -23,10 +22,10 @@ const state = {
   categoriesById: new Map(),
   yearsById: new Map(),
   methodsById: new Map(),
+  yearSeriesMode: 'anchor',
+  moduleViewMode: 'anchor',
   crosswalk: null,
   sharedContext: {},
-  wbsNodesById: null,
-  wbsNodesPromise: null,
 };
 
 const elements = {
@@ -201,26 +200,6 @@ function getTopLevelWbsId(wbsId) {
   return `${parts[0]}.${parts[1]}`;
 }
 
-async function ensureWbsNodesById() {
-  if (state.wbsNodesById) return state.wbsNodesById;
-  if (!state.wbsNodesPromise) {
-    state.wbsNodesPromise = fetch(WBS_DATA_URL)
-      .then((response) => (response.ok ? response.json() : null))
-      .then((data) => {
-        state.wbsNodesById = new Map((data?.nodes || []).map((node) => [node.id, node]));
-        return state.wbsNodesById;
-      })
-      .catch(() => {
-        state.wbsNodesById = new Map();
-        return state.wbsNodesById;
-      })
-      .finally(() => {
-        state.wbsNodesPromise = null;
-      });
-  }
-  return state.wbsNodesPromise;
-}
-
 function getCategoryYearValue(category, fy) {
   return category.yearly.find((entry) => entry.fy === fy)?.totalUsd || 0;
 }
@@ -300,11 +279,19 @@ function buildAnchors(data) {
 }
 
 function getDefaultAnchorId() {
-  return state.anchorsById.has('halo') ? 'halo' : state.anchors[0]?.id || null;
+  return null;
+}
+
+function getAnchorById(anchorId) {
+  return anchorId ? state.anchorsById.get(anchorId) || null : null;
+}
+
+function isVisualAnchor(anchor) {
+  return Boolean(anchor?.visualId);
 }
 
 function getCurrentAnchor() {
-  return state.anchorsById.get(state.selectedAnchorId) || state.anchors[0] || null;
+  return getAnchorById(state.selectedAnchorId);
 }
 
 function getCurrentYear() {
@@ -319,14 +306,17 @@ function getAnchorContext(anchorId = state.selectedAnchorId) {
   return state.crosswalk?.cost?.byAnchorId?.[anchorId] || null;
 }
 
-function resolveAnchorIdFromContext(sharedContext, explicitAnchorId = '') {
-  if (explicitAnchorId && state.anchorsById.has(explicitAnchorId)) {
-    return explicitAnchorId;
-  }
+function resolveWbsContextAnchorId(wbsId = '') {
+  const wbsContext = wbsId ? state.crosswalk?.wbs?.byId?.[wbsId] : null;
+  return wbsContext?.cost.anchorId && state.anchorsById.has(wbsContext.cost.anchorId)
+    ? wbsContext.cost.anchorId
+    : '';
+}
 
-  const wbsContext = sharedContext.wbs ? state.crosswalk?.wbs?.byId?.[sharedContext.wbs] : null;
-  if (wbsContext?.cost.anchorId && state.anchorsById.has(wbsContext.cost.anchorId)) {
-    return wbsContext.cost.anchorId;
+function resolveSharedContextAnchorId(sharedContext = {}) {
+  const wbsAnchorId = resolveWbsContextAnchorId(sharedContext.wbs);
+  if (wbsAnchorId) {
+    return wbsAnchorId;
   }
 
   const milestoneContext = sharedContext.milestone
@@ -356,6 +346,24 @@ function resolveAnchorIdFromContext(sharedContext, explicitAnchorId = '') {
     : null;
   if (moduleContext?.costAnchorId && state.anchorsById.has(moduleContext.costAnchorId)) {
     return moduleContext.costAnchorId;
+  }
+
+  return '';
+}
+
+function resolveAnchorIdFromContext(sharedContext, explicitAnchorId = '') {
+  const wbsAnchorId = resolveWbsContextAnchorId(sharedContext.wbs);
+  if (wbsAnchorId) {
+    return wbsAnchorId;
+  }
+
+  if (explicitAnchorId && state.anchorsById.has(explicitAnchorId)) {
+    return explicitAnchorId;
+  }
+
+  const contextAnchorId = resolveSharedContextAnchorId({ ...sharedContext, wbs: '' });
+  if (contextAnchorId) {
+    return contextAnchorId;
   }
 
   return getDefaultAnchorId();
@@ -392,6 +400,20 @@ function getDefaultMethodId() {
     : state.data?.methodology?.cards?.[0]?.id || null;
 }
 
+function hasResettableState() {
+  const defaultAnchorId = getDefaultAnchorId();
+  const defaultYearId = getDefaultYearId();
+  const defaultMethodId = getDefaultMethodId();
+
+  return (
+    hasSharedContext(state.sharedContext) ||
+    Boolean(state.selectedAnchorId && state.selectedAnchorId !== defaultAnchorId) ||
+    Boolean(state.selectedYearId && state.selectedYearId !== defaultYearId) ||
+    Boolean(state.selectedMethodId && state.selectedMethodId !== defaultMethodId) ||
+    state.yearSeriesMode !== 'anchor'
+  );
+}
+
 function syncUrlState() {
   const defaultAnchorId = getDefaultAnchorId();
   const defaultYearId = getDefaultYearId();
@@ -419,14 +441,15 @@ function syncUrlState() {
 function buildCurrentContext(anchor = getCurrentAnchor()) {
   const anchorContext = getAnchorContext(anchor?.id);
   const sharedContext = state.sharedContext || {};
-  const selectedWbsNode = sharedContext.wbs ? state.wbsNodesById?.get(sharedContext.wbs) : null;
-  const selectedWbsCostM = Number.isFinite(Number(selectedWbsNode?.related?.cost?.totalBaseCost))
-    ? Number(selectedWbsNode.related.cost.totalBaseCost)
+  const selectedWbsCategory = sharedContext.wbs ? state.categoriesById.get(sharedContext.wbs) : null;
+  const selectedWbsYearly = Array.isArray(selectedWbsCategory?.yearly) ? selectedWbsCategory.yearly : [];
+  const selectedWbsCostUsd = Number.isFinite(Number(selectedWbsCategory?.baseUsd))
+    ? Number(selectedWbsCategory.baseUsd)
     : null;
-  const selectedWbsLabel = selectedWbsCostM !== null ? selectedWbsNode?.name || selectedWbsNode?.id || '' : '';
-  const selectedWbsCostDisplay = selectedWbsCostM !== null ? formatMillionCurrency(selectedWbsCostM) : '';
+  const selectedWbsLabel = selectedWbsCategory?.name || selectedWbsCategory?.id || '';
+  const selectedWbsCostDisplay = selectedWbsCostUsd !== null ? formatCompactCurrency(selectedWbsCostUsd) : '';
   const candidateWbsId =
-    sharedContext.wbs && anchor?.groupIds?.includes(getTopLevelWbsId(sharedContext.wbs))
+    sharedContext.wbs && (!anchor || anchor?.groupIds?.includes(getTopLevelWbsId(sharedContext.wbs)))
       ? sharedContext.wbs
       : anchorContext?.primaryWbsId || anchor?.groupIds?.[0] || '';
   const wbsContext = candidateWbsId ? state.crosswalk?.wbs?.byId?.[candidateWbsId] : null;
@@ -450,7 +473,7 @@ function buildCurrentContext(anchor = getCurrentAnchor()) {
     ? `Cost area for WBS ${candidateWbsId}`
     : `Cost area: ${anchor?.label || 'Gateway'}`;
   const body = selectedWbsCostDisplay && selectedWbsLabel
-    ? `${selectedWbsLabel} (${selectedWbsCostDisplay}) is shown here within the broader ${anchor?.label || 'Gateway'} roll-up.`
+    ? `${selectedWbsLabel} (${selectedWbsCostDisplay}) stays in focus here. ${anchor?.label || 'Gateway'} remains the broader cost area.`
     : candidateWbsId && wbsContext
       ? `${anchor?.label || 'This cost area'} is the best-matching roll-up for WBS ${candidateWbsId}.`
       : anchorContext?.reason || 'The best-matching cost roll-up for what you were viewing.';
@@ -460,9 +483,10 @@ function buildCurrentContext(anchor = getCurrentAnchor()) {
     anchorContext,
     wbsId: candidateWbsId,
     wbsName: candidateWbsId ? state.categoriesById.get(candidateWbsId)?.name || '' : '',
+    selectedWbsCategory,
     selectedWbsLabel,
-    selectedWbsCostM,
     selectedWbsCostDisplay,
+    selectedWbsYearly,
     milestoneId,
     riskId,
     moduleKey,
@@ -484,18 +508,43 @@ function buildSuiteAction(route, label, params) {
 
 function renderContextBanner(anchor = getCurrentAnchor()) {
   const context = buildCurrentContext(anchor);
-  if (!context.anchor || !hasSharedContext(state.sharedContext)) return '';
+  const contextIsActive = hasSharedContext(state.sharedContext);
+  if (!hasResettableState()) return '';
+
+  const defaultAnchorId = getDefaultAnchorId();
+  const defaultYearId = getDefaultYearId();
+  const defaultMethodId = getDefaultMethodId();
+  const methodLabel = state.methodsById.get(state.selectedMethodId)?.title || state.selectedMethodId || '';
+  const costAreaLabel = context.anchor?.label || 'Lunar Gateway project';
+  const title = contextIsActive
+    ? context.title
+    : state.view === 'year'
+      ? 'Filtered yearly view'
+      : state.view === 'method'
+        ? 'Filtered defensibility view'
+        : 'Focused cost area';
+  const body = contextIsActive
+    ? context.body
+    : state.view === 'year'
+      ? 'Reset view to return to full-project Gateway spend over time.'
+      : state.view === 'method'
+        ? 'Reset view to return to the default Lunar Gateway defensibility view.'
+        : 'Reset view to return to the default Lunar Gateway cost map.';
 
   return `
     <section class="suite-context-banner">
-      <h3 class="suite-context-banner__title">${escapeHtml(context.title)}</h3>
-      <p class="suite-context-banner__body">${escapeHtml(context.body)}</p>
+      <h3 class="suite-context-banner__title">${escapeHtml(title)}</h3>
+      <p class="suite-context-banner__body">${escapeHtml(body)}</p>
       <div class="suite-context-banner__chips">
-        <span class="suite-context-chip"><strong>Cost area</strong>${escapeHtml(context.anchor.label)}</span>
-        ${context.wbsId ? `<span class="suite-context-chip"><strong>WBS</strong>${escapeHtml(context.wbsId)}</span>` : ''}
-        ${context.selectedWbsCostDisplay ? `<span class="suite-context-chip"><strong>Selected cost</strong>${escapeHtml(context.selectedWbsCostDisplay)}</span>` : ''}
-        ${context.milestoneId ? `<span class="suite-context-chip"><strong>Schedule</strong>${escapeHtml(context.milestoneId)}</span>` : ''}
-        ${context.riskId ? `<span class="suite-context-chip"><strong>Risk</strong>${escapeHtml(context.riskId)}</span>` : ''}
+        <span class="suite-context-chip"><strong>Cost area</strong>${escapeHtml(costAreaLabel)}</span>
+        ${contextIsActive && context.wbsId ? `<span class="suite-context-chip"><strong>WBS</strong>${escapeHtml(context.wbsId)}</span>` : ''}
+        ${contextIsActive && context.selectedWbsCostDisplay ? `<span class="suite-context-chip"><strong>Selected cost</strong>${escapeHtml(context.selectedWbsCostDisplay)}</span>` : ''}
+        ${!contextIsActive && state.selectedAnchorId !== defaultAnchorId && context.anchor ? `<span class="suite-context-chip"><strong>Focus</strong>${escapeHtml(context.anchor.label)}</span>` : ''}
+        ${state.view === 'year' && state.selectedYearId && state.selectedYearId !== defaultYearId ? `<span class="suite-context-chip"><strong>Year</strong>${escapeHtml(state.selectedYearId)}</span>` : ''}
+        ${state.view === 'method' && methodLabel && state.selectedMethodId !== defaultMethodId ? `<span class="suite-context-chip"><strong>Method</strong>${escapeHtml(methodLabel)}</span>` : ''}
+        ${state.yearSeriesMode !== 'anchor' ? `<span class="suite-context-chip"><strong>Year mode</strong>${escapeHtml(state.yearSeriesMode === 'selected-wbs' ? 'Selected WBS' : 'Broader anchor')}</span>` : ''}
+        ${contextIsActive && context.milestoneId ? `<span class="suite-context-chip"><strong>Schedule</strong>${escapeHtml(context.milestoneId)}</span>` : ''}
+        ${contextIsActive && context.riskId ? `<span class="suite-context-chip"><strong>Risk</strong>${escapeHtml(context.riskId)}</span>` : ''}
       </div>
       <div class="suite-context-actions">
         <button class="suite-context-action" type="button" data-action="reset-view">Reset view</button>
@@ -570,11 +619,14 @@ function normalizeSelections() {
 }
 
 function resetView() {
+  const currentView = viewDefinitions[state.view] ? state.view : 'module';
   state.sharedContext = {};
-  state.view = 'module';
   state.selectedAnchorId = getDefaultAnchorId();
   state.selectedYearId = getDefaultYearId();
   state.selectedMethodId = getDefaultMethodId();
+  state.yearSeriesMode = 'anchor';
+  state.moduleViewMode = 'project';
+  state.view = currentView;
   normalizeSelections();
   render();
 }
@@ -588,12 +640,19 @@ function setView(view) {
 function setAnchor(anchorId) {
   if (!state.anchorsById.has(anchorId)) return;
   state.selectedAnchorId = anchorId;
+  state.moduleViewMode = 'anchor';
   render();
 }
 
 function setYear(fy) {
   if (!state.yearsById.has(fy)) return;
   state.selectedYearId = fy;
+  render();
+}
+
+function setYearSeriesMode(mode) {
+  if (!['selected-wbs', 'anchor'].includes(mode)) return;
+  state.yearSeriesMode = mode;
   render();
 }
 
@@ -776,8 +835,8 @@ function buildDefensibilityDisclosure(note, title = 'How this was estimated') {
   `;
 }
 
-function renderHotspot(anchor) {
-  const isActive = anchor.id === state.selectedAnchorId;
+function renderHotspot(anchor, activeAnchorId = state.selectedAnchorId) {
+  const isActive = anchor.id === activeAnchorId;
   return `
     <button
       class="module-hit module-hit--${escapeHtml(anchor.visualId)}${isActive ? ' is-active' : ''}"
@@ -792,8 +851,8 @@ function renderHotspot(anchor) {
   `;
 }
 
-function renderProgramNode(anchor) {
-  const isActive = anchor.id === state.selectedAnchorId;
+function renderProgramNode(anchor, activeAnchorId = state.selectedAnchorId) {
+  const isActive = anchor.id === activeAnchorId;
   return `
     <button
       class="program-node program-node--${escapeHtml(anchor.tone)}${isActive ? ' is-active' : ''}"
@@ -807,9 +866,10 @@ function renderProgramNode(anchor) {
   `;
 }
 
-function renderGatewayScene(selectedAnchor) {
+function renderGatewayScene(selectedAnchor, activeAnchorId = state.selectedAnchorId) {
   const physicalAnchors = state.anchors.filter((anchor) => anchor.visualId);
   const adjacentAnchors = state.anchors.filter((anchor) => !anchor.visualId);
+  const selectedVisualId = selectedAnchor?.visualId || '';
 
   return `
     <div class="gateway-map">
@@ -845,74 +905,74 @@ function renderGatewayScene(selectedAnchor) {
             <rect x="764" y="330" width="18" height="54" rx="9" class="gateway-svg__truss" />
           </g>
 
-          <g class="gateway-svg__element gateway-svg__element--ppe${selectedAnchor.visualId === 'ppe' ? ' is-active' : ''}">
+          <g class="gateway-svg__element gateway-svg__element--ppe${selectedVisualId === 'ppe' ? ' is-active' : ''}">
             <rect x="264" y="314" width="118" height="84" rx="36" class="gateway-svg__body" />
             <circle cx="276" cy="356" r="16" class="gateway-svg__cap" />
             <circle cx="370" cy="356" r="16" class="gateway-svg__cap" />
           </g>
 
-          <g class="gateway-svg__element gateway-svg__element--halo${selectedAnchor.visualId === 'halo' ? ' is-active' : ''}">
+          <g class="gateway-svg__element gateway-svg__element--halo${selectedVisualId === 'halo' ? ' is-active' : ''}">
             <rect x="382" y="286" width="210" height="140" rx="52" class="gateway-svg__body" />
             <circle cx="398" cy="356" r="18" class="gateway-svg__cap" />
             <circle cx="576" cy="356" r="18" class="gateway-svg__cap" />
           </g>
 
-          <g class="gateway-svg__element gateway-svg__element--ihab${selectedAnchor.visualId === 'ihab' ? ' is-active' : ''}">
+          <g class="gateway-svg__element gateway-svg__element--ihab${selectedVisualId === 'ihab' ? ' is-active' : ''}">
             <rect x="602" y="288" width="208" height="136" rx="52" class="gateway-svg__body" />
             <circle cx="618" cy="356" r="18" class="gateway-svg__cap" />
             <circle cx="794" cy="356" r="18" class="gateway-svg__cap" />
           </g>
 
-          <g class="gateway-svg__element gateway-svg__element--esprit${selectedAnchor.visualId === 'esprit' ? ' is-active' : ''}">
+          <g class="gateway-svg__element gateway-svg__element--esprit${selectedVisualId === 'esprit' ? ' is-active' : ''}">
             <rect x="820" y="322" width="118" height="72" rx="30" class="gateway-svg__body" />
             <circle cx="834" cy="358" r="14" class="gateway-svg__cap" />
             <circle cx="924" cy="358" r="14" class="gateway-svg__cap" />
           </g>
 
-          <g class="gateway-svg__element gateway-svg__element--airlock${selectedAnchor.visualId === 'airlock' ? ' is-active' : ''}">
+          <g class="gateway-svg__element gateway-svg__element--airlock${selectedVisualId === 'airlock' ? ' is-active' : ''}">
             <circle cx="546" cy="520" r="46" class="gateway-svg__body gateway-svg__body--round" />
             <circle cx="546" cy="520" r="18" class="gateway-svg__cap" />
             <rect x="534" y="426" width="24" height="52" rx="12" class="gateway-svg__strut" />
           </g>
 
-          <g class="gateway-svg__element gateway-svg__element--arm${selectedAnchor.visualId === 'arm' ? ' is-active' : ''}">
+          <g class="gateway-svg__element gateway-svg__element--arm${selectedVisualId === 'arm' ? ' is-active' : ''}">
             <path d="M744 248L872 172L976 108" class="gateway-svg__arm" />
             <circle cx="744" cy="248" r="14" class="gateway-svg__joint" />
             <circle cx="872" cy="172" r="14" class="gateway-svg__joint" />
             <circle cx="976" cy="108" r="14" class="gateway-svg__joint" />
           </g>
 
-          <g class="gateway-svg__tag gateway-svg__tag--ppe${selectedAnchor.visualId === 'ppe' ? ' is-active' : ''}">
+          <g class="gateway-svg__tag gateway-svg__tag--ppe${selectedVisualId === 'ppe' ? ' is-active' : ''}">
             <line x1="322" y1="298" x2="322" y2="254" class="gateway-svg__tag-line" />
             <rect x="268" y="224" width="108" height="32" rx="16" class="gateway-svg__tag-box" />
             <text x="322" y="244" class="gateway-svg__tag-text">PPE</text>
           </g>
 
-          <g class="gateway-svg__tag gateway-svg__tag--halo${selectedAnchor.visualId === 'halo' ? ' is-active' : ''}">
+          <g class="gateway-svg__tag gateway-svg__tag--halo${selectedVisualId === 'halo' ? ' is-active' : ''}">
             <line x1="488" y1="270" x2="488" y2="226" class="gateway-svg__tag-line" />
             <rect x="424" y="194" width="128" height="32" rx="16" class="gateway-svg__tag-box" />
             <text x="488" y="214" class="gateway-svg__tag-text">HALO</text>
           </g>
 
-          <g class="gateway-svg__tag gateway-svg__tag--ihab${selectedAnchor.visualId === 'ihab' ? ' is-active' : ''}">
+          <g class="gateway-svg__tag gateway-svg__tag--ihab${selectedVisualId === 'ihab' ? ' is-active' : ''}">
             <line x1="706" y1="272" x2="706" y2="226" class="gateway-svg__tag-line" />
             <rect x="634" y="194" width="144" height="32" rx="16" class="gateway-svg__tag-box" />
             <text x="706" y="214" class="gateway-svg__tag-text">I-HAB</text>
           </g>
 
-          <g class="gateway-svg__tag gateway-svg__tag--esprit${selectedAnchor.visualId === 'esprit' ? ' is-active' : ''}">
+          <g class="gateway-svg__tag gateway-svg__tag--esprit${selectedVisualId === 'esprit' ? ' is-active' : ''}">
             <line x1="880" y1="318" x2="880" y2="280" class="gateway-svg__tag-line" />
             <rect x="812" y="248" width="136" height="32" rx="16" class="gateway-svg__tag-box" />
             <text x="880" y="268" class="gateway-svg__tag-text">ESPRIT</text>
           </g>
 
-          <g class="gateway-svg__tag gateway-svg__tag--arm${selectedAnchor.visualId === 'arm' ? ' is-active' : ''}">
+          <g class="gateway-svg__tag gateway-svg__tag--arm${selectedVisualId === 'arm' ? ' is-active' : ''}">
             <line x1="934" y1="104" x2="934" y2="68" class="gateway-svg__tag-line" />
             <rect x="854" y="36" width="160" height="32" rx="16" class="gateway-svg__tag-box" />
             <text x="934" y="56" class="gateway-svg__tag-text">Canadarm3</text>
           </g>
 
-          <g class="gateway-svg__tag gateway-svg__tag--airlock${selectedAnchor.visualId === 'airlock' ? ' is-active' : ''}">
+          <g class="gateway-svg__tag gateway-svg__tag--airlock${selectedVisualId === 'airlock' ? ' is-active' : ''}">
             <line x1="546" y1="566" x2="546" y2="604" class="gateway-svg__tag-line" />
             <rect x="476" y="604" width="140" height="32" rx="16" class="gateway-svg__tag-box" />
             <text x="546" y="624" class="gateway-svg__tag-text">Airlock</text>
@@ -921,17 +981,126 @@ function renderGatewayScene(selectedAnchor) {
       </div>
 
       <div class="gateway-map__hotspots">
-        ${physicalAnchors.map((anchor) => renderHotspot(anchor)).join('')}
+        ${physicalAnchors.map((anchor) => renderHotspot(anchor, activeAnchorId)).join('')}
       </div>
     </div>
 
     <div class="adjacent-program">
       <p class="adjacent-program__label">Adjacent program cost</p>
       <div class="adjacent-program__nodes">
-        ${adjacentAnchors.map((anchor) => renderProgramNode(anchor)).join('')}
+        ${adjacentAnchors.map((anchor) => renderProgramNode(anchor, activeAnchorId)).join('')}
       </div>
     </div>
   `;
+}
+
+function buildProjectOverviewContributors() {
+  return state.data.overview.majorDrivers.map((driver) => ({
+    id: driver.id,
+    name: driver.name,
+    value: driver.totalUsd,
+    note: driver.scopeLabel || driver.basisLabel,
+  }));
+}
+
+function renderProjectOverviewFocus(contextAnchor) {
+  const busiestYear = state.data.overview.busiestYear;
+  const summary = contextAnchor
+    ? `${contextAnchor.label} is broader than any single Gateway module, so the cost map stays at the project level until you pick a specific element.`
+    : hasSharedContext(state.sharedContext)
+      ? 'This handoff does not map to a single Gateway module, so the cost map stays at the project level until you pick a specific element.'
+      : 'No module is selected, so the cost map stays at the project level until you pick a specific element.';
+
+  return `
+    <aside class="focus-panel detail-panel">
+      <div>
+        <h3>Lunar Gateway project</h3>
+        <p class="focus-panel__summary">${escapeHtml(summary)}</p>
+      </div>
+
+      <div class="focus-panel__value mono">${formatCurrency(state.data.overview.totalCostUsd)}</div>
+
+      ${buildMetricStrip([
+        { label: 'Project scope', value: 'Full program view' },
+        {
+          label: 'Peak year',
+          value: busiestYear ? `${busiestYear.fy} - ${formatCompactCurrency(busiestYear.totalUsd)}` : 'Not stated',
+        },
+        { label: 'Mapped cost area', value: contextAnchor?.label || 'No single module' },
+        { label: 'Top drivers shown', value: String(Math.min(state.data.overview.majorDrivers.length, 4)) },
+      ])}
+
+      <section class="focus-statement">
+        <h4>Why it matters</h4>
+        <p>${escapeHtml(state.data.overview.includedSummary)}</p>
+      </section>
+
+      <details class="focus-disclosure">
+        <summary class="focus-disclosure__summary">
+          <span class="focus-disclosure__title">Main cost drivers</span>
+          <span class="focus-disclosure__chevron" aria-hidden="true">▾</span>
+        </summary>
+        <div class="focus-disclosure__body">
+          <div class="detail-list">
+            ${buildContributors(buildProjectOverviewContributors().slice(0, 4), 'No cost drivers.')}
+          </div>
+        </div>
+      </details>
+    </aside>
+  `;
+}
+
+function renderProjectOverviewSupport() {
+  const sourceIds = state.data.overview.majorDrivers.map((driver) => driver.id);
+
+  return `
+    <section class="module-support">
+      <div class="module-support__heading">
+        <div>
+          <h3>Evidence and sources for the project view</h3>
+        </div>
+      </div>
+
+      ${buildEvidenceDisclosure(
+        'Show evidence',
+        `
+          <div class="support-grid support-grid--wide">
+            <section class="support-block">
+              <h4>Major cost drivers</h4>
+              <div class="detail-list">
+                ${buildContributors(buildProjectOverviewContributors().slice(0, 4), 'No major drivers.')}
+              </div>
+            </section>
+          </div>
+        `,
+      )}
+
+      ${buildEvidenceDisclosure(
+        'Show source support',
+        `
+          <div class="support-source-list">
+            ${buildSourceCards(buildCategorySourceList(sourceIds))}
+          </div>
+        `,
+      )}
+
+      ${buildDefensibilityDisclosure(state.data.overview.judgmentSummary, 'How the project view was estimated')}
+    </section>
+  `;
+}
+
+function getModuleViewSelection() {
+  const selectedAnchor = getAnchorById(state.selectedAnchorId);
+  const contextAnchor = getAnchorById(resolveWbsContextAnchorId(state.sharedContext.wbs)) || selectedAnchor;
+  const showProjectOverview =
+    state.moduleViewMode === 'project' || !selectedAnchor;
+
+  return {
+    contextAnchor,
+    selectedAnchor: showProjectOverview ? null : selectedAnchor,
+    activeAnchorId: showProjectOverview ? '' : selectedAnchor?.id || '',
+    showProjectOverview,
+  };
 }
 
 function renderAnchorFocus(anchor) {
@@ -1054,11 +1223,14 @@ function renderAnchorSupport(anchor) {
 }
 
 function renderModuleView() {
-  const anchor = getCurrentAnchor();
+  const selection = getModuleViewSelection();
+  const contextAnchor = selection.contextAnchor || getCurrentAnchor();
+  const detailAnchor = selection.selectedAnchor || contextAnchor;
+  const bannerAnchor = selection.showProjectOverview ? contextAnchor : detailAnchor;
 
   return `
     <div class="module-story">
-      ${renderContextBanner(anchor)}
+      ${renderContextBanner(bannerAnchor)}
       <div class="module-story__primary">
         <section class="hero-map">
           <div class="hero-map__topline">
@@ -1070,30 +1242,34 @@ function renderModuleView() {
             </p>
           </div>
 
-          ${renderGatewayScene(anchor)}
+          ${renderGatewayScene(selection.selectedAnchor, selection.activeAnchorId)}
         </section>
 
-        ${renderAnchorFocus(anchor)}
+        ${selection.showProjectOverview ? renderProjectOverviewFocus(contextAnchor) : renderAnchorFocus(detailAnchor)}
       </div>
 
-      ${renderAnchorSupport(anchor)}
+      ${selection.showProjectOverview ? renderProjectOverviewSupport() : renderAnchorSupport(detailAnchor)}
     </div>
   `;
 }
 
-function renderYearChart() {
-  const maxYearTotal = Math.max(...state.data.years.map((year) => year.totalUsd), 1);
+function renderYearChartRows(years, segmented = false) {
+  const maxYearTotal = Math.max(...years.map((year) => year.totalUsd), 1);
 
   return `
     <div class="year-chart">
-      ${state.data.years
+      ${years
         .map((year) => {
           const totalWidth = `${Math.max((year.totalUsd / maxYearTotal) * 100, 7)}%`;
           const total = year.totalUsd || 1;
-          const laborWidth = `${(year.laborUsd / total) * 100}%`;
-          const materialWidth = `${(year.materialUsd / total) * 100}%`;
-          const integrationWidth = `${(year.integrationUsd / total) * 100}%`;
-          const reserveWidth = `${(year.reserveUsd / total) * 100}%`;
+          const segments = segmented
+            ? `
+                <span class="year-row__segment year-row__segment--labor" style="width:${(year.laborUsd / total) * 100}%"></span>
+                <span class="year-row__segment year-row__segment--material" style="width:${(year.materialUsd / total) * 100}%"></span>
+                <span class="year-row__segment year-row__segment--integration" style="width:${(year.integrationUsd / total) * 100}%"></span>
+                <span class="year-row__segment year-row__segment--reserve" style="width:${(year.reserveUsd / total) * 100}%"></span>
+              `
+            : '<span class="year-row__segment year-row__segment--labor" style="width:100%"></span>';
 
           return `
             <button
@@ -1109,10 +1285,7 @@ function renderYearChart() {
 
               <div class="year-row__track">
                 <span class="year-row__fill" style="width:${totalWidth}">
-                  <span class="year-row__segment year-row__segment--labor" style="width:${laborWidth}"></span>
-                  <span class="year-row__segment year-row__segment--material" style="width:${materialWidth}"></span>
-                  <span class="year-row__segment year-row__segment--integration" style="width:${integrationWidth}"></span>
-                  <span class="year-row__segment year-row__segment--reserve" style="width:${reserveWidth}"></span>
+                  ${segments}
                 </span>
               </div>
 
@@ -1123,6 +1296,10 @@ function renderYearChart() {
         .join('')}
     </div>
   `;
+}
+
+function renderYearChart() {
+  return renderYearChartRows(state.data.years, true);
 }
 
 function buildCategorySourceList(categoryIds) {
@@ -1249,21 +1426,264 @@ function renderYearSupport(year) {
   `;
 }
 
+function hasSelectedWbsYearContext(context) {
+  return Boolean(context.selectedWbsCategory && context.selectedWbsYearly.length);
+}
+
+function getCurrentSeriesYear(years) {
+  return years.find((entry) => entry.fy === state.selectedYearId) || years.find((entry) => entry.totalUsd > 0) || years[0] || null;
+}
+
+function buildCategoryYearDrivers(category, fy) {
+  const childDrivers = (category.children || [])
+    .map((child) => {
+      const childCategory = state.categoriesById.get(child.id);
+      return {
+        id: child.id,
+        name: child.name,
+        value: getCategoryYearValue(childCategory || { yearly: [] }, fy),
+        note: child.scopeLabel || child.basisLabel,
+      };
+    })
+    .filter((entry) => entry.value > 0)
+    .sort((left, right) => right.value - left.value)
+    .slice(0, 4);
+
+  if (childDrivers.length) {
+    return childDrivers;
+  }
+
+  return (category.representativeDetails || [])
+    .filter((detail) => detail.fy === fy)
+    .sort((left, right) => right.amountUsd - left.amountUsd)
+    .slice(0, 4)
+    .map((detail) => ({
+      id: detail.id,
+      name: detail.name,
+      value: detail.amountUsd,
+      note: detail.traceabilityNote || '',
+    }));
+}
+
+function buildAnchorYearDrivers(anchor, fy) {
+  return anchor.categories
+    .map((category) => ({
+      id: category.id,
+      name: category.name,
+      value: getCategoryYearValue(category, fy),
+      note: category.scopeLabel,
+    }))
+    .filter((entry) => entry.value > 0)
+    .sort((left, right) => right.value - left.value)
+    .slice(0, 4);
+}
+
+function buildContextualYearSeries(anchor, context) {
+  const showSelectedWbs = hasSelectedWbsYearContext(context) && state.yearSeriesMode === 'selected-wbs';
+
+  if (showSelectedWbs) {
+    const category = context.selectedWbsCategory;
+    const years = context.selectedWbsYearly;
+    const currentYear = getCurrentSeriesYear(years);
+    const drivers = currentYear ? buildCategoryYearDrivers(category, currentYear.fy) : [];
+    const categorySourceIds = drivers.map((entry) => entry.id).filter((id) => state.categoriesById.has(id));
+
+    return {
+      mode: 'selected-wbs',
+      title: 'Selected WBS item over time',
+      heading: `${category.name} (${category.id})`,
+      note: `${category.name} stays in focus here. Use Broader anchor to step back to ${anchor.label}.`,
+      years,
+      currentYear,
+      drivers,
+      metrics: [
+        { label: 'Shown year', value: currentYear?.fy || 'Not stated' },
+        { label: 'Selected WBS total', value: context.selectedWbsCostDisplay || 'Not stated' },
+        {
+          label: 'Peak year',
+          value: category.topYear ? `${category.topYear.fy} - ${formatCompactCurrency(category.topYear.totalUsd)}` : 'Not stated',
+        },
+        { label: 'Broader area', value: anchor.label },
+      ],
+      summary: currentYear
+        ? `${category.name} shows ${formatCurrency(currentYear.totalUsd)} in ${currentYear.fy}.`
+        : category.meaning || '',
+      statement: `This year view is pinned to the selected WBS item itself. ${anchor.label} remains available as broader context.`,
+      breakdownTitle: currentYear ? `What drives ${category.id} in ${currentYear.fy}` : `What drives ${category.id}`,
+      evidenceHeading: `Evidence and sources for ${category.name}`,
+      evidenceCopy: category.meaning || category.includedNote || state.data.overview.directSummary,
+      sources: categorySourceIds.length ? buildCategorySourceList(categorySourceIds) : category.linkedSources,
+      defensibilityNote: category.judgmentNote || state.data.overview.judgmentSummary,
+    };
+  }
+
+  const years = anchor.yearly;
+  const currentYear = getCurrentSeriesYear(years);
+  const drivers = currentYear ? buildAnchorYearDrivers(anchor, currentYear.fy) : [];
+
+  return {
+    mode: 'anchor',
+    title: 'Broader anchor over time',
+    heading: anchor.label,
+    note: context.wbsId
+      ? `Showing the broader ${anchor.label} area that contains WBS ${context.wbsId}.`
+      : `Showing the broader ${anchor.label} cost area over time.`,
+    years,
+    currentYear,
+    drivers,
+    metrics: [
+      { label: 'Shown year', value: currentYear?.fy || 'Not stated' },
+      { label: 'Anchor total', value: formatCompactCurrency(anchor.totalUsd) },
+      {
+        label: 'Peak year',
+        value: anchor.topYear ? `${anchor.topYear.fy} - ${formatCompactCurrency(anchor.topYear.totalUsd)}` : 'Not stated',
+      },
+      { label: 'Selected WBS', value: context.wbsId || 'Not pinned' },
+    ],
+    summary: currentYear ? `${anchor.label} shows ${formatCurrency(currentYear.totalUsd)} in ${currentYear.fy}.` : anchor.primaryNote,
+    statement: context.selectedWbsLabel
+      ? `${context.selectedWbsLabel} remains preserved in the banner above while this view steps back to the broader ${anchor.label} context.`
+      : `This view steps back to the broader ${anchor.label} context.`,
+    breakdownTitle: currentYear ? `What drives ${anchor.label} in ${currentYear.fy}` : `What drives ${anchor.label}`,
+    evidenceHeading: `Evidence and sources for ${anchor.label}`,
+    evidenceCopy: anchor.primaryNote || anchor.judgmentNote || state.data.overview.directSummary,
+    sources: drivers.length ? buildCategorySourceList(drivers.map((entry) => entry.id)) : anchor.linkedSources,
+    defensibilityNote: anchor.judgmentNote || state.data.overview.judgmentSummary,
+  };
+}
+
+function renderContextualYearFocus(series) {
+  return `
+    <aside class="focus-panel detail-panel">
+      <div>
+        <h3>${escapeHtml(series.heading)}</h3>
+        <p class="focus-panel__summary">${escapeHtml(series.summary)}</p>
+      </div>
+
+      <div class="focus-panel__value mono">${formatCurrency(series.currentYear?.totalUsd || 0)}</div>
+
+      ${buildMetricStrip(series.metrics)}
+
+      <section class="focus-statement">
+        <h4>Why this view matters</h4>
+        <p>${escapeHtml(series.statement)}</p>
+      </section>
+
+      <details class="focus-disclosure">
+        <summary class="focus-disclosure__summary">
+          <span class="focus-disclosure__title">${escapeHtml(series.breakdownTitle)}</span>
+          <span class="focus-disclosure__chevron" aria-hidden="true">▾</span>
+        </summary>
+        <div class="focus-disclosure__body">
+          <div class="detail-list">
+            ${buildContributors(series.drivers, 'No additional cost drivers are surfaced for this year.')}
+          </div>
+        </div>
+      </details>
+    </aside>
+  `;
+}
+
+function renderContextualYearSupport(series) {
+  return `
+    <section class="module-support">
+      <div class="module-support__heading">
+        <div>
+          <h3>${escapeHtml(series.evidenceHeading)}</h3>
+        </div>
+      </div>
+
+      ${buildEvidenceDisclosure(
+        'Show evidence',
+        `
+          <div class="support-grid support-grid--wide">
+            <section class="support-block">
+              <h4>Current focus</h4>
+              <p class="support-copy">${escapeHtml(series.evidenceCopy)}</p>
+            </section>
+          </div>
+        `,
+      )}
+
+      ${buildEvidenceDisclosure(
+        'Show source support',
+        `
+          <div class="support-source-list">
+            ${buildSourceCards(series.sources)}
+          </div>
+        `,
+      )}
+
+      ${buildDefensibilityDisclosure(series.defensibilityNote, 'How this profile was estimated')}
+    </section>
+  `;
+}
+
+function renderContextualYearView(anchor, context) {
+  const series = buildContextualYearSeries(anchor, context);
+
+  return `
+    <div class="year-story">
+      ${renderContextBanner(anchor)}
+      <div class="year-story__primary">
+        <section class="year-panel">
+          <div class="year-panel__topline">
+            <div>
+              <h3>${escapeHtml(series.title)}</h3>
+            </div>
+            <div class="view-switcher__main" aria-label="Year series focus">
+              <button
+                class="view-switcher__button${series.mode === 'selected-wbs' ? ' is-active' : ''}"
+                type="button"
+                data-year-series-mode="selected-wbs"
+                aria-pressed="${String(series.mode === 'selected-wbs')}"
+              >
+                Selected WBS
+              </button>
+              <button
+                class="view-switcher__button${series.mode === 'anchor' ? ' is-active' : ''}"
+                type="button"
+                data-year-series-mode="anchor"
+                aria-pressed="${String(series.mode === 'anchor')}"
+              >
+                Broader anchor
+              </button>
+            </div>
+          </div>
+
+          <p class="year-panel__note">${escapeHtml(series.note)}</p>
+
+          ${renderYearChartRows(series.years)}
+        </section>
+
+        ${renderContextualYearFocus(series)}
+      </div>
+
+      ${renderContextualYearSupport(series)}
+    </div>
+  `;
+}
+
 function renderYearView() {
+  const anchor = getCurrentAnchor();
+  const context = buildCurrentContext(anchor);
+
+  if (hasSelectedWbsYearContext(context)) {
+    return renderContextualYearView(anchor, context);
+  }
+
   const year = getCurrentYear();
 
   return `
     <div class="year-story">
-      ${renderContextBanner(getCurrentAnchor())}
+      ${renderContextBanner(anchor)}
       <div class="year-story__primary">
         <section class="year-panel">
           <div class="year-panel__topline">
             <div>
               <h3>How annual spend moves over time</h3>
             </div>
-            <p class="year-panel__note">
-              Click a year for detail.
-            </p>
+            <p class="year-panel__note">Click a year for detail.</p>
           </div>
 
           <div class="year-legend">
@@ -1445,6 +1865,12 @@ function handleClick(event) {
     return;
   }
 
+  const yearSeriesButton = event.target.closest('[data-year-series-mode]');
+  if (yearSeriesButton) {
+    setYearSeriesMode(yearSeriesButton.dataset.yearSeriesMode);
+    return;
+  }
+
   const yearButton = event.target.closest('[data-year]');
   if (yearButton) {
     setYear(yearButton.dataset.year);
@@ -1472,16 +1898,24 @@ async function loadDataset() {
     state.data = data;
     state.crosswalk = crosswalk;
     state.sharedContext = readSharedContext();
-    if (state.sharedContext.wbs) {
-      await ensureWbsNodesById();
-    }
     state.categoriesById = new Map(data.categories.map((category) => [category.id, category]));
     state.yearsById = new Map(data.years.map((year) => [year.fy, year]));
     state.methodsById = new Map(data.methodology.cards.map((card) => [card.id, card]));
     state.anchors = buildAnchors(data);
     state.anchorsById = new Map(state.anchors.map((anchor) => [anchor.id, anchor]));
+    state.yearSeriesMode =
+      state.sharedContext.wbs && state.categoriesById.get(state.sharedContext.wbs)?.yearly?.length
+        ? 'selected-wbs'
+        : 'anchor';
     state.view = ['module', 'year', 'method'].includes(urlParams.get('view')) ? urlParams.get('view') : 'module';
+    const contextAnchorId = resolveWbsContextAnchorId(state.sharedContext.wbs);
     state.selectedAnchorId = resolveAnchorIdFromContext(state.sharedContext, urlParams.get('anchor') || '');
+    state.moduleViewMode =
+      state.sharedContext.wbs && (!contextAnchorId || !isVisualAnchor(getAnchorById(contextAnchorId)))
+        ? 'project'
+        : state.selectedAnchorId
+          ? 'anchor'
+          : 'project';
     state.selectedYearId = urlParams.get('year') || data.defaultSelection?.defaultYear || null;
     state.selectedMethodId = urlParams.get('method') || null;
     normalizeSelections();
