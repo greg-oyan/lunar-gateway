@@ -428,6 +428,94 @@ export async function buildDataset() {
     node.childIds.sort(compareWbsId);
   });
 
+  const descendantIdsByNode = new Map();
+  const getDescendantIds = (nodeId) => {
+    if (descendantIdsByNode.has(nodeId)) {
+      return descendantIdsByNode.get(nodeId);
+    }
+
+    const node = nodesById.get(nodeId);
+    const descendantIds = [];
+
+    for (const childId of node?.childIds || []) {
+      descendantIds.push(childId, ...getDescendantIds(childId));
+    }
+
+    descendantIdsByNode.set(nodeId, descendantIds);
+    return descendantIds;
+  };
+
+  const leafIdsByNode = new Map();
+  const getLeafIds = (nodeId) => {
+    if (leafIdsByNode.has(nodeId)) {
+      return leafIdsByNode.get(nodeId);
+    }
+
+    const node = nodesById.get(nodeId);
+    const leafIds =
+      node?.childIds.length > 0 ? node.childIds.flatMap((childId) => getLeafIds(childId)) : nodeId ? [nodeId] : [];
+
+    leafIdsByNode.set(nodeId, leafIds);
+    return leafIds;
+  };
+
+  const directBaseCostByNodeId = costRows.reduce((map, entry) => {
+    map.set(entry.wbsId, (map.get(entry.wbsId) || 0) + entry.baseCost);
+    return map;
+  }, new Map());
+  const directPhasingRowsByNodeId = phasingRows.reduce((map, entry) => {
+    const rows = map.get(entry.wbsId) || [];
+    rows.push(entry);
+    map.set(entry.wbsId, rows);
+    return map;
+  }, new Map());
+  const rootNodeId = wbsRows.find((row) => !row.parentId)?.id || wbsRows[0]?.id || '';
+  const effectivePhasingRowsByNode = new Map();
+  const getEffectivePhasingRows = (nodeId) => {
+    if (effectivePhasingRowsByNode.has(nodeId)) {
+      return effectivePhasingRowsByNode.get(nodeId);
+    }
+
+    const node = nodesById.get(nodeId);
+    const directRows = directPhasingRowsByNodeId.get(nodeId) || [];
+
+    if (!node?.childIds.length) {
+      effectivePhasingRowsByNode.set(nodeId, directRows);
+      return directRows;
+    }
+
+    const childRows = node.childIds.flatMap((childId) => getEffectivePhasingRows(childId));
+    if (childRows.length) {
+      effectivePhasingRowsByNode.set(nodeId, childRows);
+      return childRows;
+    }
+
+    const leafIds = getLeafIds(nodeId);
+    const totalLeafBaseCost = leafIds.reduce((sum, leafId) => sum + (directBaseCostByNodeId.get(leafId) || 0), 0);
+    const distributedRows = totalLeafBaseCost
+      ? directRows.flatMap((entry) =>
+          leafIds
+            .map((leafId) => {
+              const share = (directBaseCostByNodeId.get(leafId) || 0) / totalLeafBaseCost;
+              if (!share) return null;
+              return {
+                ...entry,
+                wbsId: leafId,
+                laborCost: entry.laborCost * share,
+                materialCost: entry.materialCost * share,
+                integrationCost: entry.integrationCost * share,
+                totalCost: entry.totalCost * share,
+              };
+            })
+            .filter(Boolean),
+        )
+      : [];
+
+    effectivePhasingRowsByNode.set(nodeId, distributedRows);
+    return distributedRows;
+  };
+  const effectivePhasingRows = rootNodeId ? getEffectivePhasingRows(rootNodeId) : [];
+
   const scheduleById = new Map(scheduleRows.map((row) => [row.id, row]));
 
   const nodes = wbsRows.map((row) => {
@@ -440,9 +528,15 @@ export async function buildDataset() {
       currentParentId = nodesById.get(currentParentId).parentId;
     }
 
-    const descendants = wbsRows.filter((entry) => sameOrDescendant(entry.id, node.id) && entry.id !== node.id);
+    const descendantIds = getDescendantIds(node.id);
+    const descendantIdSet = new Set(descendantIds);
+    const descendants = descendantIds.map((descendantId) => nodesById.get(descendantId)).filter(Boolean);
+    const matchesCostRollup =
+      node.childIds.length === 0
+        ? (entryId) => entryId === node.id
+        : (entryId) => descendantIdSet.has(entryId) && nodesById.get(entryId)?.childIds.length === 0;
     const relatedCosts = costRows
-      .filter((entry) => sameOrDescendant(entry.wbsId, node.id))
+      .filter((entry) => matchesCostRollup(entry.wbsId))
       .sort((left, right) => right.baseCost - left.baseCost || compareWbsId(left.wbsId, right.wbsId));
     const relatedRisks = riskRows
       .filter((entry) => sameOrDescendant(entry.wbsId, node.id))
@@ -465,7 +559,7 @@ export async function buildDataset() {
         .sort((left, right) => left.term.localeCompare(right.term)),
       'term',
     );
-    const relatedPhasing = summarizePhasing(phasingRows.filter((entry) => sameOrDescendant(entry.wbsId, node.id)));
+    const relatedPhasing = summarizePhasing(effectivePhasingRows.filter((entry) => matchesCostRollup(entry.wbsId)));
     const relatedPricing = pricingRows
       .filter((entry) => sameOrDescendant(entry.wbsId, node.id))
       .sort((left, right) => right.totalPrice - left.totalPrice || left.description.localeCompare(right.description));
