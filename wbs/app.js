@@ -1,11 +1,13 @@
 import {
   applySuiteNav,
+  buildScopePillHtml,
   buildSuiteHref,
   getSharedContextEntries,
   hasSharedContext,
   loadSuiteCrosswalk,
   mergeQueryState,
   readSharedContext,
+  resolveScope,
 } from '../suite-assets/suite-context.js';
 
 const DATA_URL = './data/gateway-wbs.json';
@@ -225,7 +227,9 @@ function buildWbsNavContext(node = state.nodesById.get(state.selectedId)) {
   const context = getNodeContext(node?.id);
   const params = {
     from: 'wbs',
-    wbs: node?.id || '',
+    // The root is the unscoped program view; only non-root selections travel
+    // as a suite-wide scope.
+    wbs: getScope()?.id || '',
     module: context?.simulation.moduleKeys?.[0] || '',
     milestone: context?.schedule.primaryMilestoneId || '',
     phase: context?.schedule.phaseId || '',
@@ -240,17 +244,21 @@ function syncSuiteNavigation() {
   applySuiteNav(buildWbsNavContext(), { currentRoute: 'wbs' });
 }
 
-function syncUrlState() {
+// In the WBS app the selection is the scope: any non-root selection writes
+// the `wbs` shared-context param so the scope rides along to every other app.
+function getScope() {
   const rootId = state.data?.rootId || '';
-  const contextIsActive = hasSharedContext(state.sharedContext);
+  if (!state.selectedId || state.selectedId === rootId) return null;
+  return resolveScope(state.crosswalk, state.selectedId);
+}
+
+function syncUrlState() {
+  const scope = getScope();
 
   mergeQueryState(
     {
       ...getSharedContextEntries(state.sharedContext),
-      wbs:
-        contextIsActive || (state.selectedId && state.selectedId !== rootId) || Boolean(state.activeDetail)
-          ? state.selectedId
-          : '',
+      wbs: scope ? scope.id : '',
       detail: state.activeDetail || '',
       mode: state.viewMode === 'structure' ? 'structure' : '',
     },
@@ -395,11 +403,19 @@ function ensureAncestorsExpanded(nodeId) {
 
 function buildIntroSignals() {
   const rootNode = getRootNode();
-  const signals = [
-    { label: 'Major parts', value: formatNumber(rootNode?.childIds.length || 0) },
-    { label: 'Full hierarchy', value: formatNumber(state.data?.overview.totalNodes || 0) },
-    { label: 'Detail lenses', value: '4 guided views' },
-  ];
+  const scope = getScope();
+  const scopedNode = scope ? state.nodesById.get(scope.id) : null;
+  const signals = scopedNode
+    ? [
+        { label: 'Scoped to', value: scopedNode.id },
+        { label: 'Direct branches', value: formatNumber(scopedNode.childIds.length) },
+        { label: 'Subtree elements', value: formatNumber(scopedNode.metrics.descendantCount + 1) },
+      ]
+    : [
+        { label: 'Major parts', value: formatNumber(rootNode?.childIds.length || 0) },
+        { label: 'Full hierarchy', value: formatNumber(state.data?.overview.totalNodes || 0) },
+        { label: 'Detail lenses', value: '4 guided views' },
+      ];
 
   appSignals.innerHTML = signals
     .map(
@@ -1142,6 +1158,7 @@ function renderOverview() {
   const lensCards = buildLensCards(node);
   overviewContent.innerHTML = `
     <section class="overview-shell">
+      ${buildScopePillHtml(getScope())}
       ${buildContextBanner(node)}
       <section class="overview-hero">
         <p class="overview-hero__code">${escapeHtml(node.id)}</p>
@@ -1356,6 +1373,7 @@ function renderNavigationMode() {
 }
 
 function render() {
+  buildIntroSignals();
   renderOverview();
   renderNavigationMode();
   renderFocus();
@@ -1440,6 +1458,13 @@ treeElement.addEventListener('click', (event) => {
 });
 
 overviewContent.addEventListener('click', (event) => {
+  const clearScopeControl = event.target.closest('[data-action="clear-scope"]');
+  if (clearScopeControl) {
+    delete state.sharedContext.wbs;
+    selectNode(state.data?.rootId || '');
+    return;
+  }
+
   const resetControl = event.target.closest('[data-action="reset-view"]');
   if (resetControl) {
     resetView();

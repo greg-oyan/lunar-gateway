@@ -1,11 +1,14 @@
 import {
   applySuiteNav,
+  buildScopeEmptyStateHtml,
+  buildScopePillHtml,
   buildSuiteHref,
   getSharedContextEntries,
   hasSharedContext,
   loadSuiteCrosswalk,
   mergeQueryState,
   readSharedContext,
+  resolveScope,
 } from '../suite-assets/suite-context.js';
 
 const DATA_URL = './data/gateway-schedule.json';
@@ -116,6 +119,29 @@ function buildMaps(data) {
   state.driversById = new Map(data.drivers.map((item) => [item.id, item]));
 }
 
+function getScope() {
+  return resolveScope(state.crosswalk, state.sharedContext?.wbs);
+}
+
+// The crosswalk is the join table between WBS and schedule: the scoped
+// milestone set is the union of schedule.milestoneIds over every crosswalk
+// WBS node inside the scope subtree. Returns null when no scope is active.
+function getScopedMilestoneIdSet() {
+  const scope = getScope();
+  if (!scope) return null;
+
+  const ids = new Set();
+  Object.values(state.crosswalk?.wbs?.byId || {}).forEach((node) => {
+    if (!scope.has(node.id)) return;
+    (node.schedule?.milestoneIds || []).forEach((id) => ids.add(id));
+  });
+  return ids;
+}
+
+function isMilestoneInScope(milestoneId, scopedIds = getScopedMilestoneIdSet()) {
+  return !scopedIds || scopedIds.has(milestoneId);
+}
+
 function getSelectedMilestone() {
   return state.selection?.type === 'milestone' ? state.milestonesById.get(state.selection.id) || null : null;
 }
@@ -194,7 +220,8 @@ function buildScheduleNavContext() {
   const context = getSelectedContext();
   return {
     from: 'schedule',
-    wbs: context.wbsId,
+    // An explicit scope wins; derived per-selection context fills the gap.
+    wbs: getScope()?.id || context.wbsId,
     module: context.moduleKey,
     milestone: context.milestone?.id || '',
     phase: context.phase?.id || '',
@@ -267,6 +294,7 @@ function resolveInitialSelection() {
 }
 
 function renderContextBanner() {
+  if (getScope()) return '';
   const context = getSelectedContext();
   if (!hasSharedContext(state.sharedContext) || (!context.milestone && !context.phase)) return '';
 
@@ -401,7 +429,10 @@ function getAnchorMilestones() {
 }
 
 function getTimelineMilestones() {
-  return getAnchorMilestones().sort((left, right) => dateValue(left.date) - dateValue(right.date));
+  const scopedIds = getScopedMilestoneIdSet();
+  return getAnchorMilestones()
+    .filter((milestone) => isMilestoneInScope(milestone.id, scopedIds))
+    .sort((left, right) => dateValue(left.date) - dateValue(right.date));
 }
 
 function getTimelineMetrics() {
@@ -417,12 +448,23 @@ function getTimelinePosition(date) {
 }
 
 function buildStageOverview() {
+  const scope = getScope();
+  const scopedIds = getScopedMilestoneIdSet();
+  const totalMilestones = state.data.milestones.length;
+  const inScopeCount = scopedIds
+    ? state.data.milestones.filter((milestone) => scopedIds.has(milestone.id)).length
+    : totalMilestones;
+  const milestonePill = scope
+    ? `${inScopeCount} of ${totalMilestones} milestones in scope`
+    : pluralize(totalMilestones, 'milestone');
+
   overviewContent.innerHTML = `
+    ${scope ? buildScopePillHtml(scope) : ''}
     ${renderContextBanner()}
     <div class="stage-strip" aria-label="Schedule overview key">
       <span class="stage-pill stage-pill--primary mono">${escapeHtml(state.data.overview.spanValue)}</span>
       <span class="stage-pill">${escapeHtml(pluralize(state.data.phases.length, 'major phase'))}</span>
-      <span class="stage-pill">${escapeHtml(pluralize(getAnchorMilestones().length, 'key milestone date', 'key milestone dates'))}</span>
+      <span class="stage-pill">${escapeHtml(milestonePill)}</span>
       <span class="stage-pill stage-pill--ghost">Click a band or marker to focus</span>
     </div>
   `;
@@ -561,10 +603,12 @@ function renderTimeline() {
         <span class="section-kicker">Key milestone dates</span>
           <strong>Click a marker to open the selected milestone view.</strong>
       </div>
-        <div class="schedule-milestones__plot">
+        ${getScope() && !getTimelineMilestones().length
+          ? buildScopeEmptyStateHtml(getScope(), 'milestones')
+          : `<div class="schedule-milestones__plot">
           <div class="schedule-milestones__spine"></div>
           ${buildScheduleMarkers()}
-        </div>
+        </div>`}
       </div>
     </div>
   `;
@@ -600,7 +644,11 @@ function buildLinkedMomentButtons(items) {
 
 function buildFocusPhaseView(phase) {
   const selectedMilestone = getSelectedMilestone();
-  const focusMilestones = phase.keyMilestoneIds.map((id) => state.milestonesById.get(id)).filter(Boolean);
+  const scopedIds = getScopedMilestoneIdSet();
+  const focusMilestones = phase.keyMilestoneIds
+    .map((id) => state.milestonesById.get(id))
+    .filter(Boolean)
+    .filter((milestone) => isMilestoneInScope(milestone.id, scopedIds));
 
   focusHeading.textContent = 'Selected phase';
   focusSubtitle.textContent = 'Choose a milestone to open the evidence behind that date.';
@@ -769,9 +817,31 @@ function renderApp() {
   syncSuiteNavigation();
 }
 
+function clearScope() {
+  if (!state.sharedContext?.wbs) return;
+  delete state.sharedContext.wbs;
+  renderApp();
+}
+
+function setScope(wbsId) {
+  if (!wbsId) return;
+  state.sharedContext.wbs = wbsId;
+  renderApp();
+}
+
 function handleAction(target) {
   const action = target.dataset.action;
   if (!action) return;
+
+  if (action === 'clear-scope') {
+    clearScope();
+    return;
+  }
+
+  if (action === 'scope-view-parent') {
+    setScope(target.dataset.parentId);
+    return;
+  }
 
   if (action === 'clear-focus') {
     state.selection = null;

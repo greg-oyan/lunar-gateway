@@ -1,11 +1,14 @@
 import {
   applySuiteNav,
+  buildScopeEmptyStateHtml,
+  buildScopePillHtml,
   buildSuiteHref,
   getSharedContextEntries,
   hasSharedContext,
   loadSuiteCrosswalk,
   mergeQueryState,
   readSharedContext,
+  resolveScope,
 } from '../suite-assets/suite-context.js';
 
 const DATA_URL = './data/risks.json';
@@ -144,20 +147,30 @@ function clampText(text, maxLength = 120) {
   return `${value.slice(0, maxLength - 1).trim()}...`;
 }
 
-function findNearestRiskBearingWbs(wbsId) {
-  let currentId = wbsId;
-  while (currentId) {
-    const context = state.crosswalk?.wbs?.byId?.[currentId];
-    if (!context) return null;
-    if (context.risks.ids.length) return context;
-    currentId = context.parentId || '';
-  }
-  return null;
+function getScope() {
+  return resolveScope(state.crosswalk, state.sharedContext?.wbs);
 }
 
 function deriveRiskContext() {
   const shared = state.sharedContext || {};
   if (!hasSharedContext(shared)) return null;
+
+  // An explicit WBS scope wins over every derived context. The scoped base
+  // list is exactly the crosswalk node's risk union - never silently widened.
+  if (shared.wbs) {
+    const scope = getScope();
+    const directContext = state.crosswalk?.wbs?.byId?.[shared.wbs];
+    return {
+      scoped: true,
+      title: `${directContext?.risks.ids.length || 0} of ${state.allRisks.length} risks linked to WBS ${shared.wbs}${scope?.name ? ` ${scope.name}` : ''}`,
+      body: directContext?.risks.reason || `WBS ${shared.wbs} is not in the current crosswalk.`,
+      wbsId: shared.wbs,
+      milestoneId: directContext?.schedule.primaryMilestoneId || '',
+      riskIds: directContext?.risks.ids || [],
+      docId: directContext?.documents.sourceDocIds?.[0] || '',
+      moduleKey: directContext?.simulation.moduleKeys?.[0] || '',
+    };
+  }
 
   if (shared.milestone) {
     const milestoneContext = state.crosswalk?.schedule?.byMilestoneId?.[shared.milestone];
@@ -176,49 +189,21 @@ function deriveRiskContext() {
     }
   }
 
-  if (shared.wbs) {
-    const directContext = state.crosswalk?.wbs?.byId?.[shared.wbs];
-    if (directContext?.risks.ids.length) {
-      return {
-        title: `Showing risks related to WBS ${shared.wbs}`,
-        body: directContext.risks.reason,
-        wbsId: shared.wbs,
-        milestoneId: directContext.schedule.primaryMilestoneId || '',
-        riskIds: directContext.risks.ids,
-        docId: directContext.documents.sourceDocIds?.[0] || '',
-        moduleKey: directContext.simulation.moduleKeys?.[0] || '',
-      };
-    }
-
-    const broaderContext = findNearestRiskBearingWbs(shared.wbs);
-    if (broaderContext) {
-      return {
-        title: `Showing the nearest broader risk context for WBS ${shared.wbs}`,
-        body: `No direct risks are linked to WBS ${shared.wbs}. Showing the nearest broader branch with linked risks: WBS ${broaderContext.id}.`,
-        wbsId: broaderContext.id,
-        milestoneId: broaderContext.schedule.primaryMilestoneId || '',
-        riskIds: broaderContext.risks.ids,
-        docId: broaderContext.documents.sourceDocIds?.[0] || '',
-        moduleKey: broaderContext.simulation.moduleKeys?.[0] || '',
-      };
-    }
-  }
-
   if (shared.module) {
     const moduleContext = state.crosswalk?.simulation?.byModuleKey?.[shared.module];
-    if (moduleContext?.primaryWbsId) {
-      const broaderContext = findNearestRiskBearingWbs(moduleContext.primaryWbsId);
-      if (broaderContext) {
-        return {
-          title: `Showing risks related to ${shared.module}`,
-          body: moduleContext.note,
-          wbsId: broaderContext.id,
-          milestoneId: broaderContext.schedule.primaryMilestoneId || '',
-          riskIds: broaderContext.risks.ids,
-          docId: broaderContext.documents.sourceDocIds?.[0] || '',
-          moduleKey: shared.module,
-        };
-      }
+    const moduleWbsContext = moduleContext?.primaryWbsId
+      ? state.crosswalk?.wbs?.byId?.[moduleContext.primaryWbsId]
+      : null;
+    if (moduleWbsContext) {
+      return {
+        title: `Showing risks related to ${shared.module}`,
+        body: moduleContext.note,
+        wbsId: moduleWbsContext.id,
+        milestoneId: moduleWbsContext.schedule.primaryMilestoneId || '',
+        riskIds: moduleWbsContext.risks.ids,
+        docId: moduleWbsContext.documents.sourceDocIds?.[0] || '',
+        moduleKey: shared.module,
+      };
     }
   }
 
@@ -248,11 +233,17 @@ function buildSuiteAction(route, label, params) {
   `;
 }
 
+// An explicit scope wins over derived per-risk context in outbound links;
+// derived context only fills the gap when no scope is set.
+function navWbsValue(riskContext = null) {
+  return getScope()?.id || riskContext?.primaryWbsId || state.context?.wbsId || '';
+}
+
 function buildRiskNavContext(risk = getSelectedRisk()) {
   const riskContext = risk ? state.crosswalk?.risk?.byId?.[risk.id] : null;
   return {
     from: 'risk',
-    wbs: riskContext?.primaryWbsId || state.context?.wbsId || '',
+    wbs: navWbsValue(riskContext),
     module: riskContext?.simulation.moduleKeys?.[0] || state.context?.moduleKey || '',
     milestone: riskContext?.primaryMilestoneId || state.context?.milestoneId || '',
     risk: risk?.id || '',
@@ -374,9 +365,13 @@ function syncSelectedRiskId() {
 }
 
 function updateVisibleRisks() {
-  const baseRisks = state.context?.riskIds?.length
+  // A scoped base is honored even when empty; only derived (non-scope)
+  // contexts fall back to the full register when they carry no risk ids.
+  const baseRisks = state.context?.scoped
     ? state.allRisks.filter((risk) => state.context.riskIds.includes(risk.id))
-    : state.allRisks;
+    : state.context?.riskIds?.length
+      ? state.allRisks.filter((risk) => state.context.riskIds.includes(risk.id))
+      : state.allRisks;
 
   const filtered = filterRisks(baseRisks, {
     searchQuery: state.searchQuery,
@@ -410,8 +405,9 @@ function renderSummary() {
   elements.categoryStat.textContent = String(categoryCount);
 
   if (!risks.length) {
-    elements.summaryNarrative.textContent =
-      'No risks are visible with the current filters. Clear or broaden the filter set to repopulate the review surface.';
+    elements.summaryNarrative.textContent = state.context?.scoped
+      ? `${state.context.title}.`
+      : 'No risks are visible with the current filters. Clear or broaden the filter set to repopulate the review surface.';
     elements.summaryMethod.textContent =
       `Scoring: ${scoreFormulaText()}. ${bandThresholdText()}`;
     return;
@@ -441,6 +437,12 @@ function renderContextBanner() {
   if (!elements.contextBannerHost) return;
   if (!state.context || !hasSharedContext(state.sharedContext)) {
     elements.contextBannerHost.innerHTML = '';
+    return;
+  }
+
+  const scope = getScope();
+  if (scope) {
+    elements.contextBannerHost.innerHTML = buildScopePillHtml(scope);
     return;
   }
 
@@ -530,6 +532,13 @@ function renderRiskList() {
   }
 
   if (!risks.length) {
+    const scope = getScope();
+    if (scope && state.context?.scoped && !state.context.riskIds.length) {
+      elements.listState.hidden = false;
+      elements.listState.innerHTML = buildScopeEmptyStateHtml(scope, 'risks');
+      elements.riskList.innerHTML = '';
+      return;
+    }
     renderListState(
       'Try a broader search, another category, or a different priority band.',
       false,
@@ -702,24 +711,24 @@ function renderRiskDetail(risk) {
         <div class="cross-app-collapsed__actions">
           ${buildSuiteAction('wbs', 'Open in WBS', {
             from: 'risk',
-            wbs: riskContext?.primaryWbsId || state.context?.wbsId || '',
+            wbs: navWbsValue(riskContext),
             risk: risk.id,
           })}
           ${buildSuiteAction('schedule', 'Open in Schedule', {
             from: 'risk',
-            wbs: riskContext?.primaryWbsId || state.context?.wbsId || '',
+            wbs: navWbsValue(riskContext),
             milestone: riskContext?.primaryMilestoneId || state.context?.milestoneId || '',
             risk: risk.id,
           })}
           ${buildSuiteAction('documents', 'Open in Documents', {
             from: 'risk',
-            wbs: riskContext?.primaryWbsId || state.context?.wbsId || '',
+            wbs: navWbsValue(riskContext),
             risk: risk.id,
             doc: riskContext?.documents.sourceDocIds?.[0] || state.context?.docId || '',
           })}
           ${buildSuiteAction('cost', 'Open in Cost', {
             from: 'risk',
-            wbs: riskContext?.primaryWbsId || state.context?.wbsId || '',
+            wbs: navWbsValue(riskContext),
             risk: risk.id,
             view: 'module',
           })}
@@ -779,6 +788,24 @@ function resetView() {
   render();
 }
 
+function clearScope() {
+  if (!state.sharedContext?.wbs) return;
+  delete state.sharedContext.wbs;
+  state.context = deriveRiskContext();
+  state.selectedRiskId = null;
+  updateVisibleRisks();
+  render();
+}
+
+function setScope(wbsId) {
+  if (!wbsId) return;
+  state.sharedContext.wbs = wbsId;
+  state.context = deriveRiskContext();
+  state.selectedRiskId = null;
+  updateVisibleRisks();
+  render();
+}
+
 function handleRiskListClick(event) {
   const button = event.target.closest('[data-risk-id]');
   if (!button) return;
@@ -822,8 +849,22 @@ function attachEvents() {
   elements.clearFiltersButton.addEventListener('click', resetView);
 
   elements.contextBannerHost.addEventListener('click', (event) => {
+    if (event.target.closest('[data-action="clear-scope"]')) {
+      clearScope();
+      return;
+    }
     if (event.target.closest('[data-action="reset-view"]')) {
       resetView();
+    }
+  });
+  elements.listState.addEventListener('click', (event) => {
+    const parentControl = event.target.closest('[data-action="scope-view-parent"]');
+    if (parentControl) {
+      setScope(parentControl.getAttribute('data-parent-id'));
+      return;
+    }
+    if (event.target.closest('[data-action="clear-scope"]')) {
+      clearScope();
     }
   });
   elements.riskList.addEventListener('click', handleRiskListClick);
