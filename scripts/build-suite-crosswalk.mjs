@@ -330,13 +330,46 @@ function buildPrimaryMilestoneContext(node, scheduleData, phasesById) {
   };
 }
 
-function buildWbsContexts(wbsData, scheduleData, docCatalog) {
+function inSubtree(candidateId, scopeId) {
+  const candidate = cleanValue(candidateId);
+  return candidate === scopeId || candidate.startsWith(`${scopeId}.`);
+}
+
+// Union of (a) risks whose register home wbsId falls in the node's subtree
+// and (b) risks whose elementWbsIds contain an id in the node's subtree.
+// Falls back to the WBS dataset's register-homed roll-up when the manifest
+// predates the elementWbsIds field.
+function buildNodeRiskUnion(node, riskRecords) {
+  if (!riskRecords.length || !riskRecords.every((risk) => cleanValue(risk.wbsId))) {
+    return null;
+  }
+
+  return riskRecords.filter(
+    (risk) =>
+      inSubtree(risk.wbsId, node.id) ||
+      (Array.isArray(risk.elementWbsIds) ? risk.elementWbsIds : []).some((elementId) =>
+        inSubtree(elementId, node.id),
+      ),
+  );
+}
+
+function buildWbsContexts(wbsData, scheduleData, riskManifest, docCatalog) {
   const phasesById = new Map(scheduleData.phases.map((phase) => [phase.id, phase]));
+  const riskRecords = Array.isArray(riskManifest?.risks) ? riskManifest.risks : [];
   const contexts = {};
 
   wbsData.nodes.forEach((node) => {
     const scheduleContext = buildPrimaryMilestoneContext(node, scheduleData, phasesById);
-    const riskIds = uniqueById(node.related.risks.items).map((risk) => risk.id);
+    const riskUnion = buildNodeRiskUnion(node, riskRecords);
+    const riskIds = riskUnion
+      ? riskUnion.map((risk) => risk.id).sort()
+      : uniqueById(node.related.risks.items).map((risk) => risk.id);
+    const primaryRiskId = riskUnion
+      ? [...riskUnion].sort(
+          (left, right) => Number(right.priority) - Number(left.priority) || left.id.localeCompare(right.id),
+        )[0]?.id || ''
+      : [...node.related.risks.items].sort((left, right) => Number(right.riskScore) - Number(left.riskScore))[0]
+          ?.id || '';
     const controlDocuments = uniqueById(node.related.documents.items);
     const sourceDocIds = scoreWbsSourceDocs(node, docCatalog);
 
@@ -353,11 +386,10 @@ function buildWbsContexts(wbsData, scheduleData, docCatalog) {
       schedule: scheduleContext,
       risks: {
         ids: riskIds,
-        primaryRiskId:
-          [...node.related.risks.items].sort((left, right) => Number(right.riskScore) - Number(left.riskScore))[0]?.id || '',
+        primaryRiskId,
         reason: riskIds.length
-          ? `Showing risks linked directly to WBS ${node.id} in the current risk roll-up.`
-          : `No direct risks are linked to WBS ${node.id} in the current register.`,
+          ? `Showing the ${riskIds.length} register risks homed in WBS ${node.id} or tied to it through an element association.`
+          : `No risks in the current register are homed in or associated with WBS ${node.id}.`,
       },
       documents: {
         controlDocuments,
@@ -583,7 +615,7 @@ export function buildSuiteCrosswalk({
   documentsManifest,
 }) {
   const docCatalog = buildDocumentCatalog(documentsManifest);
-  const wbsContexts = buildWbsContexts(wbsData, scheduleData, docCatalog);
+  const wbsContexts = buildWbsContexts(wbsData, scheduleData, riskManifest, docCatalog);
   const milestoneContexts = buildMilestoneContexts(scheduleData, wbsContexts, docCatalog);
   const phaseContexts = buildPhaseContexts(scheduleData, milestoneContexts);
   const riskContexts = buildRiskContexts(riskManifest, scheduleData, wbsContexts, docCatalog);

@@ -6,6 +6,7 @@ import { buildDataset as buildWbsDataset } from '../wbs/server.mjs';
 import { buildSchedulePayload } from '../schedule/server.mjs';
 import { getDataset as buildCostDataset } from '../cost/server.mjs';
 import { buildSuiteCrosswalk } from './build-suite-crosswalk.mjs';
+import { writeRiskManifest } from './build-risk-data.mjs';
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(currentDir, '..');
@@ -18,19 +19,43 @@ const outputs = [
 
 const generatedPayloads = {};
 
+// The schedule milestones carry hand-written plainLanguage explanations that
+// the generator does not produce. Re-applying them by id keeps regeneration
+// lossless for curated content, mirroring the risk manifest's curated fields.
+async function preserveCuratedMilestoneContent(absolutePath, payload) {
+  let previous = null;
+  try {
+    previous = JSON.parse(await fs.readFile(absolutePath, 'utf8'));
+  } catch {
+    return payload;
+  }
+
+  const previousById = new Map((previous.milestones || []).map((item) => [item.id, item]));
+  (payload.milestones || []).forEach((milestone) => {
+    const existing = previousById.get(milestone.id);
+    if (existing?.plainLanguage && !milestone.plainLanguage) {
+      milestone.plainLanguage = existing.plainLanguage;
+    }
+  });
+  return payload;
+}
+
 for (const output of outputs) {
   const absolutePath = path.join(repoRoot, output.relativePath);
   await fs.mkdir(path.dirname(absolutePath), { recursive: true });
-  const payload = await output.loader();
+  let payload = await output.loader();
+  if (output.key === 'scheduleData') {
+    payload = await preserveCuratedMilestoneContent(absolutePath, payload);
+  }
   generatedPayloads[output.key] = payload;
   await fs.writeFile(absolutePath, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
   console.log(`Wrote ${output.relativePath}`);
 }
 
-const [riskManifest, documentsManifest] = await Promise.all([
-  fs.readFile(path.join(repoRoot, 'risk/data/risks.json'), 'utf8').then((contents) => JSON.parse(contents)),
-  fs.readFile(path.join(repoRoot, 'documents/data/documents.json'), 'utf8').then((contents) => JSON.parse(contents)),
-]);
+const riskManifest = await writeRiskManifest();
+const documentsManifest = await fs
+  .readFile(path.join(repoRoot, 'documents/data/documents.json'), 'utf8')
+  .then((contents) => JSON.parse(contents));
 
 const crosswalk = buildSuiteCrosswalk({
   wbsData: generatedPayloads.wbsData,
