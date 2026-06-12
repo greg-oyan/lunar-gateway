@@ -171,6 +171,70 @@ export function uniqueById(items = []) {
   return [...seen.values()];
 }
 
+function escapeHtmlValue(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Resolves a `wbs` shared-context value into a suite-wide scope token.
+// Returns null when no scope is set. `has(id)` is the single subtree test
+// every app shares: exact match or dotted-prefix descendant.
+export function resolveScope(crosswalk, wbsId) {
+  const id = cleanValue(wbsId);
+  if (!id) return null;
+
+  const node = crosswalk?.wbs?.byId?.[id] || null;
+  return {
+    id,
+    name: cleanValue(node?.name),
+    parentId: cleanValue(node?.parentId),
+    known: Boolean(node),
+    has(candidateId) {
+      const candidate = cleanValue(candidateId);
+      if (!candidate) return false;
+      return candidate === id || candidate.startsWith(`${id}.`);
+    },
+  };
+}
+
+// Shared scope-pill markup. The host app wires `[data-action="clear-scope"]`.
+// `options.note` adds a literal qualifier label (e.g. "Program-level view")
+// for views that cannot meaningfully scope.
+export function buildScopePillHtml(scope, options = {}) {
+  if (!scope) return '';
+  const label = `Scoped to ${scope.id}${scope.name ? ` ${scope.name}` : ''}`;
+  const note = cleanValue(options.note);
+
+  return `
+    <div class="suite-scope-pill" role="status">
+      <span class="suite-scope-pill__label">${escapeHtmlValue(label)}</span>
+      ${note ? `<span class="suite-scope-pill__note">${escapeHtmlValue(note)}</span>` : ''}
+      <button class="suite-scope-pill__clear" type="button" data-action="clear-scope">Clear</button>
+    </div>
+  `;
+}
+
+// Shared zero-result state for an active scope. The host app wires
+// `[data-action="scope-view-parent"]` and `[data-action="clear-scope"]`.
+export function buildScopeEmptyStateHtml(scope, itemLabel = 'items') {
+  if (!scope) return '';
+  const parentId = cleanValue(scope.parentId);
+
+  return `
+    <div class="suite-scope-empty">
+      <p class="suite-scope-empty__title">No ${escapeHtmlValue(itemLabel)} linked to WBS ${escapeHtmlValue(scope.id)}${scope.name ? ` ${escapeHtmlValue(scope.name)}` : ''}</p>
+      <div class="suite-scope-empty__actions">
+        ${parentId ? `<button class="suite-context-action" type="button" data-action="scope-view-parent" data-parent-id="${escapeHtmlValue(parentId)}">View parent ${escapeHtmlValue(parentId)}</button>` : ''}
+        <button class="suite-context-action" type="button" data-action="clear-scope">Show all</button>
+      </div>
+    </div>
+  `;
+}
+
 export function basenameFromPath(pathValue) {
   const cleanPath = cleanValue(pathValue);
   if (!cleanPath) return '';

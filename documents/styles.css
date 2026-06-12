@@ -372,6 +372,15 @@ code {
   overscroll-behavior: contain;
 }
 
+.list-group-label {
+  margin: 6px 0 -4px;
+  font-size: 0.74rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  font-weight: 700;
+}
+
 .document-item {
   width: 100%;
   text-align: left;

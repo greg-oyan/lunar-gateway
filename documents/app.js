@@ -1,11 +1,14 @@
 import {
   applySuiteNav,
+  buildScopeEmptyStateHtml,
+  buildScopePillHtml,
   buildSuiteHref,
   getSharedContextEntries,
   hasSharedContext,
   loadSuiteCrosswalk,
   mergeQueryState,
   readSharedContext,
+  resolveScope,
 } from '../suite-assets/suite-context.js';
 
 const DATA_URL = './data/documents.json';
@@ -103,10 +106,45 @@ function buildDocumentUseNote(documentRecord) {
   }
 }
 
+function getScope() {
+  return resolveScope(state.crosswalk, state.sharedContext?.wbs);
+}
+
+// Union of crosswalk-linked source-doc ids over every WBS node in the scope's
+// subtree - the only WBS relation the source-library files carry.
+function collectScopedDocIds(scope) {
+  const linked = new Set();
+  Object.values(state.crosswalk?.wbs?.byId || {}).forEach((node) => {
+    if (!scope.has(node.id)) return;
+    (node.documents?.sourceDocIds || []).forEach((docId) => linked.add(docId));
+  });
+  return linked;
+}
+
 function deriveDocumentContext() {
   const shared = state.sharedContext || {};
   const docCatalog = state.crosswalk?.documents?.byId || {};
   if (!hasSharedContext(shared)) return null;
+
+  // An explicit WBS scope wins over derived contexts. Library files without a
+  // WBS relation stay visible under a labeled program-wide section instead of
+  // disappearing.
+  if (shared.wbs) {
+    const scope = getScope();
+    const wbsContext = state.crosswalk?.wbs?.byId?.[shared.wbs];
+    return {
+      scoped: true,
+      title: `Documents linked to WBS ${shared.wbs}${scope?.name ? ` ${scope.name}` : ''}`,
+      body: wbsContext?.documents.reason || `WBS ${shared.wbs} is not in the current crosswalk.`,
+      sourceDocIds: [],
+      scopedDocIds: collectScopedDocIds(scope),
+      controlDocuments: wbsContext?.documents.controlDocuments || [],
+      wbsId: shared.wbs,
+      milestoneId: wbsContext?.schedule.primaryMilestoneId || '',
+      riskId: wbsContext?.risks.primaryRiskId || '',
+      moduleKey: wbsContext?.simulation.moduleKeys?.[0] || '',
+    };
+  }
 
   if (shared.milestone) {
     const milestoneContext = state.crosswalk?.schedule?.byMilestoneId?.[shared.milestone];
@@ -138,22 +176,6 @@ function deriveDocumentContext() {
         milestoneId: riskContext.primaryMilestoneId || '',
         riskId: shared.risk,
         moduleKey: riskContext.simulation.moduleKeys?.[0] || '',
-      };
-    }
-  }
-
-  if (shared.wbs) {
-    const wbsContext = state.crosswalk?.wbs?.byId?.[shared.wbs];
-    if (wbsContext) {
-      return {
-        title: `Showing documents related to WBS ${shared.wbs}`,
-        body: wbsContext.documents.reason,
-        sourceDocIds: wbsContext.documents.sourceDocIds || [],
-        controlDocuments: wbsContext.documents.controlDocuments || [],
-        wbsId: shared.wbs,
-        milestoneId: wbsContext.schedule.primaryMilestoneId || '',
-        riskId: wbsContext.risks.primaryRiskId || '',
-        moduleKey: wbsContext.simulation.moduleKeys?.[0] || '',
       };
     }
   }
@@ -289,6 +311,12 @@ function renderContextBanner() {
     return;
   }
 
+  const scope = state.context.scoped ? getScope() : null;
+  if (scope) {
+    elements.contextBannerHost.innerHTML = buildScopePillHtml(scope);
+    return;
+  }
+
   const chips = [];
   const sourceLabel = SOURCE_LABELS[state.sharedContext.from] || '';
   if (sourceLabel) {
@@ -359,32 +387,47 @@ function renderList() {
   elements.listState.hidden = true;
   elements.listState.textContent = '';
 
-  elements.documentList.innerHTML = documents
-    .map((documentRecord) => {
-      const isSelected = selectedDocument?.id === documentRecord.id;
-      const summaryTags = documentRecord.tags.slice(0, 3);
+  const renderDocumentButton = (documentRecord) => {
+    const isSelected = selectedDocument?.id === documentRecord.id;
+    const summaryTags = documentRecord.tags.slice(0, 3);
 
-      return `
-        <button
-          class="document-item${isSelected ? ' is-selected' : ''}"
-          type="button"
-          data-document-id="${documentRecord.id}"
-          role="option"
-          aria-selected="${String(isSelected)}"
-        >
-          <div class="document-item__meta">
-            <span class="file-badge">${documentRecord.fileType}</span>
-            <span class="meta-chip">${documentRecord.category}</span>
-          </div>
-          <h3 class="document-item__title">${documentRecord.title}</h3>
-          <p class="document-item__description">${documentRecord.shortDescription}</p>
-          <div class="document-item__footer">
-            ${summaryTags.map((tag) => `<span class="tag-chip">${tag}</span>`).join('')}
-          </div>
-        </button>
-      `;
-    })
-    .join('');
+    return `
+      <button
+        class="document-item${isSelected ? ' is-selected' : ''}"
+        type="button"
+        data-document-id="${documentRecord.id}"
+        role="option"
+        aria-selected="${String(isSelected)}"
+      >
+        <div class="document-item__meta">
+          <span class="file-badge">${documentRecord.fileType}</span>
+          <span class="meta-chip">${documentRecord.category}</span>
+        </div>
+        <h3 class="document-item__title">${documentRecord.title}</h3>
+        <p class="document-item__description">${documentRecord.shortDescription}</p>
+        <div class="document-item__footer">
+          ${summaryTags.map((tag) => `<span class="tag-chip">${tag}</span>`).join('')}
+        </div>
+      </button>
+    `;
+  };
+
+  const scope = state.context?.scoped ? getScope() : null;
+  if (!scope) {
+    elements.documentList.innerHTML = documents.map(renderDocumentButton).join('');
+    return;
+  }
+
+  const scopedDocIds = state.context.scopedDocIds || new Set();
+  const linkedDocuments = documents.filter((documentRecord) => scopedDocIds.has(documentRecord.id));
+  const programWideDocuments = documents.filter((documentRecord) => !scopedDocIds.has(documentRecord.id));
+
+  elements.documentList.innerHTML = `
+    <p class="list-group-label">Linked to WBS ${escapeHtml(scope.id)} (${linkedDocuments.length})</p>
+    ${linkedDocuments.length ? linkedDocuments.map(renderDocumentButton).join('') : buildScopeEmptyStateHtml(scope, 'documents')}
+    <p class="list-group-label">Program-wide sources (${programWideDocuments.length})</p>
+    ${programWideDocuments.map(renderDocumentButton).join('')}
+  `;
 }
 
 function renderDetailEmptyState(eyebrow, title, body) {
@@ -570,9 +613,12 @@ function syncSelectedDocumentId() {
 }
 
 function updateVisibleDocuments() {
-  const baseDocuments = state.context?.sourceDocIds?.length
-    ? state.allDocuments.filter((documentRecord) => state.context.sourceDocIds.includes(documentRecord.id))
-    : state.allDocuments;
+  // A scope keeps every document visible (grouped into linked vs program-wide
+  // sections in the list); derived contexts keep their narrower filter.
+  const baseDocuments =
+    !state.context?.scoped && state.context?.sourceDocIds?.length
+      ? state.allDocuments.filter((documentRecord) => state.context.sourceDocIds.includes(documentRecord.id))
+      : state.allDocuments;
 
   state.visibleDocuments = filterDocuments(baseDocuments, {
     searchQuery: state.searchQuery,
@@ -606,7 +652,33 @@ function resetView() {
   render();
 }
 
+function clearScope() {
+  if (!state.sharedContext?.wbs) return;
+  delete state.sharedContext.wbs;
+  state.context = deriveDocumentContext();
+  updateVisibleDocuments();
+  render();
+}
+
+function setScope(wbsId) {
+  if (!wbsId) return;
+  state.sharedContext.wbs = wbsId;
+  state.context = deriveDocumentContext();
+  updateVisibleDocuments();
+  render();
+}
+
 function handleListClick(event) {
+  const parentControl = event.target.closest('[data-action="scope-view-parent"]');
+  if (parentControl) {
+    setScope(parentControl.getAttribute('data-parent-id'));
+    return;
+  }
+  if (event.target.closest('[data-action="clear-scope"]')) {
+    clearScope();
+    return;
+  }
+
   const button = event.target.closest('[data-document-id]');
   if (!button) return;
 
@@ -637,6 +709,10 @@ function attachEvents() {
   elements.clearFiltersButton.addEventListener('click', resetView);
 
   elements.contextBannerHost.addEventListener('click', (event) => {
+    if (event.target.closest('[data-action="clear-scope"]')) {
+      clearScope();
+      return;
+    }
     if (event.target.closest('[data-action="reset-view"]')) {
       resetView();
     }

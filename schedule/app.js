@@ -1,11 +1,14 @@
 import {
   applySuiteNav,
+  buildScopeEmptyStateHtml,
+  buildScopePillHtml,
   buildSuiteHref,
   getSharedContextEntries,
   hasSharedContext,
   loadSuiteCrosswalk,
   mergeQueryState,
   readSharedContext,
+  resolveScope,
 } from '../suite-assets/suite-context.js';
 
 const DATA_URL = './data/gateway-schedule.json';
@@ -18,15 +21,16 @@ const storySignals = document.getElementById('storySignals');
 const stageFrame = document.getElementById('stageFrame');
 const overviewContent = document.getElementById('overviewContent');
 const timelineChart = document.getElementById('timelineChart');
-const focusLayer = document.getElementById('focusLayer');
-const focusHeading = document.getElementById('focusHeading');
-const focusSubtitle = document.getElementById('focusSubtitle');
-const focusContent = document.getElementById('focusContent');
-const supportLayer = document.getElementById('supportLayer');
-const supportHeading = document.getElementById('supportHeading');
-const supportSubtitle = document.getElementById('supportSubtitle');
-const supportTabs = document.getElementById('supportTabs');
-const supportContent = document.getElementById('supportContent');
+const milestoneStrip = document.getElementById('milestoneStrip');
+const detailPanel = document.getElementById('detailPanel');
+const detailHeading = document.getElementById('detailHeading');
+const detailSubtitle = document.getElementById('detailSubtitle');
+const detailContent = document.getElementById('detailContent');
+
+// The six dates that anchor the chart's Key set alongside every phase's
+// curated keyMilestoneIds. No other milestone id list exists in the app;
+// everything else derives from the dataset.
+const TIMELINE_ANCHORS = ['M-001', 'M-009', 'M-017', 'M-024', 'M-030', 'M-037'];
 
 const dateTimeFormatter = new Intl.DateTimeFormat('en-US', {
   dateStyle: 'medium',
@@ -41,14 +45,7 @@ const state = {
   driversById: new Map(),
   selection: null,
   activeDriverId: null,
-  support: {
-    open: false,
-  },
-  reveal: {
-    phaseMilestones: false,
-    artifacts: false,
-    sources: false,
-  },
+  milestoneDensity: 'key',
   crosswalk: null,
   sharedContext: {},
 };
@@ -64,12 +61,6 @@ function escapeHtml(value) {
 
 function cleanText(value) {
   return String(value ?? '').replace(/\s+/g, ' ').trim();
-}
-
-function compactText(value, wordLimit = 18) {
-  const words = cleanText(value).split(' ').filter(Boolean);
-  if (words.length <= wordLimit) return words.join(' ');
-  return `${words.slice(0, wordLimit).join(' ')}...`;
 }
 
 function firstSentence(value) {
@@ -114,6 +105,29 @@ function buildMaps(data) {
   state.phasesById = new Map(data.phases.map((item) => [item.id, item]));
   state.yearsById = new Map(data.years.map((item) => [String(item.year), item]));
   state.driversById = new Map(data.drivers.map((item) => [item.id, item]));
+}
+
+function getScope() {
+  return resolveScope(state.crosswalk, state.sharedContext?.wbs);
+}
+
+// The crosswalk is the join table between WBS and schedule: the scoped
+// milestone set is the union of schedule.milestoneIds over every crosswalk
+// WBS node inside the scope subtree. Returns null when no scope is active.
+function getScopedMilestoneIdSet() {
+  const scope = getScope();
+  if (!scope) return null;
+
+  const ids = new Set();
+  Object.values(state.crosswalk?.wbs?.byId || {}).forEach((node) => {
+    if (!scope.has(node.id)) return;
+    (node.schedule?.milestoneIds || []).forEach((id) => ids.add(id));
+  });
+  return ids;
+}
+
+function isMilestoneInScope(milestoneId, scopedIds = getScopedMilestoneIdSet()) {
+  return !scopedIds || scopedIds.has(milestoneId);
 }
 
 function getSelectedMilestone() {
@@ -194,7 +208,8 @@ function buildScheduleNavContext() {
   const context = getSelectedContext();
   return {
     from: 'schedule',
-    wbs: context.wbsId,
+    // An explicit scope wins; derived per-selection context fills the gap.
+    wbs: getScope()?.id || context.wbsId,
     module: context.moduleKey,
     milestone: context.milestone?.id || '',
     phase: context.phase?.id || '',
@@ -267,6 +282,7 @@ function resolveInitialSelection() {
 }
 
 function renderContextBanner() {
+  if (getScope()) return '';
   const context = getSelectedContext();
   if (!hasSharedContext(state.sharedContext) || (!context.milestone && !context.phase)) return '';
 
@@ -324,14 +340,6 @@ function renderContextActions() {
   `;
 }
 
-function scrollToId(id) {
-  const element = document.getElementById(id);
-  if (!element) return;
-  window.requestAnimationFrame(() => {
-    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
-}
-
 function buildEmptyState(title, body) {
   return `
     <div class="empty-state">
@@ -368,40 +376,43 @@ function syncActiveDriver(selection) {
   state.activeDriverId = state.data.defaultDriverId;
 }
 
-function setSelection(selection, options = {}) {
+function setSelection(selection) {
   state.selection = selection;
-  state.reveal.phaseMilestones = false;
-  state.reveal.artifacts = false;
-  state.reveal.sources = false;
-
-  if (!selection || selection.type === 'phase') {
-    state.support.open = false;
-  } else if (selection.type === 'milestone') {
-    state.support.open = true;
-  }
-
   syncActiveDriver(selection);
   renderApp();
-
-  if (selection?.type === 'milestone' && state.support.open) {
-    scrollToId('supportLayer');
-    return;
-  }
-
-  scrollToId('focusLayer');
 }
 
 function buildSignalPills() {
   storySignals.innerHTML = '';
 }
 
-function getAnchorMilestones() {
-  const preferredIds = ['M-001', 'M-009', 'M-017', 'M-024', 'M-030', 'M-037'];
-  return preferredIds.map((id) => state.milestonesById.get(id)).filter(Boolean);
+function getKeyMilestoneIdSet() {
+  return new Set([
+    ...TIMELINE_ANCHORS,
+    ...state.data.phases.flatMap((phase) => phase.keyMilestoneIds || []),
+  ]);
 }
 
+// Milestones drawn on the lanes: scope-filtered, then thinned to the Key set
+// unless density is `all`. The current selection always stays visible.
 function getTimelineMilestones() {
-  return getAnchorMilestones().sort((left, right) => dateValue(left.date) - dateValue(right.date));
+  const scopedIds = getScopedMilestoneIdSet();
+  const keyIds = getKeyMilestoneIdSet();
+  const selectedId = state.selection?.type === 'milestone' ? state.selection.id : '';
+
+  return state.data.milestones
+    .filter((milestone) => isMilestoneInScope(milestone.id, scopedIds))
+    .filter(
+      (milestone) =>
+        state.milestoneDensity === 'all' || keyIds.has(milestone.id) || milestone.id === selectedId,
+    )
+    .sort((left, right) => dateValue(left.date) - dateValue(right.date));
+}
+
+function getScopedMilestoneCount() {
+  const scopedIds = getScopedMilestoneIdSet();
+  if (!scopedIds) return state.data.milestones.length;
+  return state.data.milestones.filter((milestone) => scopedIds.has(milestone.id)).length;
 }
 
 function getTimelineMetrics() {
@@ -417,13 +428,20 @@ function getTimelinePosition(date) {
 }
 
 function buildStageOverview() {
+  const scope = getScope();
+  const totalMilestones = state.data.milestones.length;
+  const inScopeCount = getScopedMilestoneCount();
+  const milestonePill = scope
+    ? `${inScopeCount} of ${totalMilestones} milestones in scope`
+    : pluralize(totalMilestones, 'milestone');
+
   overviewContent.innerHTML = `
+    ${scope ? buildScopePillHtml(scope) : ''}
     ${renderContextBanner()}
     <div class="stage-strip" aria-label="Schedule overview key">
       <span class="stage-pill stage-pill--primary mono">${escapeHtml(state.data.overview.spanValue)}</span>
       <span class="stage-pill">${escapeHtml(pluralize(state.data.phases.length, 'major phase'))}</span>
-      <span class="stage-pill">${escapeHtml(pluralize(getAnchorMilestones().length, 'key milestone date', 'key milestone dates'))}</span>
-      <span class="stage-pill stage-pill--ghost">Click a band or marker to focus</span>
+      <span class="stage-pill">${escapeHtml(milestonePill)}</span>
     </div>
   `;
 }
@@ -441,8 +459,42 @@ function buildScheduleAxis() {
     .join('');
 }
 
+function buildLaneMilestones(phase, visibleMilestones) {
+  const selectedMilestone = getSelectedMilestone();
+
+  const keyIds = getKeyMilestoneIdSet();
+
+  return visibleMilestones
+    .filter((milestone) => milestone.phaseId === phase.id)
+    .map((milestone) => {
+      const classes = [
+        'lane-milestone',
+        `lane-milestone--${milestone.tone || 'brand'}`,
+        keyIds.has(milestone.id) ? 'lane-milestone--key' : '',
+        selectedMilestone?.id === milestone.id ? 'lane-milestone--active' : '',
+      ]
+        .filter(Boolean)
+        .join(' ');
+
+      return `
+        <button
+          class="${classes}"
+          type="button"
+          data-select-type="milestone"
+          data-select-id="${escapeHtml(milestone.id)}"
+          style="left:${getTimelinePosition(milestone.date)}%;"
+          aria-label="${escapeHtml(`${milestone.shortName}, ${milestone.dateLabel}`)}"
+          title="${escapeHtml(`${milestone.shortName}, ${milestone.dateLabel}`)}"
+          aria-pressed="${String(selectedMilestone?.id === milestone.id)}"
+        ><span class="lane-milestone__diamond" aria-hidden="true"></span></button>
+      `;
+    })
+    .join('');
+}
+
 function buildScheduleLanes() {
   const focusedPhase = getFocusedPhase();
+  const visibleMilestones = getTimelineMilestones();
 
   return state.data.phases
     .map((phase) => {
@@ -466,85 +518,73 @@ function buildScheduleLanes() {
         .join(' ');
 
       return `
-        <button
-          class="${classes}"
-          type="button"
-          data-select-type="phase"
-          data-select-id="${escapeHtml(phase.id)}"
-          aria-pressed="${String(focusedPhase?.id === phase.id)}"
-          title="${escapeHtml(`${phase.name}: ${phase.rangeLabel}`)}"
-        >
-          <div class="schedule-lane__label">
-            <strong>${escapeHtml(phase.name)}</strong>
-            <span class="mono">${escapeHtml(phase.rangeLabel)}</span>
-          </div>
+        <div class="${classes}">
+          <button
+            class="schedule-lane__select"
+            type="button"
+            data-select-type="phase"
+            data-select-id="${escapeHtml(phase.id)}"
+            aria-pressed="${String(focusedPhase?.id === phase.id)}"
+            title="${escapeHtml(`${phase.name}: ${phase.rangeLabel}`)}"
+          >
+            <div class="schedule-lane__label">
+              <strong>${escapeHtml(phase.name)}</strong>
+              <span class="mono">${escapeHtml(phase.rangeLabel)}</span>
+            </div>
+          </button>
           <div class="schedule-lane__plot">
             <div class="schedule-lane__baseline"></div>
-            <div class="${barClasses}" style="left:${left}%; width:${Math.max(width, 8)}%;"></div>
+            <button
+              class="${barClasses}"
+              type="button"
+              data-select-type="phase"
+              data-select-id="${escapeHtml(phase.id)}"
+              aria-label="${escapeHtml(`${phase.name}: ${phase.rangeLabel}`)}"
+              style="left:${left}%; width:${Math.max(width, 8)}%;"
+            ></button>
+            ${buildLaneMilestones(phase, visibleMilestones)}
           </div>
-        </button>
+        </div>
       `;
     })
     .join('');
 }
 
-function buildScheduleMarkers() {
-  const selectedMilestone = getSelectedMilestone();
-  const focusedPhase = getFocusedPhase();
-  const milestones = getTimelineMilestones();
+function buildDensityToggle() {
+  const options = [
+    { id: 'key', label: 'Key' },
+    { id: 'all', label: 'All' },
+  ];
 
-  return milestones
-    .map((milestone, index) => {
-      const align = index === 0 ? 'start' : index === milestones.length - 1 ? 'end' : 'center';
-      const level = index % 2 === 0 ? 'upper' : 'lower';
-      const classes = [
-        'schedule-marker',
-        `schedule-marker--${milestone.tone || 'brand'}`,
-        `schedule-marker--${level}`,
-        `schedule-marker--${align}`,
-        selectedMilestone?.id === milestone.id ? 'schedule-marker--active' : '',
-        focusedPhase && milestone.phaseId !== focusedPhase.id ? 'schedule-marker--muted' : '',
-      ]
-        .filter(Boolean)
-        .join(' ');
-
-      return `
-        <button
-          class="${classes}"
-          type="button"
-          data-select-type="milestone"
-          data-select-id="${escapeHtml(milestone.id)}"
-          style="left:${getTimelinePosition(milestone.date)}%;"
-          aria-label="${escapeHtml(`${milestone.shortName} on ${milestone.dateLabel}`)}"
-          title="${escapeHtml(`${milestone.shortName} - ${milestone.dateLabel}`)}"
-          aria-pressed="${String(selectedMilestone?.id === milestone.id)}"
-        >
-          <span class="schedule-marker__stem"></span>
-          <span class="schedule-marker__dot"></span>
-          <span class="schedule-marker__card">
-            <span class="schedule-marker__date mono">${escapeHtml(milestone.dateLabel)}</span>
-            <strong>${escapeHtml(milestone.shortName)}</strong>
-            <span class="schedule-marker__phase">${escapeHtml(milestone.phaseName)}</span>
-          </span>
-        </button>
-      `;
-    })
-    .join('');
-}
-
-function buildScheduleVisualHint() {
-  const milestone = getSelectedMilestone();
-  const phase = getFocusedPhase();
-  if (milestone) return `${milestone.shortName} is highlighted. Layer 2 now explains this date before the evidence layer opens.`;
-  if (phase) return `${phase.name} is highlighted. Layer 2 now shows the key milestones inside this phase.`;
-  return 'The big-picture schedule comes first. Click a phase band, then choose a key date to go deeper.';
+  return `
+    <div class="density-toggle" role="group" aria-label="Milestone density">
+      ${options
+        .map(
+          (option) => `
+            <button
+              class="density-toggle__button${state.milestoneDensity === option.id ? ' is-active' : ''}"
+              type="button"
+              data-density="${option.id}"
+              aria-pressed="${String(state.milestoneDensity === option.id)}"
+            >
+              ${escapeHtml(option.label)}
+            </button>
+          `,
+        )
+        .join('')}
+    </div>
+  `;
 }
 
 function renderTimeline() {
+  const scope = getScope();
+  const scopeIsEmpty = scope && !getScopedMilestoneCount();
+
   timelineChart.innerHTML = `
     <div class="schedule-map">
       <div class="schedule-map__heading">
-        <p class="schedule-map__hint">${escapeHtml(buildScheduleVisualHint())}</p>
+        <span class="schedule-map__hint">Milestones shown</span>
+        ${buildDensityToggle()}
       </div>
 
       <div class="schedule-axis">
@@ -556,28 +596,51 @@ function renderTimeline() {
         ${buildScheduleLanes()}
       </div>
 
-      <div class="schedule-milestones">
-      <div class="schedule-milestones__label">
-        <span class="section-kicker">Key milestone dates</span>
-          <strong>Click a marker to open the selected milestone view.</strong>
-      </div>
-        <div class="schedule-milestones__plot">
-          <div class="schedule-milestones__spine"></div>
-          ${buildScheduleMarkers()}
-        </div>
-      </div>
+      ${scopeIsEmpty ? buildScopeEmptyStateHtml(scope, 'milestones') : ''}
     </div>
   `;
 }
 
-function buildLinkedMomentButtons(items) {
-  if (!items.length) {
-    return buildEmptyState('No additional linked moments', 'This selected item is already one of the key schedule anchors.');
+function renderMilestoneStrip() {
+  const milestone = getSelectedMilestone();
+
+  if (!milestone) {
+    milestoneStrip.innerHTML = `
+      <p class="milestone-strip__empty">No milestone selected.</p>
+    `;
+    return;
+  }
+
+  const confidenceTone = (milestone.confidenceLabel || 'unknown')
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/-confidence$/, '');
+
+  milestoneStrip.innerHTML = `
+    <span class="milestone-strip__date mono">${escapeHtml(milestone.dateLabel)}</span>
+    <strong class="milestone-strip__name">${escapeHtml(milestone.shortName)}</strong>
+    <span class="milestone-strip__phase">${escapeHtml(milestone.phaseName)}</span>
+    <span class="milestone-slim__pill milestone-slim__pill--${escapeHtml(confidenceTone)}">${escapeHtml(milestone.confidenceLabel)}</span>
+  `;
+}
+
+function buildPhaseMilestoneRows(phase) {
+  const scopedIds = getScopedMilestoneIdSet();
+  const keyIds = getKeyMilestoneIdSet();
+  const phaseMilestones = (phase.milestones || [])
+    .map((item) => state.milestonesById.get(item.id) || item)
+    .filter((milestone) => isMilestoneInScope(milestone.id, scopedIds))
+    .sort((left, right) => dateValue(left.date) - dateValue(right.date));
+
+  if (!phaseMilestones.length) {
+    const scope = getScope();
+    if (scope) return buildScopeEmptyStateHtml(scope, 'milestones in this phase');
+    return buildEmptyState('No milestones', 'No milestones are recorded for this phase in the current dataset.');
   }
 
   return `
     <div class="milestone-choice-grid">
-      ${items
+      ${phaseMilestones
         .map(
           (item) => `
             <button
@@ -587,9 +650,8 @@ function buildLinkedMomentButtons(items) {
               data-select-id="${escapeHtml(item.id)}"
               aria-pressed="${String(state.selection?.id === item.id)}"
             >
-              <span class="linked-moment__date mono">${escapeHtml(item.dateLabel)}</span>
+              <span class="linked-moment__date mono">${escapeHtml(item.dateLabel)}${keyIds.has(item.id) ? ' <span class="key-badge">Key</span>' : ''}</span>
               <strong>${escapeHtml(item.shortName)}</strong>
-              <span class="linked-moment__summary">${escapeHtml(compactText(item.whyItMatters, 14))}</span>
             </button>
           `,
         )
@@ -598,22 +660,29 @@ function buildLinkedMomentButtons(items) {
   `;
 }
 
-function buildFocusPhaseView(phase) {
-  const selectedMilestone = getSelectedMilestone();
-  const focusMilestones = phase.keyMilestoneIds.map((id) => state.milestonesById.get(id)).filter(Boolean);
+function buildPhaseDetail(phase) {
+  const scopedIds = getScopedMilestoneIdSet();
+  const totalCount = (phase.milestones || []).length;
+  const inScopeCount = scopedIds
+    ? (phase.milestones || []).filter((item) => scopedIds.has(item.id)).length
+    : totalCount;
+  const keyIds = getKeyMilestoneIdSet();
+  const keyCount = (phase.milestones || []).filter((item) => keyIds.has(item.id)).length;
+  const countCopy = scopedIds
+    ? `${inScopeCount} of ${totalCount} milestones in scope, ${keyCount} key`
+    : `${pluralize(totalCount, 'milestone')}, ${keyCount} key`;
 
-  focusHeading.textContent = 'Selected phase';
-  focusSubtitle.textContent = 'Choose a milestone to open the evidence behind that date.';
+  detailHeading.textContent = phase.name;
+  detailSubtitle.textContent = `${phase.rangeLabel} · ${countCopy}`;
 
   return `
     <div class="focus-layout focus-layout--phase">
       <section class="focus-card focus-card--primary">
         <div class="focus-header">
-          <p class="section-kicker">Selected phase</p>
           <h3>${escapeHtml(phase.name)}</h3>
           <div class="focus-meta">
             <span class="mono">${escapeHtml(phase.rangeLabel)}</span>
-            <span>${escapeHtml(pluralize(focusMilestones.length, 'milestone'))}</span>
+            <span>${escapeHtml(countCopy)}</span>
           </div>
         </div>
 
@@ -626,32 +695,8 @@ function buildFocusPhaseView(phase) {
         <div class="focus-header">
           <h3>Milestones in ${escapeHtml(phase.name)}</h3>
         </div>
-        ${buildLinkedMomentButtons(focusMilestones)}
+        ${buildPhaseMilestoneRows(phase)}
       </section>
-    </div>
-  `;
-}
-
-function renderFocus() {
-  const phase = getFocusedPhase();
-
-  if (!phase) {
-    focusHeading.textContent = 'Selected phase';
-    focusSubtitle.textContent = 'Choose one key milestone in this phase to open the evidence behind that date.';
-    focusLayer.hidden = true;
-    return;
-  }
-
-  focusLayer.hidden = false;
-  focusContent.innerHTML = buildFocusPhaseView(phase);
-}
-
-function buildSupportList(items, builder) {
-  if (!items.length) return buildEmptyState('Nothing linked here yet', 'No stronger direct source is attached to this group in the current dataset.');
-
-  return `
-    <div class="support-list">
-      ${items.map(builder).join('')}
     </div>
   `;
 }
@@ -721,90 +766,88 @@ function buildMilestoneSupport(milestone) {
   `;
 }
 
-function buildSupportTabContent() {
+// One detail panel below the timeline: a phase selection shows the phase's
+// full milestone list; a milestone selection shows the evidence content.
+function renderDetail() {
   const milestone = getSelectedMilestone();
-
-  supportHeading.textContent = 'Evidence behind the selected milestone';
+  const phase = getFocusedPhase();
 
   if (milestone) {
-    supportSubtitle.textContent =
-      `${milestone.shortName} is selected. This view explains why the date matters and what evidence supports it.`;
-    return buildMilestoneSupport(milestone);
-  }
-
-  supportSubtitle.textContent =
-    'Choose a milestone first so the evidence view can stay specific and easy to follow.';
-
-  return buildEmptyState('Choose a milestone first', 'Select one milestone in Layer 2 to open the evidence behind that date.');
-}
-
-function renderSupport() {
-  const milestone = getSelectedMilestone();
-
-  if (!state.support.open || !milestone) {
-    supportLayer.hidden = true;
-    supportTabs.hidden = true;
-    supportTabs.innerHTML = '';
+    detailPanel.hidden = false;
+    detailHeading.textContent = milestone.shortName;
+    detailSubtitle.textContent = `${milestone.dateLabel} · ${milestone.phaseName}`;
+    detailContent.innerHTML = buildMilestoneSupport(milestone);
     return;
   }
 
-  supportLayer.hidden = false;
-  supportTabs.hidden = true;
-  supportTabs.innerHTML = '';
-  supportContent.innerHTML = buildSupportTabContent();
+  if (phase) {
+    detailPanel.hidden = false;
+    detailContent.innerHTML = buildPhaseDetail(phase);
+    return;
+  }
+
+  detailPanel.hidden = true;
+  detailContent.innerHTML = '';
 }
 
 function renderApp() {
   appTitle.textContent = state.data.appTitle;
   appSubtitle.textContent = 'Visual schedule map of Gateway across major phases and milestone dates.';
   generatedAt.textContent = `Updated ${dateTimeFormatter.format(new Date(state.data.generatedAt))}`;
-  stageFrame.textContent = '2017 to 2031. Major phases. Key milestone dates.';
+
+  const totalMilestones = state.data.milestones.length;
+  const inScopeCount = getScopedMilestoneCount();
+  stageFrame.textContent = `${state.data.overview.spanLabel}. ${pluralize(state.data.phases.length, 'phase')}. ${
+    getScope() ? `${inScopeCount} of ${totalMilestones} milestones in scope.` : `${pluralize(totalMilestones, 'milestone')}.`
+  }`;
 
   buildSignalPills();
   buildStageOverview();
   renderTimeline();
-  renderFocus();
-  renderSupport();
+  renderMilestoneStrip();
+  renderDetail();
   syncUrlState();
   syncSuiteNavigation();
+}
+
+function clearScope() {
+  if (!state.sharedContext?.wbs) return;
+  delete state.sharedContext.wbs;
+  renderApp();
+}
+
+function setScope(wbsId) {
+  if (!wbsId) return;
+  state.sharedContext.wbs = wbsId;
+  renderApp();
 }
 
 function handleAction(target) {
   const action = target.dataset.action;
   if (!action) return;
 
+  if (action === 'clear-scope') {
+    clearScope();
+    return;
+  }
+
+  if (action === 'scope-view-parent') {
+    setScope(target.dataset.parentId);
+    return;
+  }
+
   if (action === 'clear-focus') {
     state.selection = null;
-    state.support.open = false;
     syncActiveDriver(null);
     renderApp();
-    scrollToId('stageHeading');
     return;
   }
 
   if (action === 'reset-view') {
     state.sharedContext = {};
     state.selection = getDefaultSelection();
-    state.support.open = state.selection?.type === 'milestone';
-    state.reveal.phaseMilestones = false;
-    state.reveal.artifacts = false;
-    state.reveal.sources = false;
     syncActiveDriver(state.selection);
     renderApp();
-    scrollToId('stageHeading');
-    return;
-  }
-
-  if (action === 'close-support') {
-    state.support.open = false;
-    renderApp();
-    scrollToId('focusLayer');
-    return;
-  }
-
-  if (action === 'toggle-reveal') {
-    state.reveal[target.dataset.reveal] = !state.reveal[target.dataset.reveal];
-    renderSupport();
   }
 }
 
@@ -813,8 +856,14 @@ function handleSelection(target) {
   const id = target.dataset.selectId;
   if (!type || !id) return;
 
-  const context = target.closest('#supportLayer') ? 'support' : target.closest('#focusLayer') ? 'focus' : 'stage';
-  setSelection({ type, id }, { context });
+  setSelection({ type, id });
+}
+
+function handleDensity(target) {
+  const density = target.dataset.density;
+  if (!density || density === state.milestoneDensity) return;
+  state.milestoneDensity = density === 'all' ? 'all' : 'key';
+  renderApp();
 }
 
 async function loadData() {
@@ -834,7 +883,6 @@ async function loadData() {
   state.activeDriverId = data.defaultDriverId;
   state.selection = resolveInitialSelection();
   syncActiveDriver(state.selection);
-  state.support.open = state.selection?.type === 'milestone';
 
   renderApp();
 }
@@ -848,8 +896,8 @@ function renderError(error) {
     </section>
   `;
   timelineChart.innerHTML = '';
-  focusLayer.hidden = true;
-  supportLayer.hidden = true;
+  milestoneStrip.innerHTML = '';
+  detailPanel.hidden = true;
   generatedAt.textContent = 'Schedule data unavailable';
 }
 
@@ -857,6 +905,12 @@ document.body.addEventListener('click', (event) => {
   const actionTarget = event.target.closest('[data-action]');
   if (actionTarget) {
     handleAction(actionTarget);
+    return;
+  }
+
+  const densityTarget = event.target.closest('[data-density]');
+  if (densityTarget) {
+    handleDensity(densityTarget);
     return;
   }
 

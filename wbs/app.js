@@ -1,11 +1,13 @@
 import {
   applySuiteNav,
+  buildScopePillHtml,
   buildSuiteHref,
   getSharedContextEntries,
   hasSharedContext,
   loadSuiteCrosswalk,
   mergeQueryState,
   readSharedContext,
+  resolveScope,
 } from '../suite-assets/suite-context.js';
 
 const DATA_URL = './data/gateway-wbs.json';
@@ -56,8 +58,6 @@ const structureViewport = document.getElementById('structureViewport');
 const structureSvg = document.getElementById('structureSvg');
 const structureSelectedSummary = document.getElementById('structureSelectedSummary');
 const overviewContent = document.getElementById('overviewContent');
-const focusZone = document.getElementById('focusZone');
-const focusContent = document.getElementById('focusContent');
 
 const moneyFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
 const dateFormatter = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' });
@@ -225,7 +225,9 @@ function buildWbsNavContext(node = state.nodesById.get(state.selectedId)) {
   const context = getNodeContext(node?.id);
   const params = {
     from: 'wbs',
-    wbs: node?.id || '',
+    // The root is the unscoped program view; only non-root selections travel
+    // as a suite-wide scope.
+    wbs: getScope()?.id || '',
     module: context?.simulation.moduleKeys?.[0] || '',
     milestone: context?.schedule.primaryMilestoneId || '',
     phase: context?.schedule.phaseId || '',
@@ -240,17 +242,21 @@ function syncSuiteNavigation() {
   applySuiteNav(buildWbsNavContext(), { currentRoute: 'wbs' });
 }
 
-function syncUrlState() {
+// In the WBS app the selection is the scope: any non-root selection writes
+// the `wbs` shared-context param so the scope rides along to every other app.
+function getScope() {
   const rootId = state.data?.rootId || '';
-  const contextIsActive = hasSharedContext(state.sharedContext);
+  if (!state.selectedId || state.selectedId === rootId) return null;
+  return resolveScope(state.crosswalk, state.selectedId);
+}
+
+function syncUrlState() {
+  const scope = getScope();
 
   mergeQueryState(
     {
       ...getSharedContextEntries(state.sharedContext),
-      wbs:
-        contextIsActive || (state.selectedId && state.selectedId !== rootId) || Boolean(state.activeDetail)
-          ? state.selectedId
-          : '',
+      wbs: scope ? scope.id : '',
       detail: state.activeDetail || '',
       mode: state.viewMode === 'structure' ? 'structure' : '',
     },
@@ -395,11 +401,19 @@ function ensureAncestorsExpanded(nodeId) {
 
 function buildIntroSignals() {
   const rootNode = getRootNode();
-  const signals = [
-    { label: 'Major parts', value: formatNumber(rootNode?.childIds.length || 0) },
-    { label: 'Full hierarchy', value: formatNumber(state.data?.overview.totalNodes || 0) },
-    { label: 'Detail lenses', value: '4 guided views' },
-  ];
+  const scope = getScope();
+  const scopedNode = scope ? state.nodesById.get(scope.id) : null;
+  const signals = scopedNode
+    ? [
+        { label: 'Scoped to', value: scopedNode.id },
+        { label: 'Direct branches', value: formatNumber(scopedNode.childIds.length) },
+        { label: 'Subtree elements', value: formatNumber(scopedNode.metrics.descendantCount + 1) },
+      ]
+    : [
+        { label: 'Major parts', value: formatNumber(rootNode?.childIds.length || 0) },
+        { label: 'Full hierarchy', value: formatNumber(state.data?.overview.totalNodes || 0) },
+        { label: 'Detail lenses', value: '4 guided views' },
+      ];
 
   appSignals.innerHTML = signals
     .map(
@@ -464,33 +478,21 @@ function buildLensCards(node) {
       key: 'cost',
       label: 'Cost',
       value: node.related.cost.estimates.length ? pluralize(node.related.cost.estimates.length, 'related item') : 'No linked items',
-      hint: node.related.cost.totalBaseCost
-        ? 'View cost detail.'
-        : 'No linked cost.',
     },
     {
       key: 'schedule',
       label: 'Schedule',
       value: scheduleValue,
-      hint: node.metrics.taskCount
-        ? 'View schedule detail.'
-        : 'No linked schedule.',
     },
     {
       key: 'risks',
       label: 'Risks',
       value: activeRiskCount ? pluralize(activeRiskCount, 'notable risk') : 'No notable risks',
-      hint: activeRiskCount
-        ? 'View risk detail.'
-        : 'No linked risks.',
     },
     {
       key: 'documents',
       label: 'Documents',
       value: node.metrics.documentCount ? pluralize(node.metrics.documentCount, 'supporting file') : 'No supporting files',
-      hint: node.metrics.documentCount
-        ? 'View documents.'
-        : 'No linked documents.',
     },
   ];
 }
@@ -610,9 +612,6 @@ function openDetail(detailKey) {
   }
   state.activeDetail = nextDetail;
   render();
-  if (state.activeDetail && window.matchMedia('(max-width: 1120px)').matches) {
-    focusZone.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
 }
 
 function closeDetail() {
@@ -622,7 +621,7 @@ function closeDetail() {
 
 function togglePreviewMore(detailKey) {
   state.expandedPreviewByDetail[detailKey] = !state.expandedPreviewByDetail[detailKey];
-  renderFocus();
+  render();
 }
 
 function buildStructureLayout(rootNode, viewportWidth) {
@@ -727,17 +726,14 @@ function renderStructureSummary() {
     {
       label: 'Detailed work',
       value: pluralize(countsByLevel.get(3) || 0, 'element'),
-      hint: 'Detailed work, leftmost.',
     },
     {
       label: 'Major parts',
       value: pluralize(countsByLevel.get(2) || 0, 'element'),
-      hint: 'Major branches.',
     },
     {
       label: 'Program roll-up',
       value: pluralize(countsByLevel.get(1) || 0, 'program node'),
-      hint: 'The full program, rightmost.',
     },
   ];
 
@@ -747,7 +743,6 @@ function renderStructureSummary() {
         <article class="structure-level-card">
           <p class="structure-level-card__label">${escapeHtml(card.label)}</p>
           <p class="structure-level-card__value">${escapeHtml(card.value)}</p>
-          <p class="structure-level-card__hint">${escapeHtml(card.hint)}</p>
         </article>
       `,
     )
@@ -833,7 +828,7 @@ function renderStructureView() {
     ? hasMatches
       ? `${pluralize(state.searchMatches.size, 'matching branch')} highlighted in Structure View while the full hierarchy remains visible.`
       : 'No matches. Full hierarchy still shown.'
-    : 'The full roll-up, left to right.';
+    : '';
 
   renderStructureSummary();
   const viewportWidth = Math.max(structureViewport.clientWidth - 36, 920);
@@ -931,7 +926,7 @@ function renderTree() {
 
   treeStatus.textContent = queryActive
     ? `${pluralize(state.searchMatches.size, 'matching branch')} shown with its context.`
-    : 'Click to expand. Pick a branch to see detail.';
+    : '';
 
   treeElement.innerHTML = renderTreeBranch(rootNode);
 }
@@ -972,154 +967,53 @@ function renderListGrid(items, renderItem) {
   return `<div class="list-grid">${items.map(renderItem).join('')}</div>`;
 }
 
-function buildDetailScopeNote(detailKey) {
-  return {
-    cost: 'This view summarizes the linked cost records attached to the selected branch.',
-    schedule: 'This view summarizes the linked schedule records attached to the selected branch.',
-    risks: 'This view summarizes the linked risk records attached to the selected branch.',
-    documents: 'This view summarizes the linked documents and terms attached to the selected branch.',
-  }[detailKey];
-}
-
-function buildLensInterpretation(node, detailKey) {
+// One stat line atop each lens list, replacing the takeaway card grid.
+function buildLensStatLine(node, detailKey) {
   if (detailKey === 'cost') {
-    if (!node.related.cost.estimates.length) {
-      return 'No linked cost data.';
-    }
-    const topType = node.related.cost.byType[0]?.label || 'linked estimate items';
-    return `This branch carries a measurable cost footprint, led by ${topType.toLowerCase()} and a focused set of linked estimate items.`;
+    if (!node.related.cost.totalBaseCost && !node.related.cost.estimates.length) return 'No linked cost.';
+    const parts = [];
+    if (node.related.cost.totalBaseCost) parts.push(`${formatMillions(node.related.cost.totalBaseCost)} base estimate`);
+    if (node.related.cost.estimates.length) parts.push(pluralize(node.related.cost.estimates.length, 'linked item'));
+    if (node.related.cost.byType[0]?.label) parts.push(`led by ${node.related.cost.byType[0].label.toLowerCase()}`);
+    return parts.join(' · ');
   }
 
   if (detailKey === 'schedule') {
-    if (!node.metrics.taskCount) {
-      return 'No linked schedule data.';
-    }
-    return 'The linked schedule records show how work in this branch unfolds over time, where milestone dates appear, and whether any critical tasks stand out.';
+    if (!node.metrics.taskCount) return 'No linked schedule.';
+    return [
+      formatDateRange(node.related.schedule.startDate, node.related.schedule.endDate),
+      pluralize(node.metrics.taskCount, 'task'),
+      pluralize(node.related.schedule.milestones.length, 'milestone'),
+      pluralize(node.related.schedule.criticalCount, 'critical task'),
+    ].join(' · ');
   }
 
   if (detailKey === 'risks') {
-    if (!node.metrics.riskCount) {
-      return 'No linked risks.';
-    }
-    return 'The linked risk set shows how many active issues affect this branch and which one carries the highest score.';
-  }
-
-  if (!node.metrics.documentCount) {
-    return 'No linked documents.';
-  }
-  return 'The linked documents show the main source material and terminology associated with this branch.';
-}
-
-function buildLensTakeaways(node, detailKey) {
-  if (detailKey === 'cost') {
+    if (!node.related.risks.totalCount) return 'No linked risks.';
     return [
-      {
-        label: 'Main signal',
-        headline: node.related.cost.byType[0]?.label || 'No dominant cost driver',
-        text: node.related.cost.estimates.length
-          ? `${pluralize(node.related.cost.estimates.length, 'linked cost item')} shape the current picture.`
-          : 'No linked cost items are attached to this branch.',
-      },
-      {
-        label: 'Visible estimate',
-        headline: node.related.cost.totalBaseCost ? formatMillions(node.related.cost.totalBaseCost) : 'No estimate linked',
-        text: node.related.cost.totalBaseCost
-          ? 'This is the rolled-up base estimate attached to the branch.'
-          : 'No rolled-up estimate is attached to this branch.',
-      },
-    ];
+      `${node.related.risks.activeCount} active of ${pluralize(node.related.risks.totalCount, 'linked risk')}`,
+      `highest score ${formatNumber(node.related.risks.highestScore)}`,
+    ].join(' · ');
   }
 
-  if (detailKey === 'schedule') {
-    return [
-      {
-        label: 'Schedule at a glance',
-        headline: formatDateRange(node.related.schedule.startDate, node.related.schedule.endDate),
-        text: node.metrics.taskCount
-          ? 'This is the visible timing span for the branch in the current schedule extract.'
-          : 'No linked schedule dates are attached to this branch right now.',
-      },
-      {
-        label: 'Primary pacing signal',
-        headline: node.related.schedule.milestones.length
-          ? pluralize(node.related.schedule.milestones.length, 'milestone')
-          : node.related.schedule.criticalCount
-            ? pluralize(node.related.schedule.criticalCount, 'critical task')
-            : 'No key dates yet',
-        text: node.related.schedule.milestones.length
-          ? 'Milestones are the clearest timing signal in this branch.'
-          : node.related.schedule.criticalCount
-            ? 'Critical tasks are the clearest timing signal in this branch.'
-            : 'No key dates are attached to this branch in the current extract.',
-      },
-    ];
-  }
-
-  if (detailKey === 'risks') {
-    return [
-      {
-        label: 'Current exposure',
-        headline: node.related.risks.activeCount ? pluralize(node.related.risks.activeCount, 'active risk') : 'No active risks',
-        text: node.related.risks.activeCount
-          ? 'This is the number of currently active risk items attached to the branch.'
-          : 'Nothing currently stands out as an active risk signal here.',
-      },
-      {
-        label: 'Strongest signal',
-        headline: node.related.risks.highestScore ? `Score ${formatNumber(node.related.risks.highestScore)}` : 'No scored issue',
-        text: node.related.risks.highestScore
-          ? 'The highest linked risk score is used as the headline indicator for this branch.'
-          : 'No scored issue is attached to this branch.',
-      },
-    ];
-  }
-
+  if (!node.metrics.documentCount && !node.metrics.glossaryCount) return 'No linked documents.';
   return [
-    {
-      label: 'Support footprint',
-      headline: node.metrics.documentCount ? pluralize(node.metrics.documentCount, 'supporting file') : 'No linked files',
-      text: node.metrics.documentCount
-        ? 'This is the number of tracked documents attached to the branch.'
-        : 'The current tracker does not attach documents to this branch.',
-    },
-    {
-      label: 'Main document type',
-      headline: node.related.documents.byType[0]?.label || 'No dominant type',
-      text: node.related.documents.byType.length
-        ? 'This is the strongest document category linked to the branch.'
-        : 'No dominant document type is attached here.',
-    },
-  ];
+    pluralize(node.metrics.documentCount, 'tracked document'),
+    node.related.documents.byType[0]?.label ? `mostly ${node.related.documents.byType[0].label}` : '',
+    pluralize(node.metrics.glossaryCount, 'glossary term'),
+  ]
+    .filter(Boolean)
+    .join(' · ');
 }
 
-function renderTakeawayCards(items) {
-  return `
-    <section class="preview-takeaways">
-      ${items
-        .map(
-          (item) => `
-            <article class="preview-takeaway">
-              <p class="preview-takeaway__label">${escapeHtml(item.label)}</p>
-              <h3 class="preview-takeaway__headline">${escapeHtml(item.headline)}</h3>
-              <p class="preview-takeaway__text">${escapeHtml(item.text)}</p>
-            </article>
-          `,
-        )
-        .join('')}
-    </section>
-  `;
-}
-
-function renderPreviewSection({ detailKey, eyebrow, title, text, items, renderItem, expandedLabel, collapsedLabel }) {
+function renderPreviewSection({ detailKey, title, items, renderItem, expandedLabel, collapsedLabel }) {
   const expanded = state.expandedPreviewByDetail[detailKey];
   const visibleItems = items.slice(0, expanded ? 5 : 2);
   const canToggle = items.length > 2;
 
   return `
     <section class="focus-block">
-      <p class="focus-block__eyebrow">${escapeHtml(eyebrow)}</p>
       <h3 class="focus-block__title">${escapeHtml(title)}</h3>
-      <p class="focus-block__text">${escapeHtml(text)}</p>
       ${renderListGrid(visibleItems, renderItem)}
       ${canToggle ? `
         <div class="preview-actions">
@@ -1135,13 +1029,14 @@ function renderPreviewSection({ detailKey, eyebrow, title, text, items, renderIt
 function renderOverview() {
   const node = state.nodesById.get(state.selectedId);
   if (!node) {
-    overviewContent.innerHTML = '<section class="empty-state"><h2>Select a program part</h2><p>Choose a branch from the structure to begin.</p></section>';
+    overviewContent.innerHTML = '<section class="empty-state"><h2>No branch selected</h2><p>Pick a branch from the structure to begin.</p></section>';
     return;
   }
 
   const lensCards = buildLensCards(node);
   overviewContent.innerHTML = `
     <section class="overview-shell">
+      ${buildScopePillHtml(getScope())}
       ${buildContextBanner(node)}
       <section class="overview-hero">
         <p class="overview-hero__code">${escapeHtml(node.id)}</p>
@@ -1159,28 +1054,24 @@ function renderOverview() {
         ${lensCards
           .map(
             (card) => `
-              <button class="lens-card ${state.activeDetail === card.key ? 'lens-card--active' : ''}" type="button" data-action="open-detail" data-detail="${escapeHtml(card.key)}">
+              <button class="lens-card ${state.activeDetail === card.key ? 'lens-card--active' : ''}" type="button" data-action="open-detail" data-detail="${escapeHtml(card.key)}" aria-expanded="${String(state.activeDetail === card.key)}">
                 <span class="lens-card__label">${escapeHtml(card.label)}</span>
                 <span class="lens-card__value">${escapeHtml(card.value)}</span>
-                <span class="lens-card__hint">${escapeHtml(card.hint)}</span>
               </button>
             `,
           )
           .join('')}
       </section>
-      ${renderConnectedViews(node)}
+      ${state.activeDetail ? renderLensDetail(node) : renderConnectedViews(node)}
     </section>
   `;
 }
 
 function renderCostDetail(node) {
   return `
-    ${renderTakeawayCards(buildLensTakeaways(node, 'cost'))}
     ${renderPreviewSection({
       detailKey: 'cost',
-      eyebrow: 'Linked items',
       title: 'Linked cost items',
-      text: 'Sample cost items linked to this branch.',
       items: node.related.cost.estimates.length
         ? node.related.cost.estimates
         : node.related.cost.contractHighlights,
@@ -1212,12 +1103,9 @@ function renderScheduleDetail(node) {
   ];
 
   return `
-    ${renderTakeawayCards(buildLensTakeaways(node, 'schedule'))}
     ${renderPreviewSection({
       detailKey: 'schedule',
-      eyebrow: 'Timeline',
       title: 'Linked milestones and tasks',
-      text: 'Sample milestones and tasks linked to this branch.',
       items: schedulePreviewItems,
       renderItem: ({ kind, item }) => `
         <article class="list-card">
@@ -1242,12 +1130,9 @@ function renderScheduleDetail(node) {
 
 function renderRiskDetail(node) {
   return `
-    ${renderTakeawayCards(buildLensTakeaways(node, 'risks'))}
     ${renderPreviewSection({
       detailKey: 'risks',
-      eyebrow: 'Open items',
       title: 'Linked risks',
-      text: 'Risks linked to this branch.',
       items: node.related.risks.items,
       renderItem: (item) => `
         <article class="list-card list-card--risk">
@@ -1265,12 +1150,9 @@ function renderRiskDetail(node) {
 
 function renderDocumentDetail(node) {
   return `
-    ${renderTakeawayCards(buildLensTakeaways(node, 'documents'))}
     ${renderPreviewSection({
       detailKey: 'documents',
-      eyebrow: 'Reference material',
       title: 'Linked files and terms',
-      text: 'Files and glossary terms linked to this branch.',
       items: node.related.documents.items.length
         ? node.related.documents.items
         : node.related.glossary.items,
@@ -1298,15 +1180,9 @@ function renderDocumentDetail(node) {
   `;
 }
 
-function renderFocus() {
-  const node = state.nodesById.get(state.selectedId);
-  if (!node || !state.activeDetail || state.viewMode === 'structure') {
-    focusZone.hidden = true;
-    focusContent.innerHTML = '';
-    workspace.classList.remove('workspace--detail-open');
-    return;
-  }
-
+// Lens detail expands in place inside the overview, swapping with the
+// connected-views block; there is no third column.
+function renderLensDetail(node) {
   const detailRenderers = {
     cost: renderCostDetail,
     schedule: renderScheduleDetail,
@@ -1314,9 +1190,9 @@ function renderFocus() {
     documents: renderDocumentDetail,
   };
   const detailKey = state.activeDetail;
-  focusZone.hidden = false;
-  workspace.classList.add('workspace--detail-open');
-  focusContent.innerHTML = `
+  if (!detailKey || !detailRenderers[detailKey]) return '';
+
+  return `
     <section class="focus-shell">
       <header class="focus-shell__header">
         <div class="focus-shell__header-row">
@@ -1326,7 +1202,7 @@ function renderFocus() {
           </div>
           <button class="focus-close" type="button" data-action="close-detail">Close</button>
         </div>
-        <p class="focus-summary">${escapeHtml(buildLensInterpretation(node, detailKey))}</p>
+        <p class="focus-summary">${escapeHtml(buildLensStatLine(node, detailKey))}</p>
         ${renderFocusActions(node)}
       </header>
       ${detailRenderers[detailKey](node)}
@@ -1356,9 +1232,9 @@ function renderNavigationMode() {
 }
 
 function render() {
+  buildIntroSignals();
   renderOverview();
   renderNavigationMode();
-  renderFocus();
   syncUrlState();
   syncSuiteNavigation();
 }
@@ -1440,9 +1316,29 @@ treeElement.addEventListener('click', (event) => {
 });
 
 overviewContent.addEventListener('click', (event) => {
+  const clearScopeControl = event.target.closest('[data-action="clear-scope"]');
+  if (clearScopeControl) {
+    delete state.sharedContext.wbs;
+    selectNode(state.data?.rootId || '');
+    return;
+  }
+
   const resetControl = event.target.closest('[data-action="reset-view"]');
   if (resetControl) {
     resetView();
+    return;
+  }
+
+  const toggleControl = event.target.closest('[data-action="toggle-more"]');
+  if (toggleControl) {
+    const toggleKey = toggleControl.dataset.detail;
+    if (toggleKey && DETAIL_META[toggleKey]) togglePreviewMore(toggleKey);
+    return;
+  }
+
+  const closeControl = event.target.closest('[data-action="close-detail"]');
+  if (closeControl) {
+    closeDetail();
     return;
   }
 
@@ -1450,18 +1346,6 @@ overviewContent.addEventListener('click', (event) => {
   if (!control) return;
   const detailKey = control.dataset.detail;
   if (detailKey && DETAIL_META[detailKey]) openDetail(detailKey);
-});
-
-focusContent.addEventListener('click', (event) => {
-  const toggleControl = event.target.closest('[data-action="toggle-more"]');
-  if (toggleControl) {
-    const detailKey = toggleControl.dataset.detail;
-    if (detailKey && DETAIL_META[detailKey]) togglePreviewMore(detailKey);
-    return;
-  }
-
-  const control = event.target.closest('[data-action="close-detail"]');
-  if (control) closeDetail();
 });
 
 structureView.addEventListener('click', (event) => {

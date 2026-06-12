@@ -655,6 +655,50 @@ code {
   font-size: 0.86rem;
 }
 
+.band-header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 10px 2px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.band-header__label {
+  font-size: 0.86rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.band-header__range {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.band-header--critical .band-header__label {
+  color: #ffc1ba;
+}
+
+.band-header--high .band-header__label {
+  color: #ffe0ab;
+}
+
+.band-header--moderate .band-header__label {
+  color: #d0efff;
+}
+
+.band-header--watch .band-header__label {
+  color: #d3dae2;
+}
+
+.confidence-chip {
+  min-height: 24px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-soft);
+}
+
 .risk-pill--critical,
 .score-pill--critical {
   background: rgba(255, 125, 114, 0.14);

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-06T15:24:10.043Z",
+  "generatedAt": "2026-06-11T21:51:12.817Z",
   "documents": {
     "byId": {
       "doc-card": {
@@ -155,7 +155,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.0 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.0."
         },
         "documents": {
           "controlDocuments": [],
@@ -199,11 +199,11 @@
         },
         "risks": {
           "ids": [
-            "R-021",
-            "R-010"
+            "R-010",
+            "R-021"
           ],
           "primaryRiskId": "R-021",
-          "reason": "Showing risks linked directly to WBS 1.1 in the current risk roll-up."
+          "reason": "Showing the 2 register risks homed in WBS 1.1 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [
@@ -318,7 +318,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.1.1 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.1.1."
         },
         "documents": {
           "controlDocuments": [
@@ -378,7 +378,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.1.2 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.1.2."
         },
         "documents": {
           "controlDocuments": [],
@@ -425,7 +425,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.1.3 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.1.3."
         },
         "documents": {
           "controlDocuments": [
@@ -497,7 +497,7 @@
             "R-010"
           ],
           "primaryRiskId": "R-010",
-          "reason": "Showing risks linked directly to WBS 1.1.4 in the current risk roll-up."
+          "reason": "Showing the 1 register risks homed in WBS 1.1.4 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [
@@ -553,7 +553,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.1.5 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.1.5."
         },
         "documents": {
           "controlDocuments": [],
@@ -593,7 +593,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.1.6 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.1.6."
         },
         "documents": {
           "controlDocuments": [
@@ -650,7 +650,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.1.7 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.1.7."
         },
         "documents": {
           "controlDocuments": [],
@@ -695,7 +695,7 @@
             "R-001"
           ],
           "primaryRiskId": "R-001",
-          "reason": "Showing risks linked directly to WBS 1.2 in the current risk roll-up."
+          "reason": "Showing the 1 register risks homed in WBS 1.2 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [
@@ -857,7 +857,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.2.1 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.2.1."
         },
         "documents": {
           "controlDocuments": [
@@ -919,7 +919,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.2.2 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.2.2."
         },
         "documents": {
           "controlDocuments": [
@@ -1044,7 +1044,7 @@
             "R-001"
           ],
           "primaryRiskId": "R-001",
-          "reason": "Showing risks linked directly to WBS 1.2.3 in the current risk roll-up."
+          "reason": "Showing the 1 register risks homed in WBS 1.2.3 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [
@@ -1120,7 +1120,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.2.4 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.2.4."
         },
         "documents": {
           "controlDocuments": [],
@@ -1162,7 +1162,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.2.5 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.2.5."
         },
         "documents": {
           "controlDocuments": [],
@@ -1204,7 +1204,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.2.6 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.2.6."
         },
         "documents": {
           "controlDocuments": [],
@@ -1248,7 +1248,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.2.7 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.2.7."
         },
         "documents": {
           "controlDocuments": [],
@@ -1292,7 +1292,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.2.8 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.2.8."
         },
         "documents": {
           "controlDocuments": [],
@@ -1343,14 +1343,17 @@
         },
         "risks": {
           "ids": [
+            "R-001",
             "R-002",
             "R-005",
-            "R-014",
             "R-008",
-            "R-017"
+            "R-014",
+            "R-016",
+            "R-017",
+            "R-019"
           ],
-          "primaryRiskId": "R-002",
-          "reason": "Showing risks linked directly to WBS 1.3 in the current risk roll-up."
+          "primaryRiskId": "R-001",
+          "reason": "Showing the 8 register risks homed in WBS 1.3 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [
@@ -1455,7 +1458,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.3.1 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.3.1."
         },
         "documents": {
           "controlDocuments": [],
@@ -1502,7 +1505,7 @@
             "R-017"
           ],
           "primaryRiskId": "R-017",
-          "reason": "Showing risks linked directly to WBS 1.3.2 in the current risk roll-up."
+          "reason": "Showing the 1 register risks homed in WBS 1.3.2 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [],
@@ -1555,7 +1558,7 @@
             "R-008"
           ],
           "primaryRiskId": "R-005",
-          "reason": "Showing risks linked directly to WBS 1.3.3 in the current risk roll-up."
+          "reason": "Showing the 2 register risks homed in WBS 1.3.3 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [
@@ -1619,7 +1622,7 @@
             "R-002"
           ],
           "primaryRiskId": "R-002",
-          "reason": "Showing risks linked directly to WBS 1.3.4 in the current risk roll-up."
+          "reason": "Showing the 1 register risks homed in WBS 1.3.4 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [],
@@ -1666,7 +1669,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.3.5 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.3.5."
         },
         "documents": {
           "controlDocuments": [],
@@ -1711,7 +1714,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.3.6 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.3.6."
         },
         "documents": {
           "controlDocuments": [],
@@ -1758,7 +1761,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.3.7 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.3.7."
         },
         "documents": {
           "controlDocuments": [],
@@ -1809,7 +1812,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.3.8 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.3.8."
         },
         "documents": {
           "controlDocuments": [],
@@ -1863,13 +1866,15 @@
         },
         "risks": {
           "ids": [
+            "R-001",
             "R-003",
+            "R-009",
             "R-015",
-            "R-022",
-            "R-009"
+            "R-019",
+            "R-022"
           ],
-          "primaryRiskId": "R-003",
-          "reason": "Showing risks linked directly to WBS 1.4 in the current risk roll-up."
+          "primaryRiskId": "R-001",
+          "reason": "Showing the 6 register risks homed in WBS 1.4 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [
@@ -1999,7 +2004,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.4.1 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.4.1."
         },
         "documents": {
           "controlDocuments": [],
@@ -2046,11 +2051,11 @@
         },
         "risks": {
           "ids": [
-            "R-022",
-            "R-009"
+            "R-009",
+            "R-022"
           ],
           "primaryRiskId": "R-022",
-          "reason": "Showing risks linked directly to WBS 1.4.2 in the current risk roll-up."
+          "reason": "Showing the 2 register risks homed in WBS 1.4.2 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [],
@@ -2097,7 +2102,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.4.3 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.4.3."
         },
         "documents": {
           "controlDocuments": [],
@@ -2142,7 +2147,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.4.4 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.4.4."
         },
         "documents": {
           "controlDocuments": [],
@@ -2187,7 +2192,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.4.5 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.4.5."
         },
         "documents": {
           "controlDocuments": [],
@@ -2236,7 +2241,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.4.6 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.4.6."
         },
         "documents": {
           "controlDocuments": [],
@@ -2283,7 +2288,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.4.7 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.4.7."
         },
         "documents": {
           "controlDocuments": [
@@ -2347,7 +2352,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.4.8 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.4.8."
         },
         "documents": {
           "controlDocuments": [],
@@ -2395,7 +2400,7 @@
             "R-015"
           ],
           "primaryRiskId": "R-015",
-          "reason": "Showing risks linked directly to WBS 1.4.9 in the current risk roll-up."
+          "reason": "Showing the 1 register risks homed in WBS 1.4.9 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [],
@@ -2445,10 +2450,13 @@
         },
         "risks": {
           "ids": [
-            "R-006"
+            "R-006",
+            "R-010",
+            "R-013",
+            "R-015"
           ],
           "primaryRiskId": "R-006",
-          "reason": "Showing risks linked directly to WBS 1.5 in the current risk roll-up."
+          "reason": "Showing the 4 register risks homed in WBS 1.5 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [
@@ -2529,7 +2537,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.5.1 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.5.1."
         },
         "documents": {
           "controlDocuments": [],
@@ -2575,7 +2583,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.5.2 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.5.2."
         },
         "documents": {
           "controlDocuments": [],
@@ -2622,7 +2630,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.5.3 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.5.3."
         },
         "documents": {
           "controlDocuments": [],
@@ -2666,7 +2674,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.5.4 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.5.4."
         },
         "documents": {
           "controlDocuments": [],
@@ -2708,7 +2716,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.5.5 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.5.5."
         },
         "documents": {
           "controlDocuments": [],
@@ -2752,7 +2760,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.5.6 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.5.6."
         },
         "documents": {
           "controlDocuments": [],
@@ -2802,7 +2810,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.5.7 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.5.7."
         },
         "documents": {
           "controlDocuments": [
@@ -2864,7 +2872,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.5.8 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.5.8."
         },
         "documents": {
           "controlDocuments": [],
@@ -2909,10 +2917,12 @@
         },
         "risks": {
           "ids": [
+            "R-007",
+            "R-010",
             "R-016"
           ],
-          "primaryRiskId": "R-016",
-          "reason": "Showing risks linked directly to WBS 1.6 in the current risk roll-up."
+          "primaryRiskId": "R-007",
+          "reason": "Showing the 3 register risks homed in WBS 1.6 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [
@@ -2975,7 +2985,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.6.1 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.6.1."
         },
         "documents": {
           "controlDocuments": [],
@@ -3022,7 +3032,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.6.2 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.6.2."
         },
         "documents": {
           "controlDocuments": [],
@@ -3070,7 +3080,7 @@
             "R-016"
           ],
           "primaryRiskId": "R-016",
-          "reason": "Showing risks linked directly to WBS 1.6.3 in the current risk roll-up."
+          "reason": "Showing the 1 register risks homed in WBS 1.6.3 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [
@@ -3130,7 +3140,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.6.4 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.6.4."
         },
         "documents": {
           "controlDocuments": [],
@@ -3171,7 +3181,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.6.5 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.6.5."
         },
         "documents": {
           "controlDocuments": [],
@@ -3210,7 +3220,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.6.6 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.6.6."
         },
         "documents": {
           "controlDocuments": [],
@@ -3257,7 +3267,7 @@
             "R-012"
           ],
           "primaryRiskId": "R-012",
-          "reason": "Showing risks linked directly to WBS 1.7 in the current risk roll-up."
+          "reason": "Showing the 1 register risks homed in WBS 1.7 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [
@@ -3322,7 +3332,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.7.1 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.7.1."
         },
         "documents": {
           "controlDocuments": [],
@@ -3367,7 +3377,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.7.2 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.7.2."
         },
         "documents": {
           "controlDocuments": [],
@@ -3410,7 +3420,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.7.3 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.7.3."
         },
         "documents": {
           "controlDocuments": [],
@@ -3451,7 +3461,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.7.4 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.7.4."
         },
         "documents": {
           "controlDocuments": [],
@@ -3492,7 +3502,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.7.5 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.7.5."
         },
         "documents": {
           "controlDocuments": [],
@@ -3533,7 +3543,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.7.6 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.7.6."
         },
         "documents": {
           "controlDocuments": [],
@@ -3576,7 +3586,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.7.7 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.7.7."
         },
         "documents": {
           "controlDocuments": [],
@@ -3623,10 +3633,11 @@
         },
         "risks": {
           "ids": [
+            "R-010",
             "R-011"
           ],
-          "primaryRiskId": "R-011",
-          "reason": "Showing risks linked directly to WBS 1.8 in the current risk roll-up."
+          "primaryRiskId": "R-010",
+          "reason": "Showing the 2 register risks homed in WBS 1.8 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [
@@ -3688,7 +3699,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.8.1 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.8.1."
         },
         "documents": {
           "controlDocuments": [],
@@ -3733,7 +3744,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.8.2 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.8.2."
         },
         "documents": {
           "controlDocuments": [],
@@ -3779,7 +3790,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.8.3 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.8.3."
         },
         "documents": {
           "controlDocuments": [],
@@ -3824,7 +3835,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.8.4 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.8.4."
         },
         "documents": {
           "controlDocuments": [],
@@ -3871,7 +3882,7 @@
             "R-011"
           ],
           "primaryRiskId": "R-011",
-          "reason": "Showing risks linked directly to WBS 1.8.5 in the current risk roll-up."
+          "reason": "Showing the 1 register risks homed in WBS 1.8.5 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [
@@ -3938,7 +3949,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.8.6 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.8.6."
         },
         "documents": {
           "controlDocuments": [],
@@ -3989,11 +4000,11 @@
         },
         "risks": {
           "ids": [
-            "R-020",
-            "R-019"
+            "R-019",
+            "R-020"
           ],
           "primaryRiskId": "R-020",
-          "reason": "Showing risks linked directly to WBS 1.9 in the current risk roll-up."
+          "reason": "Showing the 2 register risks homed in WBS 1.9 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [
@@ -4070,7 +4081,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.9.1 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.9.1."
         },
         "documents": {
           "controlDocuments": [],
@@ -4119,7 +4130,7 @@
             "R-020"
           ],
           "primaryRiskId": "R-020",
-          "reason": "Showing risks linked directly to WBS 1.9.2 in the current risk roll-up."
+          "reason": "Showing the 1 register risks homed in WBS 1.9.2 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [
@@ -4179,7 +4190,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.9.3 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.9.3."
         },
         "documents": {
           "controlDocuments": [],
@@ -4226,7 +4237,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.9.4 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.9.4."
         },
         "documents": {
           "controlDocuments": [],
@@ -4270,7 +4281,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.9.5 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.9.5."
         },
         "documents": {
           "controlDocuments": [
@@ -4328,7 +4339,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.9.6 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.9.6."
         },
         "documents": {
           "controlDocuments": [],
@@ -4370,7 +4381,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.9.7 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.9.7."
         },
         "documents": {
           "controlDocuments": [],
@@ -4413,7 +4424,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.9.8 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.9.8."
         },
         "documents": {
           "controlDocuments": [],
@@ -4465,7 +4476,7 @@
             "R-013"
           ],
           "primaryRiskId": "R-004",
-          "reason": "Showing risks linked directly to WBS 1.10 in the current risk roll-up."
+          "reason": "Showing the 2 register risks homed in WBS 1.10 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [
@@ -4533,7 +4544,7 @@
             "R-004"
           ],
           "primaryRiskId": "R-004",
-          "reason": "Showing risks linked directly to WBS 1.10.1 in the current risk roll-up."
+          "reason": "Showing the 1 register risks homed in WBS 1.10.1 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [
@@ -4599,7 +4610,7 @@
             "R-013"
           ],
           "primaryRiskId": "R-013",
-          "reason": "Showing risks linked directly to WBS 1.10.2 in the current risk roll-up."
+          "reason": "Showing the 1 register risks homed in WBS 1.10.2 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [],
@@ -4647,7 +4658,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.10.3 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.10.3."
         },
         "documents": {
           "controlDocuments": [],
@@ -4693,7 +4704,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.10.4 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.10.4."
         },
         "documents": {
           "controlDocuments": [],
@@ -4734,7 +4745,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.10.5 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.10.5."
         },
         "documents": {
           "controlDocuments": [],
@@ -4775,7 +4786,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.10.6 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.10.6."
         },
         "documents": {
           "controlDocuments": [],
@@ -4820,7 +4831,7 @@
             "R-007"
           ],
           "primaryRiskId": "R-007",
-          "reason": "Showing risks linked directly to WBS 1.11 in the current risk roll-up."
+          "reason": "Showing the 1 register risks homed in WBS 1.11 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [
@@ -4893,7 +4904,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.11.1 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.11.1."
         },
         "documents": {
           "controlDocuments": [],
@@ -4939,7 +4950,7 @@
             "R-007"
           ],
           "primaryRiskId": "R-007",
-          "reason": "Showing risks linked directly to WBS 1.11.2 in the current risk roll-up."
+          "reason": "Showing the 1 register risks homed in WBS 1.11.2 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [
@@ -5000,7 +5011,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.11.3 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.11.3."
         },
         "documents": {
           "controlDocuments": [],
@@ -5044,7 +5055,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.11.4 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.11.4."
         },
         "documents": {
           "controlDocuments": [
@@ -5102,7 +5113,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.11.5 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.11.5."
         },
         "documents": {
           "controlDocuments": [],
@@ -5145,7 +5156,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.11.6 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.11.6."
         },
         "documents": {
           "controlDocuments": [],
@@ -5191,7 +5202,7 @@
             "R-018"
           ],
           "primaryRiskId": "R-018",
-          "reason": "Showing risks linked directly to WBS 1.12 in the current risk roll-up."
+          "reason": "Showing the 1 register risks homed in WBS 1.12 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [
@@ -5291,7 +5302,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.12.1 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.12.1."
         },
         "documents": {
           "controlDocuments": [
@@ -5352,7 +5363,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.12.2 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.12.2."
         },
         "documents": {
           "controlDocuments": [
@@ -5425,7 +5436,7 @@
             "R-018"
           ],
           "primaryRiskId": "R-018",
-          "reason": "Showing risks linked directly to WBS 1.12.3 in the current risk roll-up."
+          "reason": "Showing the 1 register risks homed in WBS 1.12.3 or tied to it through an element association."
         },
         "documents": {
           "controlDocuments": [],
@@ -5469,7 +5480,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.12.4 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.12.4."
         },
         "documents": {
           "controlDocuments": [],
@@ -5512,7 +5523,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.12.5 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.12.5."
         },
         "documents": {
           "controlDocuments": [],
@@ -5555,7 +5566,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.12.6 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.12.6."
         },
         "documents": {
           "controlDocuments": [],
@@ -5598,7 +5609,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.12.7 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.12.7."
         },
         "documents": {
           "controlDocuments": [],
@@ -5639,7 +5650,7 @@
         "risks": {
           "ids": [],
           "primaryRiskId": "",
-          "reason": "No direct risks are linked to WBS 1.12.8 in the current register."
+          "reason": "No risks in the current register are homed in or associated with WBS 1.12.8."
         },
         "documents": {
           "controlDocuments": [],
@@ -8352,7 +8363,9 @@
         "primaryWbsId": "1.2",
         "wbsIds": [
           "1.2",
-          "1.2.3"
+          "1.2.3",
+          "1.3",
+          "1.4"
         ],
         "milestoneIds": [
           "M-002",
@@ -8765,6 +8778,73 @@
         },
         "reason": "Risk R-004 is tied most directly to WBS 1.10 in the current register and schedule cross-links."
       },
+      "R-005": {
+        "id": "R-005",
+        "title": "PPE AEPS Thruster Anomaly During Transit or Demo",
+        "primaryWbsId": "1.3",
+        "wbsIds": [
+          "1.3",
+          "1.3.3"
+        ],
+        "milestoneIds": [
+          "M-003",
+          "M-010",
+          "M-013"
+        ],
+        "primaryMilestoneId": "M-003",
+        "documents": {
+          "controlDocuments": [
+            {
+              "id": "CD-002",
+              "name": "PPE System Requirements Specification (SRS)",
+              "type": "Requirements",
+              "status": "Approved",
+              "evidenceRole": "baseline_definition"
+            },
+            {
+              "id": "CD-012",
+              "name": "PPE Critical Design Review Package",
+              "type": "Review Package",
+              "status": "Approved",
+              "evidenceRole": "technical_evidence"
+            },
+            {
+              "id": "CD-017",
+              "name": "PPE Failure Modes and Effects Analysis (FMEA)",
+              "type": "Reliability",
+              "status": "Approved",
+              "evidenceRole": "execution_support"
+            }
+          ],
+          "sourceDocIds": [
+            "doc-source-register",
+            "doc-master-schedule",
+            "doc-doc-tracker",
+            "doc-card",
+            "doc-risk-register",
+            "doc-cost-basis",
+            "doc-cost-detail",
+            "doc-cost-estimate",
+            "doc-glossary",
+            "doc-milestones",
+            "doc-section-b",
+            "doc-wbs-dictionary",
+            "doc-wbs"
+          ]
+        },
+        "cost": {
+          "anchorId": "ppe",
+          "categoryIds": [
+            "1.3"
+          ]
+        },
+        "simulation": {
+          "moduleKeys": [
+            "PPE"
+          ]
+        },
+        "reason": "Risk R-005 is tied most directly to WBS 1.3 in the current register and schedule cross-links."
+      },
       "R-006": {
         "id": "R-006",
         "title": "I-HAB Schedule Slip Affecting Artemis IV Co-Manifest",
@@ -8982,8 +9062,9 @@
       "R-007": {
         "id": "R-007",
         "title": "DSN Capacity Contention During Crewed Operations",
-        "primaryWbsId": "1.11",
+        "primaryWbsId": "1.6",
         "wbsIds": [
+          "1.6",
           "1.11",
           "1.11.2"
         ],
@@ -9123,15 +9204,97 @@
           ]
         },
         "cost": {
-          "anchorId": "backbone",
+          "anchorId": "esprit",
           "categoryIds": [
-            "1.11"
+            "1.6"
           ]
         },
         "simulation": {
           "moduleKeys": []
         },
-        "reason": "Risk R-007 is tied most directly to WBS 1.11 in the current register and schedule cross-links."
+        "reason": "Risk R-007 is tied most directly to WBS 1.6 in the current register and schedule cross-links."
+      },
+      "R-008": {
+        "id": "R-008",
+        "title": "Xenon Propellant Supply Chain Constraint",
+        "primaryWbsId": "1.3",
+        "wbsIds": [
+          "1.3",
+          "1.3.3"
+        ],
+        "milestoneIds": [],
+        "primaryMilestoneId": "M-003",
+        "documents": {
+          "controlDocuments": [],
+          "sourceDocIds": [
+            "doc-risk-register",
+            "doc-master-schedule",
+            "doc-milestones",
+            "doc-doc-tracker",
+            "doc-card",
+            "doc-cost-basis",
+            "doc-cost-detail",
+            "doc-cost-estimate",
+            "doc-glossary",
+            "doc-section-b",
+            "doc-source-register",
+            "doc-wbs-dictionary",
+            "doc-wbs"
+          ]
+        },
+        "cost": {
+          "anchorId": "ppe",
+          "categoryIds": [
+            "1.3"
+          ]
+        },
+        "simulation": {
+          "moduleKeys": [
+            "PPE"
+          ]
+        },
+        "reason": "Risk R-008 is tied most directly to WBS 1.3 in the current register and schedule cross-links."
+      },
+      "R-009": {
+        "id": "R-009",
+        "title": "HALO ECLSS Performance Shortfall Requiring Rework",
+        "primaryWbsId": "1.4",
+        "wbsIds": [
+          "1.4",
+          "1.4.2"
+        ],
+        "milestoneIds": [],
+        "primaryMilestoneId": "M-005",
+        "documents": {
+          "controlDocuments": [],
+          "sourceDocIds": [
+            "doc-risk-register",
+            "doc-doc-tracker",
+            "doc-card",
+            "doc-cost-basis",
+            "doc-cost-detail",
+            "doc-cost-estimate",
+            "doc-glossary",
+            "doc-master-schedule",
+            "doc-milestones",
+            "doc-section-b",
+            "doc-source-register",
+            "doc-wbs-dictionary",
+            "doc-wbs"
+          ]
+        },
+        "cost": {
+          "anchorId": "halo",
+          "categoryIds": [
+            "1.4"
+          ]
+        },
+        "simulation": {
+          "moduleKeys": [
+            "MHC"
+          ]
+        },
+        "reason": "Risk R-009 is tied most directly to WBS 1.4 in the current register and schedule cross-links."
       },
       "R-010": {
         "id": "R-010",
@@ -9139,7 +9302,10 @@
         "primaryWbsId": "1.1",
         "wbsIds": [
           "1.1",
-          "1.1.4"
+          "1.1.4",
+          "1.5",
+          "1.6",
+          "1.8"
         ],
         "milestoneIds": [
           "M-008",
@@ -9272,6 +9438,46 @@
         },
         "reason": "Risk R-010 is tied most directly to WBS 1.1 in the current register and schedule cross-links."
       },
+      "R-011": {
+        "id": "R-011",
+        "title": "Canadarm3 AI Autonomy Software Maturity Below Required TRL",
+        "primaryWbsId": "1.8",
+        "wbsIds": [
+          "1.8",
+          "1.8.5"
+        ],
+        "milestoneIds": [],
+        "primaryMilestoneId": "M-035",
+        "documents": {
+          "controlDocuments": [],
+          "sourceDocIds": [
+            "doc-risk-register",
+            "doc-doc-tracker",
+            "doc-cost-basis",
+            "doc-cost-detail",
+            "doc-cost-estimate",
+            "doc-glossary",
+            "doc-master-schedule",
+            "doc-milestones",
+            "doc-section-b",
+            "doc-source-register",
+            "doc-wbs-dictionary",
+            "doc-wbs"
+          ]
+        },
+        "cost": {
+          "anchorId": "canadarm3",
+          "categoryIds": [
+            "1.8"
+          ]
+        },
+        "simulation": {
+          "moduleKeys": [
+            "EVR"
+          ]
+        },
+        "reason": "Risk R-011 is tied most directly to WBS 1.8 in the current register and schedule cross-links."
+      },
       "R-012": {
         "id": "R-012",
         "title": "UAE Airlock Development Schedule Slip or Descope",
@@ -9380,8 +9586,9 @@
       "R-013": {
         "id": "R-013",
         "title": "SLS Block 1B Unavailability for Artemis IV I-HAB Launch",
-        "primaryWbsId": "1.10",
+        "primaryWbsId": "1.5",
         "wbsIds": [
+          "1.5",
           "1.10",
           "1.10.2"
         ],
@@ -9404,6 +9611,7 @@
             "doc-milestones",
             "doc-risk-register",
             "doc-doc-tracker",
+            "doc-card",
             "doc-cost-basis",
             "doc-cost-detail",
             "doc-cost-estimate",
@@ -9415,15 +9623,84 @@
           ]
         },
         "cost": {
-          "anchorId": "launch",
+          "anchorId": "ihab",
           "categoryIds": [
-            "1.10"
+            "1.5"
           ]
         },
         "simulation": {
-          "moduleKeys": []
+          "moduleKeys": [
+            "IHAB",
+            "USHAB"
+          ]
         },
-        "reason": "Risk R-013 is tied most directly to WBS 1.10 in the current register and schedule cross-links."
+        "reason": "Risk R-013 is tied most directly to WBS 1.5 in the current register and schedule cross-links."
+      },
+      "R-014": {
+        "id": "R-014",
+        "title": "Micrometeoroid and Orbital Debris Impact During Uncrewed Dwell",
+        "primaryWbsId": "1.3",
+        "wbsIds": [
+          "1.3"
+        ],
+        "milestoneIds": [
+          "M-003",
+          "M-010",
+          "M-013"
+        ],
+        "primaryMilestoneId": "M-003",
+        "documents": {
+          "controlDocuments": [
+            {
+              "id": "CD-002",
+              "name": "PPE System Requirements Specification (SRS)",
+              "type": "Requirements",
+              "status": "Approved",
+              "evidenceRole": "baseline_definition"
+            },
+            {
+              "id": "CD-012",
+              "name": "PPE Critical Design Review Package",
+              "type": "Review Package",
+              "status": "Approved",
+              "evidenceRole": "technical_evidence"
+            },
+            {
+              "id": "CD-017",
+              "name": "PPE Failure Modes and Effects Analysis (FMEA)",
+              "type": "Reliability",
+              "status": "Approved",
+              "evidenceRole": "execution_support"
+            }
+          ],
+          "sourceDocIds": [
+            "doc-source-register",
+            "doc-master-schedule",
+            "doc-doc-tracker",
+            "doc-card",
+            "doc-risk-register",
+            "doc-cost-basis",
+            "doc-cost-detail",
+            "doc-cost-estimate",
+            "doc-glossary",
+            "doc-milestones",
+            "doc-section-b",
+            "doc-wbs-dictionary",
+            "doc-wbs"
+          ]
+        },
+        "cost": {
+          "anchorId": "ppe",
+          "categoryIds": [
+            "1.3"
+          ]
+        },
+        "simulation": {
+          "moduleKeys": [
+            "PPE"
+          ]
+        },
+        "reason": "Risk R-014 is tied most directly to WBS 1.3 in the current register and schedule cross-links."
       },
       "R-015": {
         "id": "R-015",
@@ -9431,7 +9708,8 @@
         "primaryWbsId": "1.4",
         "wbsIds": [
           "1.4",
-          "1.4.9"
+          "1.4.9",
+          "1.5"
         ],
         "milestoneIds": [
           "M-005",
@@ -9496,13 +9774,14 @@
       "R-016": {
         "id": "R-016",
         "title": "Xenon On-Orbit Transfer Technology Readiness Gap",
-        "primaryWbsId": "1.6",
+        "primaryWbsId": "1.3",
         "wbsIds": [
+          "1.3",
           "1.6",
           "1.6.3"
         ],
         "milestoneIds": [],
-        "primaryMilestoneId": "M-033",
+        "primaryMilestoneId": "M-003",
         "documents": {
           "controlDocuments": [],
           "sourceDocIds": [
@@ -9522,15 +9801,58 @@
           ]
         },
         "cost": {
-          "anchorId": "esprit",
+          "anchorId": "ppe",
           "categoryIds": [
-            "1.6"
+            "1.3"
           ]
         },
         "simulation": {
-          "moduleKeys": []
+          "moduleKeys": [
+            "PPE"
+          ]
         },
-        "reason": "Risk R-016 is tied most directly to WBS 1.6 in the current register and schedule cross-links."
+        "reason": "Risk R-016 is tied most directly to WBS 1.3 in the current register and schedule cross-links."
+      },
+      "R-017": {
+        "id": "R-017",
+        "title": "Gateway Power Budget Shortfall During Peak Multi-Docked Configuration",
+        "primaryWbsId": "1.3",
+        "wbsIds": [
+          "1.3",
+          "1.3.2"
+        ],
+        "milestoneIds": [],
+        "primaryMilestoneId": "M-003",
+        "documents": {
+          "controlDocuments": [],
+          "sourceDocIds": [
+            "doc-risk-register",
+            "doc-doc-tracker",
+            "doc-card",
+            "doc-cost-basis",
+            "doc-cost-detail",
+            "doc-cost-estimate",
+            "doc-glossary",
+            "doc-master-schedule",
+            "doc-milestones",
+            "doc-section-b",
+            "doc-source-register",
+            "doc-wbs-dictionary",
+            "doc-wbs"
+          ]
+        },
+        "cost": {
+          "anchorId": "ppe",
+          "categoryIds": [
+            "1.3"
+          ]
+        },
+        "simulation": {
+          "moduleKeys": [
+            "PPE"
+          ]
+        },
+        "reason": "Risk R-017 is tied most directly to WBS 1.3 in the current register and schedule cross-links."
       },
       "R-018": {
         "id": "R-018",
@@ -9569,6 +9891,66 @@
           "moduleKeys": []
         },
         "reason": "Risk R-018 is tied most directly to WBS 1.12 in the current register and schedule cross-links."
+      },
+      "R-019": {
+        "id": "R-019",
+        "title": "Residual Supply Chain Disruption Affecting Long-Lead Electronics",
+        "primaryWbsId": "1.3",
+        "wbsIds": [
+          "1.3",
+          "1.4",
+          "1.9"
+        ],
+        "milestoneIds": [
+          "M-019",
+          "M-020"
+        ],
+        "primaryMilestoneId": "M-019",
+        "documents": {
+          "controlDocuments": [
+            {
+              "id": "CD-020",
+              "name": "PPE-HALO Environmental Test Plan",
+              "type": "Test Plan",
+              "status": "Approved",
+              "evidenceRole": "execution_support"
+            },
+            {
+              "id": "CD-021",
+              "name": "PPE-HALO Pre-Launch Processing Plan",
+              "type": "Operations Plan",
+              "status": "Draft",
+              "evidenceRole": "execution_support"
+            }
+          ],
+          "sourceDocIds": [
+            "doc-master-schedule",
+            "doc-doc-tracker",
+            "doc-risk-register",
+            "doc-source-register",
+            "doc-milestones",
+            "doc-card",
+            "doc-cost-basis",
+            "doc-cost-detail",
+            "doc-cost-estimate",
+            "doc-glossary",
+            "doc-section-b",
+            "doc-wbs-dictionary",
+            "doc-wbs"
+          ]
+        },
+        "cost": {
+          "anchorId": "ppe",
+          "categoryIds": [
+            "1.3"
+          ]
+        },
+        "simulation": {
+          "moduleKeys": [
+            "PPE"
+          ]
+        },
+        "reason": "Risk R-019 is tied most directly to WBS 1.3 in the current register and schedule cross-links."
       },
       "R-020": {
         "id": "R-020",
@@ -9791,11 +10173,14 @@
         "primaryWbsId": "1.3",
         "primaryMilestoneId": "M-003",
         "riskIds": [
+          "R-001",
           "R-002",
           "R-005",
-          "R-014",
           "R-008",
-          "R-017"
+          "R-014",
+          "R-016",
+          "R-017",
+          "R-019"
         ],
         "documents": {
           "controlDocuments": [
@@ -9879,10 +10264,12 @@
         "primaryWbsId": "1.4",
         "primaryMilestoneId": "M-005",
         "riskIds": [
+          "R-001",
           "R-003",
+          "R-009",
           "R-015",
-          "R-022",
-          "R-009"
+          "R-019",
+          "R-022"
         ],
         "documents": {
           "controlDocuments": [
@@ -10038,7 +10425,10 @@
         "primaryWbsId": "1.5",
         "primaryMilestoneId": "M-012",
         "riskIds": [
-          "R-006"
+          "R-006",
+          "R-010",
+          "R-013",
+          "R-015"
         ],
         "documents": {
           "controlDocuments": [
@@ -10099,6 +10489,8 @@
         "primaryWbsId": "1.6",
         "primaryMilestoneId": "M-033",
         "riskIds": [
+          "R-007",
+          "R-010",
           "R-016"
         ],
         "documents": {
@@ -10145,6 +10537,7 @@
         "primaryWbsId": "1.8",
         "primaryMilestoneId": "M-034",
         "riskIds": [
+          "R-010",
           "R-011"
         ],
         "documents": {
@@ -10242,11 +10635,11 @@
         "primaryWbsId": "1.1",
         "primaryMilestoneId": "M-008",
         "riskIds": [
-          "R-021",
           "R-010",
+          "R-021",
           "R-001",
-          "R-020",
           "R-019",
+          "R-020",
           "R-007",
           "R-018"
         ],
@@ -10550,7 +10943,7 @@
         "note": "Direct simulation-to-WBS match.",
         "costAnchorId": "ppe",
         "primaryMilestoneId": "M-003",
-        "primaryRiskId": "R-002",
+        "primaryRiskId": "R-001",
         "documents": {
           "controlDocuments": [
             {
@@ -10628,7 +11021,7 @@
         "note": "Mapped to HALO as the closest currently modeled habitation and logistics branch.",
         "costAnchorId": "halo",
         "primaryMilestoneId": "M-005",
-        "primaryRiskId": "R-003",
+        "primaryRiskId": "R-001",
         "documents": {
           "controlDocuments": [
             {
@@ -10880,7 +11273,7 @@
         "note": "Mapped to Canadarm3 as the matching robotic-system branch.",
         "costAnchorId": "canadarm3",
         "primaryMilestoneId": "M-035",
-        "primaryRiskId": "R-011",
+        "primaryRiskId": "R-010",
         "documents": {
           "controlDocuments": [
             {

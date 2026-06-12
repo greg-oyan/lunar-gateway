@@ -1,11 +1,14 @@
 ﻿import {
   applySuiteNav,
+  buildScopeEmptyStateHtml,
+  buildScopePillHtml,
   buildSuiteHref,
   getSharedContextEntries,
   hasSharedContext,
   loadSuiteCrosswalk,
   mergeQueryState,
   readSharedContext,
+  resolveScope,
 } from '../suite-assets/suite-context.js';
 
 const CROSSWALK_URL = '../suite-assets/data/gateway-crosswalk.json';
@@ -49,7 +52,7 @@ const viewDefinitions = {
   year: {
     kicker: 'Yearly Spend',
     heading: 'Spend over time',
-    subcopy: 'Click a year to see its total, reserve, and top drivers.',
+    subcopy: 'Annual totals, reserve, and top drivers.',
   },
   method: {
     kicker: 'Defensibility',
@@ -306,6 +309,22 @@ function getAnchorContext(anchorId = state.selectedAnchorId) {
   return state.crosswalk?.cost?.byAnchorId?.[anchorId] || null;
 }
 
+function getScope() {
+  return resolveScope(state.crosswalk, state.sharedContext?.wbs);
+}
+
+// Anchors whose groupIds intersect the scope subtree. Unscoped: all anchors.
+function getScopedAnchors(scope = getScope()) {
+  if (!scope) return state.anchors;
+  return state.anchors.filter((anchor) => anchor.groupIds.some((groupId) => scope.has(groupId)));
+}
+
+// The cost category matching the scope id; every WBS id in the estimate is a
+// category, so this is the scoped roll-up when it exists.
+function getScopeCategory(scope = getScope()) {
+  return scope ? state.categoriesById.get(scope.id) || null : null;
+}
+
 function resolveWbsContextAnchorId(wbsId = '') {
   const wbsContext = wbsId ? state.crosswalk?.wbs?.byId?.[wbsId] : null;
   return wbsContext?.cost.anchorId && state.anchorsById.has(wbsContext.cost.anchorId)
@@ -373,7 +392,8 @@ function buildCostNavContext(anchor = getCurrentAnchor()) {
   const sharedContext = buildCurrentContext(anchor);
   return {
     from: 'cost',
-    wbs: sharedContext.wbsId || '',
+    // An explicit scope wins; derived per-anchor context fills the gap.
+    wbs: getScope()?.id || sharedContext.wbsId || '',
     module: sharedContext.moduleKey || '',
     milestone: sharedContext.milestoneId || '',
     risk: sharedContext.riskId || '',
@@ -507,6 +527,11 @@ function buildSuiteAction(route, label, params) {
 }
 
 function renderContextBanner(anchor = getCurrentAnchor()) {
+  const scope = getScope();
+  if (scope) {
+    return buildScopePillHtml(scope, state.view === 'method' ? { note: 'Program-level view' } : {});
+  }
+
   const context = buildCurrentContext(anchor);
   const contextIsActive = hasSharedContext(state.sharedContext);
   if (!hasResettableState()) return '';
@@ -663,6 +688,26 @@ function setMethod(methodId) {
 }
 
 function buildHeroSignals() {
+  const scope = getScope();
+  const scopeCategory = getScopeCategory(scope);
+  if (scope && scopeCategory) {
+    return [
+      { label: `Scoped estimate (${scope.id})`, value: formatCompactCurrency(scopeCategory.baseUsd) },
+      {
+        label: 'Time span',
+        value: scopeCategory.startFy && scopeCategory.endFy
+          ? `FY${scopeCategory.startFy} - FY${scopeCategory.endFy}`
+          : 'Not stated',
+      },
+      {
+        label: 'Peak year',
+        value: scopeCategory.topYear
+          ? `${scopeCategory.topYear.fy} - ${formatCompactCurrency(scopeCategory.topYear.totalUsd)}`
+          : 'Not stated',
+      },
+    ];
+  }
+
   const busiestYear = state.data.overview.busiestYear;
   return [
     { label: 'Current estimate', value: formatCompactCurrency(state.data.overview.totalCostUsd) },
@@ -866,9 +911,9 @@ function renderProgramNode(anchor, activeAnchorId = state.selectedAnchorId) {
   `;
 }
 
-function renderGatewayScene(selectedAnchor, activeAnchorId = state.selectedAnchorId) {
-  const physicalAnchors = state.anchors.filter((anchor) => anchor.visualId);
-  const adjacentAnchors = state.anchors.filter((anchor) => !anchor.visualId);
+function renderGatewayScene(selectedAnchor, activeAnchorId = state.selectedAnchorId, anchors = state.anchors) {
+  const physicalAnchors = anchors.filter((anchor) => anchor.visualId);
+  const adjacentAnchors = anchors.filter((anchor) => !anchor.visualId);
   const selectedVisualId = selectedAnchor?.visualId || '';
 
   return `
@@ -985,12 +1030,14 @@ function renderGatewayScene(selectedAnchor, activeAnchorId = state.selectedAncho
       </div>
     </div>
 
+    ${adjacentAnchors.length ? `
     <div class="adjacent-program">
       <p class="adjacent-program__label">Adjacent program cost</p>
       <div class="adjacent-program__nodes">
         ${adjacentAnchors.map((anchor) => renderProgramNode(anchor, activeAnchorId)).join('')}
       </div>
     </div>
+    ` : ''}
   `;
 }
 
@@ -1223,6 +1270,43 @@ function renderAnchorSupport(anchor) {
 }
 
 function renderModuleView() {
+  const scope = getScope();
+  if (scope) {
+    const scopedAnchors = getScopedAnchors(scope);
+    if (!scopedAnchors.length) {
+      return `
+        <div class="module-story">
+          ${renderContextBanner(null)}
+          ${buildScopeEmptyStateHtml(scope, 'cost areas')}
+        </div>
+      `;
+    }
+
+    const selectedAnchor =
+      scopedAnchors.find((anchor) => anchor.id === state.selectedAnchorId) || scopedAnchors[0];
+
+    return `
+      <div class="module-story">
+        ${renderContextBanner(selectedAnchor)}
+        <div class="module-story__primary">
+          <section class="hero-map">
+            <div class="hero-map__topline">
+              <div>
+                <h3>Where the money sits across Gateway</h3>
+              </div>
+            </div>
+
+            ${renderGatewayScene(selectedAnchor, selectedAnchor.id, scopedAnchors)}
+          </section>
+
+          ${renderAnchorFocus(selectedAnchor)}
+        </div>
+
+        ${renderAnchorSupport(selectedAnchor)}
+      </div>
+    `;
+  }
+
   const selection = getModuleViewSelection();
   const contextAnchor = selection.contextAnchor || getCurrentAnchor();
   const detailAnchor = selection.selectedAnchor || contextAnchor;
@@ -1237,9 +1321,6 @@ function renderModuleView() {
             <div>
               <h3>Where the money sits across Gateway</h3>
             </div>
-            <p class="hero-map__note">
-              Click a module to see its cost detail.
-            </p>
           </div>
 
           ${renderGatewayScene(selection.selectedAnchor, selection.activeAnchorId)}
@@ -1479,7 +1560,9 @@ function buildAnchorYearDrivers(anchor, fy) {
 }
 
 function buildContextualYearSeries(anchor, context) {
-  const showSelectedWbs = hasSelectedWbsYearContext(context) && state.yearSeriesMode === 'selected-wbs';
+  const scoped = Boolean(getScope());
+  const showSelectedWbs =
+    hasSelectedWbsYearContext(context) && (scoped || state.yearSeriesMode === 'selected-wbs');
 
   if (showSelectedWbs) {
     const category = context.selectedWbsCategory;
@@ -1487,12 +1570,15 @@ function buildContextualYearSeries(anchor, context) {
     const currentYear = getCurrentSeriesYear(years);
     const drivers = currentYear ? buildCategoryYearDrivers(category, currentYear.fy) : [];
     const categorySourceIds = drivers.map((entry) => entry.id).filter((id) => state.categoriesById.has(id));
+    const broaderLabel = anchor?.label || 'the Lunar Gateway project';
 
     return {
       mode: 'selected-wbs',
-      title: 'Selected WBS item over time',
+      title: scoped ? 'Scoped WBS item over time' : 'Selected WBS item over time',
       heading: `${category.name} (${category.id})`,
-      note: `${category.name} stays in focus here. Use Broader anchor to step back to ${anchor.label}.`,
+      note: scoped
+        ? `Yearly figures are restricted to ${category.name} (${category.id}).`
+        : `${category.name} stays in focus here. Use Broader anchor to step back to ${broaderLabel}.`,
       years,
       currentYear,
       drivers,
@@ -1503,12 +1589,14 @@ function buildContextualYearSeries(anchor, context) {
           label: 'Peak year',
           value: category.topYear ? `${category.topYear.fy} - ${formatCompactCurrency(category.topYear.totalUsd)}` : 'Not stated',
         },
-        { label: 'Broader area', value: anchor.label },
+        { label: 'Broader area', value: broaderLabel },
       ],
       summary: currentYear
         ? `${category.name} shows ${formatCurrency(currentYear.totalUsd)} in ${currentYear.fy}.`
         : category.meaning || '',
-      statement: `This year view is pinned to the selected WBS item itself. ${anchor.label} remains available as broader context.`,
+      statement: scoped
+        ? `This year view is pinned to the scoped WBS item itself.`
+        : `This year view is pinned to the selected WBS item itself. ${broaderLabel} remains available as broader context.`,
       breakdownTitle: currentYear ? `What drives ${category.id} in ${currentYear.fy}` : `What drives ${category.id}`,
       evidenceHeading: `Evidence and sources for ${category.name}`,
       evidenceCopy: category.meaning || category.includedNote || state.data.overview.directSummary,
@@ -1543,7 +1631,7 @@ function buildContextualYearSeries(anchor, context) {
     summary: currentYear ? `${anchor.label} shows ${formatCurrency(currentYear.totalUsd)} in ${currentYear.fy}.` : anchor.primaryNote,
     statement: context.selectedWbsLabel
       ? `${context.selectedWbsLabel} remains preserved in the banner above while this view steps back to the broader ${anchor.label} context.`
-      : `This view steps back to the broader ${anchor.label} context.`,
+      : `The chart steps back to the broader ${anchor.label} context.`,
     breakdownTitle: currentYear ? `What drives ${anchor.label} in ${currentYear.fy}` : `What drives ${anchor.label}`,
     evidenceHeading: `Evidence and sources for ${anchor.label}`,
     evidenceCopy: anchor.primaryNote || anchor.judgmentNote || state.data.overview.directSummary,
@@ -1621,6 +1709,7 @@ function renderContextualYearSupport(series) {
 
 function renderContextualYearView(anchor, context) {
   const series = buildContextualYearSeries(anchor, context);
+  const scoped = Boolean(getScope());
 
   return `
     <div class="year-story">
@@ -1631,6 +1720,7 @@ function renderContextualYearView(anchor, context) {
             <div>
               <h3>${escapeHtml(series.title)}</h3>
             </div>
+            ${scoped ? '' : `
             <div class="view-switcher__main" aria-label="Year series focus">
               <button
                 class="view-switcher__button${series.mode === 'selected-wbs' ? ' is-active' : ''}"
@@ -1649,6 +1739,7 @@ function renderContextualYearView(anchor, context) {
                 Broader anchor
               </button>
             </div>
+            `}
           </div>
 
           <p class="year-panel__note">${escapeHtml(series.note)}</p>
@@ -1665,7 +1756,17 @@ function renderContextualYearView(anchor, context) {
 }
 
 function renderYearView() {
-  const anchor = getCurrentAnchor();
+  const scope = getScope();
+  if (scope && !getScopeCategory(scope)?.yearly?.length) {
+    return `
+      <div class="year-story">
+        ${renderContextBanner(null)}
+        ${buildScopeEmptyStateHtml(scope, 'cost lines')}
+      </div>
+    `;
+  }
+
+  const anchor = scope ? getScopedAnchors(scope)[0] || null : getCurrentAnchor();
   const context = buildCurrentContext(anchor);
 
   if (hasSelectedWbsYearContext(context)) {
@@ -1683,7 +1784,6 @@ function renderYearView() {
             <div>
               <h3>How annual spend moves over time</h3>
             </div>
-            <p class="year-panel__note">Click a year for detail.</p>
           </div>
 
           <div class="year-legend">
@@ -1846,8 +1946,42 @@ function render() {
   syncSuiteNavigation();
 }
 
+function clearScope() {
+  if (!state.sharedContext?.wbs) return;
+  delete state.sharedContext.wbs;
+  state.yearSeriesMode = 'anchor';
+  normalizeSelections();
+  render();
+}
+
+function setScope(wbsId) {
+  if (!wbsId) return;
+  state.sharedContext.wbs = wbsId;
+  state.yearSeriesMode = state.categoriesById.get(wbsId)?.yearly?.length ? 'selected-wbs' : 'anchor';
+  normalizeScopedSelection();
+  render();
+}
+
+function normalizeScopedSelection() {
+  const scope = getScope();
+  if (!scope) return;
+  const scopedAnchors = getScopedAnchors(scope);
+  if (scopedAnchors.length && !scopedAnchors.some((anchor) => anchor.id === state.selectedAnchorId)) {
+    state.selectedAnchorId = scopedAnchors[0].id;
+    state.moduleViewMode = 'anchor';
+  }
+}
+
 function handleClick(event) {
   const actionButton = event.target.closest('[data-action]');
+  if (actionButton?.dataset.action === 'clear-scope') {
+    clearScope();
+    return;
+  }
+  if (actionButton?.dataset.action === 'scope-view-parent') {
+    setScope(actionButton.dataset.parentId);
+    return;
+  }
   if (actionButton?.dataset.action === 'reset-view') {
     resetView();
     return;
@@ -1919,6 +2053,7 @@ async function loadDataset() {
     state.selectedYearId = urlParams.get('year') || data.defaultSelection?.defaultYear || null;
     state.selectedMethodId = urlParams.get('method') || null;
     normalizeSelections();
+    normalizeScopedSelection();
     render();
   } catch (error) {
     console.error('Failed to load cost data', error);
