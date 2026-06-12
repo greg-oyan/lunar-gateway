@@ -204,22 +204,17 @@ function buildSuiteAction(route, label, params) {
   `;
 }
 
-function buildScheduleNavContext() {
-  const context = getSelectedContext();
+// Top suite nav carries only the origin and an explicitly set scope. It never
+// derives wbs/milestone/risk/doc/module from the current selection.
+function buildTopNavContext() {
   return {
     from: 'schedule',
-    // An explicit scope wins; derived per-selection context fills the gap.
-    wbs: getScope()?.id || context.wbsId,
-    module: context.moduleKey,
-    milestone: context.milestone?.id || '',
-    phase: context.phase?.id || '',
-    risk: context.riskId,
-    doc: context.docId,
+    wbs: getScope()?.id || '',
   };
 }
 
 function syncSuiteNavigation() {
-  applySuiteNav(buildScheduleNavContext(), { currentRoute: 'schedule' });
+  applySuiteNav(buildTopNavContext(), { currentRoute: 'schedule' });
 }
 
 function getDefaultSelection() {

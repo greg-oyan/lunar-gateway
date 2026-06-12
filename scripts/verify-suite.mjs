@@ -288,6 +288,55 @@ async function checkNarrationBudget() {
   }
 }
 
+// Scope is explicit-only: the top suite nav must never derive params from the
+// current selection. These are string-level checks against each app's
+// buildTopNavContext and its applySuiteNav call sites - deliberately narrow so
+// item-level "Open in X" link builders are not flagged, and admittedly brittle
+// against reformatting (noted here so a rename or refactor updates them too).
+async function checkTopNavPurity() {
+  for (const appDir of APP_DIRS) {
+    const file = `${appDir}/app.js`;
+    let contents = '';
+    try {
+      contents = await fs.readFile(path.join(repoRoot, file), 'utf8');
+    } catch {
+      fail('top-nav', `${file}: unable to read`);
+      continue;
+    }
+
+    const start = contents.indexOf('function buildTopNavContext');
+    if (start === -1) {
+      fail('top-nav', `${file}: missing buildTopNavContext`);
+      continue;
+    }
+    const end = contents.indexOf('\n}', start);
+    const body = contents.slice(start, end);
+
+    if (!/wbs:\s*getScope\(\)\?\.id\s*\|\|\s*''/.test(body)) {
+      fail('top-nav', `${file}: top-nav wbs must be getScope()?.id || '' and nothing else`);
+    }
+    if (/primaryWbsId|wbsId|context\.wbs|sharedContext/.test(body)) {
+      fail('top-nav', `${file}: derived-wbs reference inside buildTopNavContext`);
+    }
+    if (/(milestone|risk|doc|module|phase)\s*:/.test(body)) {
+      fail('top-nav', `${file}: derived param key inside buildTopNavContext`);
+    }
+
+    const navCalls = contents.match(/applySuiteNav\([^)]*\)/g) || [];
+    if (!navCalls.length) {
+      fail('top-nav', `${file}: no applySuiteNav call found`);
+    }
+    navCalls.forEach((call) => {
+      if (!call.includes('buildTopNavContext()')) {
+        fail('top-nav', `${file}: applySuiteNav must be fed by buildTopNavContext(): ${call.replace(/\s+/g, ' ')}`);
+      }
+      if (/(milestone|risk|doc|module|phase)\s*:/.test(call)) {
+        fail('top-nav', `${file}: derived param key passed to applySuiteNav: ${call.replace(/\s+/g, ' ')}`);
+      }
+    });
+  }
+}
+
 const PROTECTED_PATTERN = /^(index\.html|index\.app\.html|js\/|css\/|server\.mjs|Gateway_Thumbnail|LICENSE|README)/;
 
 function resolveBaseBranch() {
@@ -331,6 +380,7 @@ async function main() {
   await checkMilestonePhaseCoverage();
   await checkForbiddenLayerStrings();
   await checkNarrationBudget();
+  await checkTopNavPurity();
   checkProtectedFiles();
 
   if (failures.length) {

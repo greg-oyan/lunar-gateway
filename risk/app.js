@@ -247,26 +247,23 @@ function buildSuiteAction(route, label, params) {
   `;
 }
 
-// An explicit scope wins over derived per-risk context in outbound links;
-// derived context only fills the gap when no scope is set.
+// Item-level "Open in X" links only: an explicit scope wins, otherwise the
+// risk's own derived context fills in. Never used for the top suite nav.
 function navWbsValue(riskContext = null) {
   return getScope()?.id || riskContext?.primaryWbsId || state.context?.wbsId || '';
 }
 
-function buildRiskNavContext(risk = getSelectedRisk()) {
-  const riskContext = risk ? state.crosswalk?.risk?.byId?.[risk.id] : null;
+// Top suite nav carries only the origin and an explicitly set scope. It never
+// derives wbs/milestone/risk/doc/module from the current selection.
+function buildTopNavContext() {
   return {
     from: 'risk',
-    wbs: navWbsValue(riskContext),
-    module: riskContext?.simulation.moduleKeys?.[0] || state.context?.moduleKey || '',
-    milestone: riskContext?.primaryMilestoneId || state.context?.milestoneId || '',
-    risk: risk?.id || '',
-    doc: riskContext?.documents.sourceDocIds?.[0] || state.context?.docId || '',
+    wbs: getScope()?.id || '',
   };
 }
 
 function syncSuiteNavigation() {
-  applySuiteNav(buildRiskNavContext(), { currentRoute: 'risk' });
+  applySuiteNav(buildTopNavContext(), { currentRoute: 'risk' });
 }
 
 function syncUrlState() {
