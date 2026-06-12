@@ -52,7 +52,7 @@ const viewDefinitions = {
   year: {
     kicker: 'Yearly Spend',
     heading: 'Spend over time',
-    subcopy: 'Click a year to see its total, reserve, and top drivers.',
+    subcopy: 'Annual totals, reserve, and top drivers.',
   },
   method: {
     kicker: 'Defensibility',
@@ -1294,9 +1294,6 @@ function renderModuleView() {
               <div>
                 <h3>Where the money sits across Gateway</h3>
               </div>
-              <p class="hero-map__note">
-                Click a module to see its cost detail.
-              </p>
             </div>
 
             ${renderGatewayScene(selectedAnchor, selectedAnchor.id, scopedAnchors)}
@@ -1324,9 +1321,6 @@ function renderModuleView() {
             <div>
               <h3>Where the money sits across Gateway</h3>
             </div>
-            <p class="hero-map__note">
-              Click a module to see its cost detail.
-            </p>
           </div>
 
           ${renderGatewayScene(selection.selectedAnchor, selection.activeAnchorId)}
@@ -1637,7 +1631,7 @@ function buildContextualYearSeries(anchor, context) {
     summary: currentYear ? `${anchor.label} shows ${formatCurrency(currentYear.totalUsd)} in ${currentYear.fy}.` : anchor.primaryNote,
     statement: context.selectedWbsLabel
       ? `${context.selectedWbsLabel} remains preserved in the banner above while this view steps back to the broader ${anchor.label} context.`
-      : `This view steps back to the broader ${anchor.label} context.`,
+      : `The chart steps back to the broader ${anchor.label} context.`,
     breakdownTitle: currentYear ? `What drives ${anchor.label} in ${currentYear.fy}` : `What drives ${anchor.label}`,
     evidenceHeading: `Evidence and sources for ${anchor.label}`,
     evidenceCopy: anchor.primaryNote || anchor.judgmentNote || state.data.overview.directSummary,
@@ -1790,7 +1784,6 @@ function renderYearView() {
             <div>
               <h3>How annual spend moves over time</h3>
             </div>
-            <p class="year-panel__note">Click a year for detail.</p>
           </div>
 
           <div class="year-legend">

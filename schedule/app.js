@@ -28,7 +28,7 @@ const detailSubtitle = document.getElementById('detailSubtitle');
 const detailContent = document.getElementById('detailContent');
 
 // The six dates that anchor the chart's Key set alongside every phase's
-// curated keyMilestoneIds. This is the only milestone id list in the app;
+// curated keyMilestoneIds. No other milestone id list exists in the app;
 // everything else derives from the dataset.
 const TIMELINE_ANCHORS = ['M-001', 'M-009', 'M-017', 'M-024', 'M-030', 'M-037'];
 

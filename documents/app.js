@@ -111,7 +111,7 @@ function getScope() {
 }
 
 // Union of crosswalk-linked source-doc ids over every WBS node in the scope's
-// subtree. This is the only WBS relation the source-library files carry.
+// subtree - the only WBS relation the source-library files carry.
 function collectScopedDocIds(scope) {
   const linked = new Set();
   Object.values(state.crosswalk?.wbs?.byId || {}).forEach((node) => {

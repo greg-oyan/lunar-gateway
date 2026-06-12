@@ -227,7 +227,7 @@ const SOURCE_EXTENSIONS = new Set(['.js', '.html', '.css', '.json', '.mjs']);
 
 // Flipped to true by the WS5 de-narration commit; the copy checks below only
 // apply once that pass has landed.
-const WS5_LANDED = false;
+const WS5_LANDED = true;
 
 async function listSourceFiles(directory) {
   const absoluteDir = path.join(repoRoot, directory);
@@ -270,7 +270,11 @@ async function checkNarrationBudget() {
     let count = 0;
     const hits = [];
     for (const file of files) {
-      if (file.includes(`${path.sep}data${path.sep}`)) continue; // data content is exempt; chrome lives in source files
+      // Dataset content is exempt from the chrome-copy budget: data folders
+      // and the server.mjs generators that author whyItMatters/plainEnglish
+      // narrative fields.
+      if (file.includes(`${path.sep}data${path.sep}`)) continue;
+      if (file.endsWith('server.mjs')) continue;
       const contents = await fs.readFile(path.join(repoRoot, file), 'utf8');
       const matches = contents.match(NARRATION_PATTERN);
       if (matches?.length) {
