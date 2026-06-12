@@ -714,7 +714,6 @@ a {
 .action-pill,
 .text-action,
 .timeline-phase,
-.schedule-marker,
 .driver-card,
 button.support-item {
   cursor: pointer;
@@ -801,13 +800,14 @@ button.support-item {
 .schedule-map__heading {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
 }
 
 .schedule-map__hint {
   margin: 0;
-  max-width: 38ch;
   color: var(--ink-soft);
-  text-align: right;
+  font-size: 0.86rem;
   line-height: 1.5;
 }
 
@@ -971,188 +971,154 @@ button.support-item {
   color: var(--ink);
 }
 
-.schedule-milestones {
-  display: grid;
-  grid-template-columns: 210px minmax(0, 1fr);
-  gap: 22px;
-  align-items: start;
-  padding-top: 18px;
-  border-top: 1px solid rgba(148, 184, 214, 0.12);
-}
-
-.schedule-milestones__label {
-  display: grid;
-  gap: 8px;
-  align-content: start;
-}
-
-.schedule-milestones__label strong {
-  line-height: 1.28;
-}
-
-.schedule-milestones__plot {
-  position: relative;
-  height: 236px;
-  border-radius: 24px;
-  background: rgba(12, 23, 34, 0.84);
-  box-shadow: inset 0 0 0 1px rgba(148, 184, 214, 0.16);
-}
-
-.schedule-milestones__spine {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 8px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(111, 207, 255, 0.28), rgba(241, 188, 125, 0.22));
-}
-
-.schedule-marker {
+.schedule-lane__select {
   appearance: none;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 0;
   padding: 0;
   border: 0;
   background: transparent;
-  transition: opacity 160ms ease;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
 }
 
-.schedule-marker--muted {
-  opacity: 0.4;
+.schedule-lane__bar {
+  appearance: none;
+  padding: 0;
+  cursor: pointer;
 }
 
-.schedule-marker__dot {
+.lane-milestone {
+  appearance: none;
   position: absolute;
-  left: 0;
   top: 50%;
-  width: 16px;
-  height: 16px;
-  border: 3px solid rgba(7, 16, 24, 0.96);
-  border-radius: 999px;
-  background: var(--brand-strong);
-  box-shadow: 0 0 0 2px rgba(148, 184, 214, 0.18);
+  width: 26px;
+  height: 26px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
   transform: translate(-50%, -50%);
+  cursor: pointer;
+  z-index: 2;
 }
 
-.schedule-marker__stem {
+.lane-milestone__diamond {
   position: absolute;
-  left: 0;
-  width: 2px;
-  background: rgba(148, 184, 214, 0.3);
-  transform: translateX(-50%);
+  left: 50%;
+  top: 50%;
+  width: 11px;
+  height: 11px;
+  border: 2px solid rgba(7, 16, 24, 0.96);
+  background: var(--brand-strong);
+  box-shadow: 0 0 0 2px rgba(148, 184, 214, 0.22);
+  transform: translate(-50%, -50%) rotate(45deg);
+  transition: box-shadow 140ms ease, width 140ms ease, height 140ms ease;
 }
 
-.schedule-marker__card {
-  position: absolute;
-  left: 0;
-  display: grid;
-  gap: 6px;
-  width: 150px;
-  padding: 12px 14px;
-  border: 1px solid rgba(148, 184, 214, 0.2);
-  border-radius: 18px;
-  background: linear-gradient(180deg, rgba(16, 30, 44, 0.98), rgba(11, 22, 32, 0.96));
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.26);
-  line-height: 1.22;
-}
-
-.schedule-marker__card strong {
-  font-size: 0.96rem;
-}
-
-.schedule-marker__date,
-.schedule-marker__phase {
-  color: var(--ink-soft);
-  font-size: 0.82rem;
-}
-
-.schedule-marker--brand .schedule-marker__dot {
+.lane-milestone--brand .lane-milestone__diamond {
   background: var(--brand);
 }
 
-.schedule-marker--forest .schedule-marker__dot {
+.lane-milestone--forest .lane-milestone__diamond {
   background: var(--forest);
 }
 
-.schedule-marker--copper .schedule-marker__dot {
+.lane-milestone--copper .lane-milestone__diamond {
   background: var(--copper);
 }
 
-.schedule-marker--plum .schedule-marker__dot {
+.lane-milestone--plum .lane-milestone__diamond {
   background: var(--plum);
 }
 
-.schedule-marker--danger .schedule-marker__dot {
+.lane-milestone--danger .lane-milestone__diamond {
   background: var(--danger);
 }
 
-.schedule-marker--brand .schedule-marker__card {
-  border-top: 4px solid rgba(111, 207, 255, 0.82);
+.lane-milestone:hover .lane-milestone__diamond {
+  box-shadow: 0 0 0 4px rgba(111, 207, 255, 0.26);
 }
 
-.schedule-marker--forest .schedule-marker__card {
-  border-top: 4px solid rgba(148, 215, 169, 0.82);
+.lane-milestone--active .lane-milestone__diamond {
+  width: 15px;
+  height: 15px;
+  box-shadow: 0 0 0 5px rgba(111, 207, 255, 0.3);
 }
 
-.schedule-marker--copper .schedule-marker__card {
-  border-top: 4px solid rgba(241, 188, 125, 0.82);
+.density-toggle {
+  display: inline-flex;
+  gap: 6px;
 }
 
-.schedule-marker--plum .schedule-marker__card {
-  border-top: 4px solid rgba(200, 180, 255, 0.82);
+.density-toggle__button {
+  appearance: none;
+  padding: 8px 14px;
+  border: 1px solid rgba(111, 207, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(111, 207, 255, 0.06);
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
 }
 
-.schedule-marker--danger .schedule-marker__card {
-  border-top: 4px solid rgba(255, 144, 134, 0.82);
+.density-toggle__button:hover {
+  border-color: rgba(111, 207, 255, 0.3);
 }
 
-.schedule-marker--upper .schedule-marker__stem {
-  top: calc(50% - 78px);
-  height: 78px;
+.density-toggle__button.is-active {
+  background: rgba(111, 207, 255, 0.16);
+  border-color: rgba(111, 207, 255, 0.4);
+  color: var(--brand-strong);
 }
 
-.schedule-marker--lower .schedule-marker__stem {
-  top: 50%;
-  height: 78px;
+.milestone-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: rgba(13, 24, 36, 0.86);
 }
 
-.schedule-marker--upper .schedule-marker__card {
-  bottom: calc(50% + 18px);
+.milestone-strip__date {
+  color: var(--ink-soft);
+  font-size: 0.88rem;
 }
 
-.schedule-marker--lower .schedule-marker__card {
-  top: calc(50% + 18px);
+.milestone-strip__name {
+  line-height: 1.25;
 }
 
-.schedule-marker--center .schedule-marker__card {
-  transform: translateX(-50%);
+.milestone-strip__phase {
+  color: var(--ink-soft);
+  font-size: 0.88rem;
 }
 
-.schedule-marker--start .schedule-marker__card {
-  transform: translateX(0);
+.milestone-strip__empty {
+  margin: 0;
+  color: var(--ink-soft);
 }
 
-.schedule-marker--end .schedule-marker__card {
-  transform: translateX(-100%);
-}
-
-.schedule-marker--active .schedule-marker__dot {
-  width: 20px;
-  height: 20px;
-  box-shadow: 0 0 0 6px rgba(111, 207, 255, 0.2);
-}
-
-.schedule-marker--active .schedule-marker__card {
-  border-color: rgba(148, 184, 214, 0.18);
-  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.3);
-}
-
-.schedule-marker:hover .schedule-marker__card {
-  border-color: rgba(148, 184, 214, 0.18);
-  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28);
+.key-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border: 1px solid rgba(111, 207, 255, 0.3);
+  border-radius: 999px;
+  background: rgba(111, 207, 255, 0.1);
+  color: var(--brand-strong);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  vertical-align: middle;
 }
 
 .focus-layer,
@@ -1725,8 +1691,7 @@ details > summary::-webkit-details-marker {
   }
 
   .schedule-axis,
-  .schedule-lane,
-  .schedule-milestones {
+  .schedule-lane {
     grid-template-columns: 180px minmax(0, 1fr);
   }
 }
