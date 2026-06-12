@@ -388,21 +388,17 @@ function resolveAnchorIdFromContext(sharedContext, explicitAnchorId = '') {
   return getDefaultAnchorId();
 }
 
-function buildCostNavContext(anchor = getCurrentAnchor()) {
-  const sharedContext = buildCurrentContext(anchor);
+// Top suite nav carries only the origin and an explicitly set scope. It never
+// derives wbs/milestone/risk/doc/module from the current selection.
+function buildTopNavContext() {
   return {
     from: 'cost',
-    // An explicit scope wins; derived per-anchor context fills the gap.
-    wbs: getScope()?.id || sharedContext.wbsId || '',
-    module: sharedContext.moduleKey || '',
-    milestone: sharedContext.milestoneId || '',
-    risk: sharedContext.riskId || '',
-    doc: sharedContext.docId || '',
+    wbs: getScope()?.id || '',
   };
 }
 
 function syncSuiteNavigation() {
-  applySuiteNav(buildCostNavContext(), { currentRoute: 'cost' });
+  applySuiteNav(buildTopNavContext(), { currentRoute: 'cost' });
 }
 
 function getDefaultYearId() {

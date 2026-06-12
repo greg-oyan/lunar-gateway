@@ -219,19 +219,17 @@ function buildSuiteAction(route, label, params) {
   `;
 }
 
-function buildDocumentNavContext(documentRecord = getSelectedDocument()) {
+// Top suite nav carries only the origin and an explicitly set scope. It never
+// derives wbs/milestone/risk/doc/module from the current selection.
+function buildTopNavContext() {
   return {
     from: 'documents',
-    wbs: state.context?.wbsId || '',
-    module: state.context?.moduleKey || '',
-    milestone: state.context?.milestoneId || '',
-    risk: state.context?.riskId || '',
-    doc: documentRecord?.id || state.sharedContext.doc || '',
+    wbs: getScope()?.id || '',
   };
 }
 
 function syncSuiteNavigation() {
-  applySuiteNav(buildDocumentNavContext(), { currentRoute: 'documents' });
+  applySuiteNav(buildTopNavContext(), { currentRoute: 'documents' });
 }
 
 function syncUrlState() {
