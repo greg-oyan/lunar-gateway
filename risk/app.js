@@ -106,7 +106,7 @@ function scoreFormulaText() {
 }
 
 function bandThresholdText() {
-  return 'Band logic: Critical 16-25, High 12-15, Moderate 8-11, Watch 1-7.';
+  return 'Band logic: Critical 16-25, High 12-15, Moderate 8-11, Watch 1-7. Within a band, risks order by impact, then likelihood, then id.';
 }
 
 function bandRangeText(band) {
@@ -124,6 +124,20 @@ function bandRangeText(band) {
 
 function statusLabel(status) {
   return String(status ?? '');
+}
+
+function confidenceLabel(confidenceLevel) {
+  const value = String(confidenceLevel ?? '').trim();
+  if (!value) return '';
+  const joined = value.split('_').join('-');
+  return `${joined[0].toUpperCase()}${joined.slice(1)} confidence`;
+}
+
+function basisLabel(basisType) {
+  const value = String(basisType ?? '').trim();
+  if (!value) return '';
+  const joined = value.split('_').join(' ');
+  return `${joined[0].toUpperCase()}${joined.slice(1)}`;
 }
 
 function riskSearchIndex(risk) {
@@ -310,6 +324,12 @@ export function filterRisks(risks, filters = {}) {
   });
 }
 
+const BAND_ORDER = ['critical', 'high', 'moderate', 'watch'];
+
+function bandRank(risk) {
+  return BAND_ORDER.indexOf(priorityBand(Number(risk.priority)));
+}
+
 export function sortRisks(risks, sortBy = 'priority_desc') {
   const clone = [...risks];
 
@@ -334,10 +354,13 @@ export function sortRisks(risks, sortBy = 'priority_desc') {
       return left.title.localeCompare(right.title);
     }
 
+    // Default order groups by band, then applies the deterministic
+    // within-band tiebreak: impact desc, likelihood desc, id asc.
     return (
-      Number(right.priority) - Number(left.priority) ||
+      bandRank(left) - bandRank(right) ||
       Number(right.impact) - Number(left.impact) ||
-      left.title.localeCompare(right.title)
+      Number(right.likelihood) - Number(left.likelihood) ||
+      left.id.localeCompare(right.id)
     );
   });
 
@@ -387,9 +410,11 @@ function updateVisibleRisks() {
 function renderHeaderCount() {
   const visible = state.visibleRisks.length;
   const total = state.allRisks.length;
+  const scope = getScope();
 
-  elements.headerCount.textContent =
-    visible === total ? `${total} risks` : `${visible} of ${total} risks`;
+  elements.headerCount.textContent = scope
+    ? `${visible} of ${total} risks linked to WBS ${scope.id}${scope.name ? ` ${scope.name}` : ''}`
+    : `${visible} of ${total} risks`;
 }
 
 function renderSummary() {
@@ -549,8 +574,26 @@ function renderRiskList() {
   elements.listState.hidden = true;
   elements.listState.textContent = '';
 
+  // Band section headers only make sense in the default band-grouped order;
+  // explicit sorts render the flat list.
+  const showBandSections = state.sortBy === 'priority_desc';
+  let previousBand = '';
+
   elements.riskList.innerHTML = risks
     .map((risk) => {
+      let sectionHeader = '';
+      if (showBandSections) {
+        const band = priorityBand(Number(risk.priority));
+        if (band !== previousBand) {
+          previousBand = band;
+          sectionHeader = `
+            <div class="band-header band-header--${band}" role="presentation">
+              <span class="band-header__label">${priorityBandLabel(band)}</span>
+              <span class="band-header__range">${escapeHtml(bandRangeText(band))}</span>
+            </div>
+          `;
+        }
+      }
       const isSelected = selectedRisk?.id === risk.id;
       const band = priorityBand(Number(risk.priority));
       const categoryTone = categoryBand(risk.category);
@@ -558,6 +601,7 @@ function renderRiskList() {
       const consequenceCue = buildConsequenceCue(risk);
 
       return `
+        ${sectionHeader}
         <button
           class="risk-item risk-item--${band} risk-item--${categoryTone}${isSelected ? ' is-selected' : ''}"
           type="button"
@@ -583,6 +627,7 @@ function renderRiskList() {
           </div>
           <div class="risk-item__footer">
             <span class="meta-chip">${escapeHtml(risk.status)}</span>
+            ${confidenceLabel(risk.confidenceLevel) ? `<span class="meta-chip confidence-chip">${escapeHtml(confidenceLabel(risk.confidenceLevel))}</span>` : ''}
             <span class="risk-item__owner">${escapeHtml(ownerLabel)}</span>
           </div>
         </button>
@@ -664,6 +709,14 @@ function renderRiskDetail(risk) {
         <span class="risk-status-line__item"><span class="risk-status-line__label">Status</span> ${escapeHtml(risk.status)}</span>
         <span class="risk-status-line__sep">·</span>
         <span class="risk-status-line__item"><span class="risk-status-line__label">Owner</span> ${escapeHtml(risk.owner)}</span>
+        ${confidenceLabel(risk.confidenceLevel) ? `
+          <span class="risk-status-line__sep">·</span>
+          <span class="risk-status-line__item"><span class="risk-status-line__label">Confidence</span> <span class="meta-chip confidence-chip">${escapeHtml(confidenceLabel(risk.confidenceLevel))}</span></span>
+        ` : ''}
+        ${basisLabel(risk.basisType) ? `
+          <span class="risk-status-line__sep">·</span>
+          <span class="risk-status-line__item"><span class="risk-status-line__label">Basis</span> ${escapeHtml(basisLabel(risk.basisType))}</span>
+        ` : ''}
         ${driverTags.length ? `
           <span class="risk-status-line__sep">·</span>
           <span class="risk-status-line__item">
