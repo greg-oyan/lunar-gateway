@@ -9,6 +9,7 @@ import {
   mergeQueryState,
   readSharedContext,
   resolveScope,
+  wbsIsScope,
 } from '../suite-assets/suite-context.js';
 
 const DATA_URL = './data/gateway-schedule.json';
@@ -108,6 +109,7 @@ function buildMaps(data) {
 }
 
 function getScope() {
+  if (!wbsIsScope(state.sharedContext)) return null;
   return resolveScope(state.crosswalk, state.sharedContext?.wbs);
 }
 
@@ -310,24 +312,24 @@ function renderContextActions() {
     <div class="suite-context-actions">
       ${buildSuiteAction('wbs', 'Open in WBS', {
         from: 'schedule',
-        wbs: context.wbsId,
+        wbs: getScope()?.id || '',
         milestone: context.milestone?.id || '',
       })}
       ${buildSuiteAction('cost', 'Open in Cost', {
         from: 'schedule',
-        wbs: context.wbsId,
+        wbs: getScope()?.id || '',
         milestone: context.milestone?.id || '',
         view: 'module',
       })}
       ${buildSuiteAction('risk', 'Open in Risk', {
         from: 'schedule',
-        wbs: context.wbsId,
+        wbs: getScope()?.id || '',
         milestone: context.milestone?.id || '',
         risk: context.riskId,
       })}
       ${buildSuiteAction('documents', 'Open in Documents', {
         from: 'schedule',
-        wbs: context.wbsId,
+        wbs: getScope()?.id || '',
         milestone: context.milestone?.id || '',
         doc: context.docId,
       })}

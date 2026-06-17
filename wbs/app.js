@@ -8,6 +8,7 @@ import {
   mergeQueryState,
   readSharedContext,
   resolveScope,
+  wbsIsScope,
 } from '../suite-assets/suite-context.js';
 
 const DATA_URL = './data/gateway-wbs.json';
@@ -335,24 +336,24 @@ function renderConnectedViews(node) {
       <div class="connected-views__actions">
         ${buildSuiteAction('cost', 'Open in Cost', {
           from: 'wbs',
-          wbs: node.id,
+          wbs: getScope()?.id || '',
           anchor: nodeContext.cost.anchorId,
           view: 'module',
         })}
         ${buildSuiteAction('schedule', 'Open in Schedule', {
           from: 'wbs',
-          wbs: node.id,
+          wbs: getScope()?.id || '',
           milestone: nodeContext.schedule.primaryMilestoneId,
           phase: nodeContext.schedule.phaseId,
         })}
         ${buildSuiteAction('risk', 'Open in Risk', {
           from: 'wbs',
-          wbs: node.id,
+          wbs: getScope()?.id || '',
           risk: nodeContext.risks.primaryRiskId,
         })}
         ${buildSuiteAction('documents', 'Open in Documents', {
           from: 'wbs',
-          wbs: node.id,
+          wbs: getScope()?.id || '',
           doc: nodeContext.documents.sourceDocIds?.[0] || '',
         })}
       </div>
@@ -368,24 +369,24 @@ function renderFocusActions(node) {
     <div class="suite-context-actions">
       ${buildSuiteAction('cost', 'Open in Cost', {
         from: 'wbs',
-        wbs: node.id,
+        wbs: getScope()?.id || '',
         anchor: nodeContext.cost.anchorId,
         view: 'module',
       })}
       ${buildSuiteAction('schedule', 'Open in Schedule', {
         from: 'wbs',
-        wbs: node.id,
+        wbs: getScope()?.id || '',
         milestone: nodeContext.schedule.primaryMilestoneId,
         phase: nodeContext.schedule.phaseId,
       })}
       ${buildSuiteAction('risk', 'Open in Risk', {
         from: 'wbs',
-        wbs: node.id,
+        wbs: getScope()?.id || '',
         risk: nodeContext.risks.primaryRiskId,
       })}
       ${buildSuiteAction('documents', 'Open in Documents', {
         from: 'wbs',
-        wbs: node.id,
+        wbs: getScope()?.id || '',
         doc: nodeContext.documents.sourceDocIds?.[0] || '',
       })}
     </div>
@@ -1280,9 +1281,11 @@ async function loadData() {
       (state.nodesById.has(state.sharedContext.wbs) ? state.sharedContext.wbs : '') ||
       decodeURIComponent(window.location.hash.replace(/^#/, ''));
     state.selectedId = state.nodesById.has(requestedId) ? requestedId : data.rootId;
-    // Arriving with `wbs` in the URL counts as an explicitly armed scope
-    // (deep link, sim module link, shared URL).
-    state.scopeArmed = Boolean(state.sharedContext.wbs) && state.selectedId !== data.rootId;
+    // Arriving with a bare `wbs` in the URL counts as an explicitly armed scope
+    // (deep link, sim module link, shared URL). A `wbs` riding alongside an
+    // item-id param is a "go look at this thing" link, never a scope: it
+    // centers via the item id but must not arm scope (wbsIsScope enforces this).
+    state.scopeArmed = wbsIsScope(state.sharedContext) && state.selectedId !== data.rootId;
     state.activeDetail = DETAIL_META[urlParams.get('detail')] ? urlParams.get('detail') : null;
     state.viewMode = urlParams.get('mode') === 'structure' ? 'structure' : 'explorer';
     state.expandedIds = getDefaultExpandedIds();

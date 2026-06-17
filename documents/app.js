@@ -9,6 +9,7 @@ import {
   mergeQueryState,
   readSharedContext,
   resolveScope,
+  wbsIsScope,
 } from '../suite-assets/suite-context.js';
 
 const DATA_URL = './data/documents.json';
@@ -107,6 +108,7 @@ function buildDocumentUseNote(documentRecord) {
 }
 
 function getScope() {
+  if (!wbsIsScope(state.sharedContext)) return null;
   return resolveScope(state.crosswalk, state.sharedContext?.wbs);
 }
 
@@ -128,8 +130,9 @@ function deriveDocumentContext() {
 
   // An explicit WBS scope wins over derived contexts. Library files without a
   // WBS relation stay visible under a labeled program-wide section instead of
-  // disappearing.
-  if (shared.wbs) {
+  // disappearing. A `wbs` riding with an item id is not a scope, so we fall
+  // through and center on the item instead.
+  if (wbsIsScope(shared)) {
     const scope = getScope();
     const wbsContext = state.crosswalk?.wbs?.byId?.[shared.wbs];
     return {
@@ -477,24 +480,24 @@ function renderDetailCard(documentRecord) {
               <div class="cross-app-collapsed__actions">
                 ${buildSuiteAction('wbs', 'Open in WBS', {
                   from: 'documents',
-                  wbs: state.context.wbsId || '',
+                  wbs: getScope()?.id || '',
                   doc: documentRecord.id,
                 })}
                 ${buildSuiteAction('schedule', 'Open in Schedule', {
                   from: 'documents',
-                  wbs: state.context.wbsId || '',
+                  wbs: getScope()?.id || '',
                   milestone: state.context.milestoneId || '',
                   doc: documentRecord.id,
                 })}
                 ${buildSuiteAction('cost', 'Open in Cost', {
                   from: 'documents',
-                  wbs: state.context.wbsId || '',
+                  wbs: getScope()?.id || '',
                   doc: documentRecord.id,
                   view: 'module',
                 })}
                 ${buildSuiteAction('risk', 'Open in Risk', {
                   from: 'documents',
-                  wbs: state.context.wbsId || '',
+                  wbs: getScope()?.id || '',
                   risk: state.context.riskId || '',
                   doc: documentRecord.id,
                 })}

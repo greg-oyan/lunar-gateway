@@ -104,6 +104,17 @@ export function hasSharedContext(sharedContext = {}) {
   return SHARED_CONTEXT_VALUE_KEYS.some((key) => Boolean(cleanValue(sharedContext?.[key])));
 }
 
+const ITEM_ID_KEYS = ['module', 'milestone', 'phase', 'risk', 'doc'];
+
+// True only when `wbs` arrives as a suite-wide scope: a bare `wbs` with no
+// accompanying item-id param. A `wbs` riding alongside an item id (module,
+// milestone, phase, risk, doc) is a "go look at this specific thing" link and
+// never establishes a scope; the destination centers on the item instead.
+export function wbsIsScope(sharedContext = {}) {
+  if (!cleanValue(sharedContext?.wbs)) return false;
+  return !ITEM_ID_KEYS.some((key) => Boolean(cleanValue(sharedContext?.[key])));
+}
+
 export function mergeQueryState(
   entries,
   options = {},

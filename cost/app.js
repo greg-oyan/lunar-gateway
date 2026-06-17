@@ -9,6 +9,7 @@
   mergeQueryState,
   readSharedContext,
   resolveScope,
+  wbsIsScope,
 } from '../suite-assets/suite-context.js';
 
 const CROSSWALK_URL = '../suite-assets/data/gateway-crosswalk.json';
@@ -310,6 +311,7 @@ function getAnchorContext(anchorId = state.selectedAnchorId) {
 }
 
 function getScope() {
+  if (!wbsIsScope(state.sharedContext)) return null;
   return resolveScope(state.crosswalk, state.sharedContext?.wbs);
 }
 
@@ -602,22 +604,22 @@ function renderAnchorConnections(anchor) {
       <div class="suite-context-actions">
         ${buildSuiteAction('wbs', 'Open in WBS', {
           from: 'cost',
-          wbs: context.wbsId,
+          wbs: getScope()?.id || '',
           module: context.moduleKey,
         })}
         ${buildSuiteAction('schedule', 'Open in Schedule', {
           from: 'cost',
-          wbs: context.wbsId,
+          wbs: getScope()?.id || '',
           milestone: context.milestoneId,
         })}
         ${buildSuiteAction('documents', 'Open in Documents', {
           from: 'cost',
-          wbs: context.wbsId,
+          wbs: getScope()?.id || '',
           doc: context.docId,
         })}
         ${buildSuiteAction('risk', 'Open in Risk', {
           from: 'cost',
-          wbs: context.wbsId,
+          wbs: getScope()?.id || '',
           risk: context.riskId,
         })}
       </div>

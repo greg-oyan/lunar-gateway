@@ -337,6 +337,33 @@ async function checkTopNavPurity() {
   }
 }
 
+// Item links must never inject a derived wbs (which would silently scope the
+// destination). The only legal `wbs:` value in a navigation params object is an
+// active scope (getScope()?.id) or the risk app's navWbsValue() wrapper around
+// it. This flags derived-wbs fallbacks - node.id, primaryWbsId, context.wbsId -
+// wherever they are used as a `wbs:` value. The top-nav builder already uses
+// getScope()?.id, and getScope itself reads state.sharedContext?.wbs (never a
+// `wbs:` value), so both are excluded by construction.
+const DERIVED_WBS_VALUE = /wbs:\s*[^,\n}]*\b(node\.id|primaryWbsId|wbsId|context\.wbs)\b/;
+
+async function checkItemLinkWbsPurity() {
+  for (const appDir of APP_DIRS) {
+    const file = `${appDir}/app.js`;
+    let contents = '';
+    try {
+      contents = await fs.readFile(path.join(repoRoot, file), 'utf8');
+    } catch {
+      fail('item-link-wbs', `${file}: unable to read`);
+      continue;
+    }
+    contents.split('\n').forEach((line, index) => {
+      if (DERIVED_WBS_VALUE.test(line)) {
+        fail('item-link-wbs', `${file}:${index + 1} derived wbs in a link param: ${line.trim()}`);
+      }
+    });
+  }
+}
+
 const PROTECTED_PATTERN = /^(index\.html|index\.app\.html|js\/|css\/|server\.mjs|Gateway_Thumbnail|LICENSE|README)/;
 
 function resolveBaseBranch() {
@@ -381,6 +408,7 @@ async function main() {
   await checkForbiddenLayerStrings();
   await checkNarrationBudget();
   await checkTopNavPurity();
+  await checkItemLinkWbsPurity();
   checkProtectedFiles();
 
   if (failures.length) {

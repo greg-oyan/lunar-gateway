@@ -9,6 +9,7 @@ import {
   mergeQueryState,
   readSharedContext,
   resolveScope,
+  wbsIsScope,
 } from '../suite-assets/suite-context.js';
 
 const DATA_URL = './data/risks.json';
@@ -162,6 +163,7 @@ function clampText(text, maxLength = 120) {
 }
 
 function getScope() {
+  if (!wbsIsScope(state.sharedContext)) return null;
   return resolveScope(state.crosswalk, state.sharedContext?.wbs);
 }
 
@@ -171,7 +173,9 @@ function deriveRiskContext() {
 
   // An explicit WBS scope wins over every derived context. The scoped base
   // list is exactly the crosswalk node's risk union - never silently widened.
-  if (shared.wbs) {
+  // A `wbs` riding with an item id is not a scope (wbsIsScope is false), so we
+  // fall through and center on the item instead.
+  if (wbsIsScope(shared)) {
     const scope = getScope();
     const directContext = state.crosswalk?.wbs?.byId?.[shared.wbs];
     return {
@@ -247,10 +251,12 @@ function buildSuiteAction(route, label, params) {
   `;
 }
 
-// Item-level "Open in X" links only: an explicit scope wins, otherwise the
-// risk's own derived context fills in. Never used for the top suite nav.
-function navWbsValue(riskContext = null) {
-  return getScope()?.id || riskContext?.primaryWbsId || state.context?.wbsId || '';
+// Item-level "Open in X" links only: only an active scope travels. Item links
+// never inject a derived wbs (that would silently scope the destination), so an
+// unscoped link carries no wbs and the destination centers via the item id.
+// Never used for the top suite nav.
+function navWbsValue() {
+  return getScope()?.id || '';
 }
 
 // Top suite nav carries only the origin and an explicitly set scope. It never
@@ -761,24 +767,24 @@ function renderRiskDetail(risk) {
         <div class="cross-app-collapsed__actions">
           ${buildSuiteAction('wbs', 'Open in WBS', {
             from: 'risk',
-            wbs: navWbsValue(riskContext),
+            wbs: navWbsValue(),
             risk: risk.id,
           })}
           ${buildSuiteAction('schedule', 'Open in Schedule', {
             from: 'risk',
-            wbs: navWbsValue(riskContext),
+            wbs: navWbsValue(),
             milestone: riskContext?.primaryMilestoneId || state.context?.milestoneId || '',
             risk: risk.id,
           })}
           ${buildSuiteAction('documents', 'Open in Documents', {
             from: 'risk',
-            wbs: navWbsValue(riskContext),
+            wbs: navWbsValue(),
             risk: risk.id,
             doc: riskContext?.documents.sourceDocIds?.[0] || state.context?.docId || '',
           })}
           ${buildSuiteAction('cost', 'Open in Cost', {
             from: 'risk',
-            wbs: navWbsValue(riskContext),
+            wbs: navWbsValue(),
             risk: risk.id,
             view: 'module',
           })}
