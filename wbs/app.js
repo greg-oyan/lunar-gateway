@@ -182,6 +182,10 @@ function getResolvedSharedContext(node) {
   const sharedContext = state.sharedContext || {};
   if (!node || !Object.keys(sharedContext).length) return null;
   if (!sharedContext.from || sharedContext.from === 'wbs') return null;
+  // `from` alone never banners: a plain top-nav arrival (e.g. ?from=risk with
+  // no value key) carries no cross-app context, so it must read as a clean
+  // root view, matching the shared hasSharedContext gate the other apps use.
+  if (!hasSharedContext(sharedContext)) return null;
   return sharedContext;
 }
 
