@@ -139,7 +139,7 @@ a {
 .hero {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
+  grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr);
   gap: 18px;
   padding: 24px 28px;
   border: 1px solid var(--line);
@@ -389,7 +389,7 @@ a {
 .hero-map {
   display: grid;
   gap: 18px;
-  min-height: clamp(700px, 74vh, 920px);
+  min-height: clamp(34rem, 74vh, 920px);
   background:
     linear-gradient(180deg, rgba(103, 204, 255, 0.1), rgba(12, 22, 31, 0.96)),
     rgba(13, 24, 36, 0.94);
@@ -429,7 +429,7 @@ a {
 
 .gateway-map {
   position: relative;
-  min-height: 620px;
+  min-height: min(620px, calc(100vh - 11rem));
   border: 1px solid rgba(148, 184, 214, 0.18);
   border-radius: 32px;
   background:
@@ -996,7 +996,7 @@ a {
 .method-panel {
   display: grid;
   gap: 16px;
-  min-height: 680px;
+  min-height: min(680px, calc(100vh - 11rem));
 }
 
 .year-legend {
@@ -1156,7 +1156,7 @@ a {
   .module-story__primary,
   .year-story__primary,
   .method-story__primary {
-    grid-template-columns: minmax(0, 1.42fr) minmax(420px, 0.78fr);
+    grid-template-columns: minmax(0, 1.42fr) minmax(320px, 0.78fr);
   }
 }
 
@@ -1180,7 +1180,7 @@ a {
   }
 }
 
-@media (max-width: 860px) {
+@media (max-width: 820px) {
   .app-shell {
     width: min(100% - 20px, 1500px);
     margin: 10px auto 22px;
