@@ -112,13 +112,16 @@ function getScope() {
   return resolveScope(state.crosswalk, state.sharedContext?.wbs);
 }
 
-// Union of crosswalk-linked source-doc ids over every WBS node in the scope's
-// subtree - the only WBS relation the source-library files carry.
-function collectScopedDocIds(scope) {
+// Element-specific (linked) docs for a scope: only documents the crosswalk
+// classified as naming a WBS element in the scope's subtree (explicit signal,
+// never inferred). Everything else is program-wide. With the current source
+// library every document is program-wide, so this set is honestly empty.
+function collectElementDocIds(scope) {
   const linked = new Set();
-  Object.values(state.crosswalk?.wbs?.byId || {}).forEach((node) => {
-    if (!scope.has(node.id)) return;
-    (node.documents?.sourceDocIds || []).forEach((docId) => linked.add(docId));
+  Object.values(state.crosswalk?.documents?.byId || {}).forEach((documentRecord) => {
+    if ((documentRecord.elementWbsIds || []).some((wbsId) => scope.has(wbsId))) {
+      linked.add(documentRecord.id);
+    }
   });
   return linked;
 }
@@ -140,7 +143,7 @@ function deriveDocumentContext() {
       title: `Documents linked to WBS ${shared.wbs}${scope?.name ? ` ${scope.name}` : ''}`,
       body: wbsContext?.documents.reason || `WBS ${shared.wbs} is not in the current crosswalk.`,
       sourceDocIds: [],
-      scopedDocIds: collectScopedDocIds(scope),
+      scopedDocIds: collectElementDocIds(scope),
       controlDocuments: wbsContext?.documents.controlDocuments || [],
       wbsId: shared.wbs,
       milestoneId: wbsContext?.schedule.primaryMilestoneId || '',
@@ -314,7 +317,12 @@ function renderContextBanner() {
 
   const scope = state.context.scoped ? getScope() : null;
   if (scope) {
-    elements.contextBannerHost.innerHTML = buildScopePillHtml(scope);
+    const linkedCount = (state.context.scopedDocIds || new Set()).size;
+    const programWideCount = Math.max(state.allDocuments.length - linkedCount, 0);
+    const note = linkedCount
+      ? `${linkedCount} linked, ${programWideCount} program-wide`
+      : 'No element-specific sources; the library is program-wide for this element';
+    elements.contextBannerHost.innerHTML = buildScopePillHtml(scope, { note });
     return;
   }
 
@@ -423,11 +431,30 @@ function renderList() {
   const linkedDocuments = documents.filter((documentRecord) => scopedDocIds.has(documentRecord.id));
   const programWideDocuments = documents.filter((documentRecord) => !scopedDocIds.has(documentRecord.id));
 
+  // With no element-specific docs, the program-wide library is all there is, so
+  // render it plainly and expanded - no "Linked (0)" header that would imply a
+  // filter that does not exist. Otherwise lead with the linked docs and tuck the
+  // program-wide library behind a collapsed, labeled summary.
+  if (!linkedDocuments.length) {
+    elements.documentList.innerHTML = `
+      <p class="list-group-label">Program-wide sources (${programWideDocuments.length})</p>
+      ${programWideDocuments.map(renderDocumentButton).join('')}
+    `;
+    return;
+  }
+
   elements.documentList.innerHTML = `
     <p class="list-group-label">Linked to WBS ${escapeHtml(scope.id)} (${linkedDocuments.length})</p>
-    ${linkedDocuments.length ? linkedDocuments.map(renderDocumentButton).join('') : buildScopeEmptyStateHtml(scope, 'documents')}
-    <p class="list-group-label">Program-wide sources (${programWideDocuments.length})</p>
-    ${programWideDocuments.map(renderDocumentButton).join('')}
+    ${linkedDocuments.map(renderDocumentButton).join('')}
+    <details class="doc-program-wide">
+      <summary class="doc-program-wide__summary">
+        <span class="list-group-label">Program-wide sources (${programWideDocuments.length})</span>
+        <span class="doc-program-wide__chevron" aria-hidden="true">▾</span>
+      </summary>
+      <div class="doc-program-wide__list">
+        ${programWideDocuments.map(renderDocumentButton).join('')}
+      </div>
+    </details>
   `;
 }
 

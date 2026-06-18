@@ -346,6 +346,48 @@ async function checkTopNavPurity() {
 // `wbs:` value), so both are excluded by construction.
 const DERIVED_WBS_VALUE = /wbs:\s*[^,\n}]*\b(node\.id|primaryWbsId|wbsId|context\.wbs)\b/;
 
+// Documents scoping must be honest: a program-wide class has to exist, and no
+// WBS node may map to the entire library (which would make "scoping" a no-op).
+async function checkDocumentScoping() {
+  const crosswalk = await readJson('suite-assets/data/gateway-crosswalk.json');
+  const byId = crosswalk?.documents?.byId || {};
+  const totalDocs = Object.keys(byId).length;
+  if (!totalDocs) {
+    fail('doc-scoping', 'Crosswalk documents.byId is empty.');
+    return;
+  }
+
+  const programWideIds = crosswalk?.documents?.programWideIds;
+  if (!Array.isArray(programWideIds) || !programWideIds.length) {
+    fail('doc-scoping', 'Crosswalk must expose a non-empty documents.programWideIds program-wide class.');
+  }
+
+  // Every document must be classified: element-specific (elementWbsIds set) or
+  // program-wide, never both and never neither.
+  Object.values(byId).forEach((documentRecord) => {
+    const elementWbsIds = documentRecord.elementWbsIds;
+    if (!Array.isArray(elementWbsIds)) {
+      fail('doc-scoping', `${documentRecord.id}: missing elementWbsIds classification array.`);
+      return;
+    }
+    const isProgramWide = (programWideIds || []).includes(documentRecord.id);
+    if (elementWbsIds.length && isProgramWide) {
+      fail('doc-scoping', `${documentRecord.id}: classified as both element-specific and program-wide.`);
+    }
+    if (!elementWbsIds.length && !isProgramWide) {
+      fail('doc-scoping', `${documentRecord.id}: classified as neither element-specific nor program-wide.`);
+    }
+  });
+
+  const maxPerNode = Math.max(
+    0,
+    ...Object.values(crosswalk?.wbs?.byId || {}).map((node) => (node.documents?.sourceDocIds || []).length),
+  );
+  if (maxPerNode >= totalDocs) {
+    fail('doc-scoping', `A WBS node maps to all ${totalDocs} documents (max per node ${maxPerNode}); scoping would be a no-op.`);
+  }
+}
+
 async function checkItemLinkWbsPurity() {
   for (const appDir of APP_DIRS) {
     const file = `${appDir}/app.js`;
@@ -409,6 +451,7 @@ async function main() {
   await checkNarrationBudget();
   await checkTopNavPurity();
   await checkItemLinkWbsPurity();
+  await checkDocumentScoping();
   checkProtectedFiles();
 
   if (failures.length) {

@@ -725,3 +725,40 @@ code {
   gap: 0.5rem;
   padding: 0.75rem 1rem 1rem;
 }
+
+/* Collapsed program-wide group in the scoped documents list. */
+.doc-program-wide {
+  margin-top: 10px;
+}
+
+.doc-program-wide__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.doc-program-wide__summary::-webkit-details-marker { display: none; }
+
+.doc-program-wide__summary .list-group-label {
+  margin: 0;
+}
+
+.doc-program-wide__chevron {
+  font-size: 0.75rem;
+  color: var(--text-soft);
+  transition: transform 0.2s ease;
+}
+
+.doc-program-wide[open] .doc-program-wide__chevron {
+  transform: rotate(180deg);
+}
+
+.doc-program-wide__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
