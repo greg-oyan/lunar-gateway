@@ -605,21 +605,25 @@ function renderAnchorConnections(anchor) {
         ${buildSuiteAction('wbs', 'Open in WBS', {
           from: 'cost',
           wbs: getScope()?.id || '',
+          scope: getScope() ? '1' : '',
           module: context.moduleKey,
         })}
         ${buildSuiteAction('schedule', 'Open in Schedule', {
           from: 'cost',
           wbs: getScope()?.id || '',
+          scope: getScope() ? '1' : '',
           milestone: context.milestoneId,
         })}
         ${buildSuiteAction('documents', 'Open in Documents', {
           from: 'cost',
           wbs: getScope()?.id || '',
+          scope: getScope() ? '1' : '',
           doc: context.docId,
         })}
         ${buildSuiteAction('risk', 'Open in Risk', {
           from: 'cost',
           wbs: getScope()?.id || '',
+          scope: getScope() ? '1' : '',
           risk: context.riskId,
         })}
       </div>
@@ -1947,6 +1951,7 @@ function render() {
 function clearScope() {
   if (!state.sharedContext?.wbs) return;
   delete state.sharedContext.wbs;
+  delete state.sharedContext.scope;
   state.yearSeriesMode = 'anchor';
   normalizeSelections();
   render();

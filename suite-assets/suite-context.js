@@ -6,8 +6,10 @@ export const SUITE_PORTS = {
   risk: 4573,
 };
 
-export const SHARED_CONTEXT_KEYS = ['from', 'wbs', 'module', 'milestone', 'phase', 'risk', 'doc'];
-const SHARED_CONTEXT_VALUE_KEYS = SHARED_CONTEXT_KEYS.filter((key) => key !== 'from');
+export const SHARED_CONTEXT_KEYS = ['from', 'wbs', 'module', 'milestone', 'phase', 'risk', 'doc', 'scope'];
+// `scope` is an intent marker, not content: it never counts as cross-app
+// context on its own and never establishes a banner.
+const SHARED_CONTEXT_VALUE_KEYS = SHARED_CONTEXT_KEYS.filter((key) => key !== 'from' && key !== 'scope');
 
 function cleanValue(value) {
   if (value === null || value === undefined) return '';
@@ -106,13 +108,20 @@ export function hasSharedContext(sharedContext = {}) {
 
 const ITEM_ID_KEYS = ['module', 'milestone', 'phase', 'risk', 'doc'];
 
-// True only when `wbs` arrives as a suite-wide scope: a bare `wbs` with no
-// accompanying item-id param. A `wbs` riding alongside an item id (module,
-// milestone, phase, risk, doc) is a "go look at this specific thing" link and
-// never establishes a scope; the destination centers on the item instead.
+// True when `wbs` arrives as a suite-wide scope. Two cases qualify:
+//   - a bare `wbs` with no accompanying item-id param (a deep link), or
+//   - a `wbs` riding alongside an item id but carrying the explicit `scope=1`
+//     marker, meaning an already-scoped app generated the link and the scope
+//     should travel with it.
+// A `wbs` riding alongside an item id WITHOUT the marker is a derived item
+// association ("go look at this specific thing"); it never establishes a scope
+// and the destination centers on the item instead.
 export function wbsIsScope(sharedContext = {}) {
-  if (!cleanValue(sharedContext?.wbs)) return false;
-  return !ITEM_ID_KEYS.some((key) => Boolean(cleanValue(sharedContext?.[key])));
+  const hasWbs = Boolean(cleanValue(sharedContext?.wbs));
+  if (!hasWbs) return false;
+  const hasItemId = ITEM_ID_KEYS.some((key) => Boolean(cleanValue(sharedContext?.[key])));
+  const hasScopeMarker = cleanValue(sharedContext?.scope) === '1';
+  return !hasItemId || hasScopeMarker;
 }
 
 export function mergeQueryState(

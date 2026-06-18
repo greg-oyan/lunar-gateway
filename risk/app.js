@@ -259,6 +259,14 @@ function navWbsValue() {
   return getScope()?.id || '';
 }
 
+// Explicit scope marker for item links. Only an active scope travels, and only
+// then does the link carry `scope=1` so the destination keeps the scope (a
+// `wbs` without this marker is treated as a derived item association, not a
+// scope). Empty when unscoped, so buildSuiteHref omits it entirely.
+function navScopeMarker() {
+  return getScope() ? '1' : '';
+}
+
 // Top suite nav carries only the origin and an explicitly set scope. It never
 // derives wbs/milestone/risk/doc/module from the current selection.
 function buildTopNavContext() {
@@ -768,23 +776,27 @@ function renderRiskDetail(risk) {
           ${buildSuiteAction('wbs', 'Open in WBS', {
             from: 'risk',
             wbs: navWbsValue(),
+            scope: navScopeMarker(),
             risk: risk.id,
           })}
           ${buildSuiteAction('schedule', 'Open in Schedule', {
             from: 'risk',
             wbs: navWbsValue(),
+            scope: navScopeMarker(),
             milestone: riskContext?.primaryMilestoneId || state.context?.milestoneId || '',
             risk: risk.id,
           })}
           ${buildSuiteAction('documents', 'Open in Documents', {
             from: 'risk',
             wbs: navWbsValue(),
+            scope: navScopeMarker(),
             risk: risk.id,
             doc: riskContext?.documents.sourceDocIds?.[0] || state.context?.docId || '',
           })}
           ${buildSuiteAction('cost', 'Open in Cost', {
             from: 'risk',
             wbs: navWbsValue(),
+            scope: navScopeMarker(),
             risk: risk.id,
             view: 'module',
           })}
@@ -847,6 +859,7 @@ function resetView() {
 function clearScope() {
   if (!state.sharedContext?.wbs) return;
   delete state.sharedContext.wbs;
+  delete state.sharedContext.scope;
   state.context = deriveRiskContext();
   state.selectedRiskId = null;
   updateVisibleRisks();

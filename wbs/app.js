@@ -343,23 +343,27 @@ function renderConnectedViews(node) {
         ${buildSuiteAction('cost', 'Open in Cost', {
           from: 'wbs',
           wbs: getScope()?.id || '',
+          scope: getScope() ? '1' : '',
           anchor: nodeContext.cost.anchorId,
           view: 'module',
         })}
         ${buildSuiteAction('schedule', 'Open in Schedule', {
           from: 'wbs',
           wbs: getScope()?.id || '',
+          scope: getScope() ? '1' : '',
           milestone: nodeContext.schedule.primaryMilestoneId,
           phase: nodeContext.schedule.phaseId,
         })}
         ${buildSuiteAction('risk', 'Open in Risk', {
           from: 'wbs',
           wbs: getScope()?.id || '',
+          scope: getScope() ? '1' : '',
           risk: nodeContext.risks.primaryRiskId,
         })}
         ${buildSuiteAction('documents', 'Open in Documents', {
           from: 'wbs',
           wbs: getScope()?.id || '',
+          scope: getScope() ? '1' : '',
           doc: nodeContext.documents.sourceDocIds?.[0] || '',
         })}
       </div>
@@ -376,23 +380,27 @@ function renderFocusActions(node) {
       ${buildSuiteAction('cost', 'Open in Cost', {
         from: 'wbs',
         wbs: getScope()?.id || '',
+        scope: getScope() ? '1' : '',
         anchor: nodeContext.cost.anchorId,
         view: 'module',
       })}
       ${buildSuiteAction('schedule', 'Open in Schedule', {
         from: 'wbs',
         wbs: getScope()?.id || '',
+        scope: getScope() ? '1' : '',
         milestone: nodeContext.schedule.primaryMilestoneId,
         phase: nodeContext.schedule.phaseId,
       })}
       ${buildSuiteAction('risk', 'Open in Risk', {
         from: 'wbs',
         wbs: getScope()?.id || '',
+        scope: getScope() ? '1' : '',
         risk: nodeContext.risks.primaryRiskId,
       })}
       ${buildSuiteAction('documents', 'Open in Documents', {
         from: 'wbs',
         wbs: getScope()?.id || '',
+        scope: getScope() ? '1' : '',
         doc: nodeContext.documents.sourceDocIds?.[0] || '',
       })}
     </div>
@@ -1358,6 +1366,7 @@ overviewContent.addEventListener('click', (event) => {
   if (clearScopeControl) {
     state.scopeArmed = false;
     delete state.sharedContext.wbs;
+    delete state.sharedContext.scope;
     render();
     return;
   }
@@ -1397,6 +1406,7 @@ structureView.addEventListener('click', (event) => {
   if (event.target.closest('[data-action="clear-scope"]')) {
     state.scopeArmed = false;
     delete state.sharedContext.wbs;
+    delete state.sharedContext.scope;
     render();
     return;
   }

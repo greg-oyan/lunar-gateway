@@ -388,6 +388,11 @@ async function checkDocumentScoping() {
   }
 }
 
+// Matches a single buildSuiteAction(route, label, { ...flat params... }) call.
+// The params objects in these builders are flat (no nested braces), so a
+// non-greedy {...} capture is sufficient.
+const SUITE_ACTION_CALL = /buildSuiteAction\(\s*'[^']*'\s*,\s*'[^']*'\s*,\s*\{([\s\S]*?)\}\s*\)/g;
+
 async function checkItemLinkWbsPurity() {
   for (const appDir of APP_DIRS) {
     const file = `${appDir}/app.js`;
@@ -403,6 +408,17 @@ async function checkItemLinkWbsPurity() {
         fail('item-link-wbs', `${file}:${index + 1} derived wbs in a link param: ${line.trim()}`);
       }
     });
+
+    // An item link may carry `wbs` only when paired with the explicit `scope`
+    // marker - that is the only way a scope (and never a derived association)
+    // travels with an item link. buildTopNavContext is not a buildSuiteAction
+    // call, so the top nav (bare `wbs`, no marker) is correctly excluded here.
+    for (const match of contents.matchAll(SUITE_ACTION_CALL)) {
+      const block = match[1];
+      if (/\bwbs:/.test(block) && !/\bscope:/.test(block)) {
+        fail('item-link-wbs', `${file}: item link carries wbs without a scope marker: ${match[0].replace(/\s+/g, ' ').slice(0, 80)}...`);
+      }
+    }
   }
 }
 

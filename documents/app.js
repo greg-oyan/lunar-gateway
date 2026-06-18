@@ -508,23 +508,27 @@ function renderDetailCard(documentRecord) {
                 ${buildSuiteAction('wbs', 'Open in WBS', {
                   from: 'documents',
                   wbs: getScope()?.id || '',
+                  scope: getScope() ? '1' : '',
                   doc: documentRecord.id,
                 })}
                 ${buildSuiteAction('schedule', 'Open in Schedule', {
                   from: 'documents',
                   wbs: getScope()?.id || '',
+                  scope: getScope() ? '1' : '',
                   milestone: state.context.milestoneId || '',
                   doc: documentRecord.id,
                 })}
                 ${buildSuiteAction('cost', 'Open in Cost', {
                   from: 'documents',
                   wbs: getScope()?.id || '',
+                  scope: getScope() ? '1' : '',
                   doc: documentRecord.id,
                   view: 'module',
                 })}
                 ${buildSuiteAction('risk', 'Open in Risk', {
                   from: 'documents',
                   wbs: getScope()?.id || '',
+                  scope: getScope() ? '1' : '',
                   risk: state.context.riskId || '',
                   doc: documentRecord.id,
                 })}
@@ -683,6 +687,7 @@ function resetView() {
 function clearScope() {
   if (!state.sharedContext?.wbs) return;
   delete state.sharedContext.wbs;
+  delete state.sharedContext.scope;
   state.context = deriveDocumentContext();
   updateVisibleDocuments();
   render();

@@ -313,23 +313,27 @@ function renderContextActions() {
       ${buildSuiteAction('wbs', 'Open in WBS', {
         from: 'schedule',
         wbs: getScope()?.id || '',
+        scope: getScope() ? '1' : '',
         milestone: context.milestone?.id || '',
       })}
       ${buildSuiteAction('cost', 'Open in Cost', {
         from: 'schedule',
         wbs: getScope()?.id || '',
+        scope: getScope() ? '1' : '',
         milestone: context.milestone?.id || '',
         view: 'module',
       })}
       ${buildSuiteAction('risk', 'Open in Risk', {
         from: 'schedule',
         wbs: getScope()?.id || '',
+        scope: getScope() ? '1' : '',
         milestone: context.milestone?.id || '',
         risk: context.riskId,
       })}
       ${buildSuiteAction('documents', 'Open in Documents', {
         from: 'schedule',
         wbs: getScope()?.id || '',
+        scope: getScope() ? '1' : '',
         milestone: context.milestone?.id || '',
         doc: context.docId,
       })}
@@ -810,6 +814,7 @@ function renderApp() {
 function clearScope() {
   if (!state.sharedContext?.wbs) return;
   delete state.sharedContext.wbs;
+  delete state.sharedContext.scope;
   renderApp();
 }
 
