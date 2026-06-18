@@ -131,10 +131,11 @@ function deriveDocumentContext() {
   const docCatalog = state.crosswalk?.documents?.byId || {};
   if (!hasSharedContext(shared)) return null;
 
-  // An explicit WBS scope wins over derived contexts. Library files without a
+  // An active WBS scope wins over derived contexts. Library files without a
   // WBS relation stay visible under a labeled program-wide section instead of
-  // disappearing. A `wbs` riding with an item id is not a scope, so we fall
-  // through and center on the item instead.
+  // disappearing. A `wbs` is an active scope when it is bare or carries the
+  // `scope=1` marker; a `wbs` riding with an item id but no marker is a derived
+  // association, so we fall through and center on the item instead.
   if (wbsIsScope(shared)) {
     const scope = getScope();
     const wbsContext = state.crosswalk?.wbs?.byId?.[shared.wbs];

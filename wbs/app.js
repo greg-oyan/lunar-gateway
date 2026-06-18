@@ -196,12 +196,9 @@ function getResolvedSharedContext(node) {
   return sharedContext;
 }
 
-function resolveSelectedIdFromContext(sharedContext) {
-  const preferredWbsId = sharedContext.wbs;
-  if (preferredWbsId && state.nodesById.has(preferredWbsId)) {
-    return preferredWbsId;
-  }
-
+// The WBS branch an item context points at (risk/milestone/phase/module -> its
+// primary WBS element). Returns '' when no item context resolves to a node.
+function resolveItemDerivedWbsId(sharedContext) {
   const phaseContext = sharedContext.phase
     ? state.crosswalk?.schedule?.byPhaseId?.[sharedContext.phase]
     : null;
@@ -223,6 +220,30 @@ function resolveSelectedIdFromContext(sharedContext) {
   ].filter(Boolean);
 
   return candidates.find((nodeId) => state.nodesById.has(nodeId)) || '';
+}
+
+function resolveSelectedIdFromContext(sharedContext) {
+  const itemWbsId = resolveItemDerivedWbsId(sharedContext);
+
+  // An active scope (bare `wbs`, or `wbs` + item id + `scope=1`) owns the
+  // selected branch: the scope id IS the selection. An accompanying item id is
+  // context, never a command to re-home the scope - so we never select an
+  // item-derived branch here, not even an in-scope descendant. In WBS the scope
+  // follows the selection (getScope reads selectedId), so centering a descendant
+  // would silently narrow the user's explicit scope, and centering an
+  // out-of-scope item branch would replace it outright; both are forbidden. The
+  // cross-app banner surfaces which item brought the user in.
+  if (wbsIsScope(sharedContext)) {
+    return state.nodesById.has(sharedContext.wbs) ? sharedContext.wbs : '';
+  }
+
+  // Not actively scoped. A `wbs` deep link - or a derived `wbs` riding on an
+  // unscoped item link without the marker, e.g. a simulation module link -
+  // selects that node; otherwise an item id centers its resolved WBS branch.
+  if (sharedContext.wbs && state.nodesById.has(sharedContext.wbs)) {
+    return sharedContext.wbs;
+  }
+  return itemWbsId;
 }
 
 function buildSuiteAction(route, label, params) {
@@ -247,8 +268,10 @@ function syncSuiteNavigation() {
 }
 
 // Browsing is not scoping: a scope exists only when the user armed it via the
-// "Scope suite to this branch" control or arrived at a URL that already
-// carried `wbs`. While armed, the scope follows the current selection. The
+// "Scope suite to this branch" control or arrived actively scoped (a bare `wbs`
+// deep link, or a `wbs` carrying the `scope=1` marker - see wbsIsScope). While
+// armed, the scope follows the current selection, and on a scoped item arrival
+// the selection is pinned to the scope id so the scope is never re-homed. The
 // root can never be a scope; it is the unscoped program view.
 function getScope() {
   const rootId = state.data?.rootId || '';
@@ -1296,10 +1319,13 @@ async function loadData() {
       (state.nodesById.has(state.sharedContext.wbs) ? state.sharedContext.wbs : '') ||
       decodeURIComponent(window.location.hash.replace(/^#/, ''));
     state.selectedId = state.nodesById.has(requestedId) ? requestedId : data.rootId;
-    // Arriving with a bare `wbs` in the URL counts as an explicitly armed scope
-    // (deep link, sim module link, shared URL). A `wbs` riding alongside an
-    // item-id param is a "go look at this thing" link, never a scope: it
-    // centers via the item id but must not arm scope (wbsIsScope enforces this).
+    // Arriving actively scoped arms the scope: that is a bare `wbs` deep link,
+    // or a `wbs` carrying the explicit `scope=1` marker from an already-scoped
+    // app (scope travels with item links). A `wbs` riding alongside an item id
+    // WITHOUT the marker is a derived association, not a scope, and never arms -
+    // wbsIsScope encodes all three cases. resolveSelectedIdFromContext has
+    // already pinned the selection to the scope id in the scoped case, so the
+    // active scope is never re-homed to an item's branch.
     state.scopeArmed = wbsIsScope(state.sharedContext) && state.selectedId !== data.rootId;
     state.activeDetail = DETAIL_META[urlParams.get('detail')] ? urlParams.get('detail') : null;
     state.viewMode = urlParams.get('mode') === 'structure' ? 'structure' : 'explorer';

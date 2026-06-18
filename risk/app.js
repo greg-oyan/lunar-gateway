@@ -171,10 +171,11 @@ function deriveRiskContext() {
   const shared = state.sharedContext || {};
   if (!hasSharedContext(shared)) return null;
 
-  // An explicit WBS scope wins over every derived context. The scoped base
-  // list is exactly the crosswalk node's risk union - never silently widened.
-  // A `wbs` riding with an item id is not a scope (wbsIsScope is false), so we
-  // fall through and center on the item instead.
+  // An active WBS scope wins over every derived context. The scoped base list
+  // is exactly the crosswalk node's risk union - never silently widened. A
+  // `wbs` is an active scope when it is bare or carries the `scope=1` marker;
+  // a `wbs` riding with an item id but no marker is a derived association
+  // (wbsIsScope is false), so we fall through and center on the item instead.
   if (wbsIsScope(shared)) {
     const scope = getScope();
     const directContext = state.crosswalk?.wbs?.byId?.[shared.wbs];

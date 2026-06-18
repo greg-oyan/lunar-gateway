@@ -422,6 +422,55 @@ async function checkItemLinkWbsPurity() {
   }
 }
 
+// The WBS app must treat an item id as context when an explicit scope is
+// active, never replacing the scoped branch with an item-derived (possibly
+// out-of-subtree) WBS id. These are string-level guards on the source: brittle
+// against renames, but they pin the intent so a future refactor that breaks the
+// rule is caught. They also confirm the wbsIsScope rule is documented as the
+// final three-case rule (bare wbs / wbs+item+marker / wbs+item without marker).
+async function checkScopeAwareWbsSelection() {
+  // 1. resolveSelectedIdFromContext in wbs/app.js must be scope-aware: when
+  //    actively scoped it returns the scope id (sharedContext.wbs), not an
+  //    item-derived branch.
+  let wbsApp = '';
+  try {
+    wbsApp = await fs.readFile(path.join(repoRoot, 'wbs/app.js'), 'utf8');
+  } catch {
+    fail('scope-aware-wbs', 'wbs/app.js: unable to read');
+    return;
+  }
+  const start = wbsApp.indexOf('function resolveSelectedIdFromContext');
+  if (start === -1) {
+    fail('scope-aware-wbs', 'wbs/app.js: missing resolveSelectedIdFromContext');
+  } else {
+    const body = wbsApp.slice(start, wbsApp.indexOf('\n}', start));
+    if (!/wbsIsScope\(sharedContext\)/.test(body)) {
+      fail('scope-aware-wbs', 'resolveSelectedIdFromContext must branch on wbsIsScope(sharedContext)');
+    }
+    // The scoped branch must resolve the selection from sharedContext.wbs (the
+    // active scope id), guaranteeing an item id cannot re-home the scope.
+    if (!/wbsIsScope\(sharedContext\)\)\s*\{\s*return[^}]*sharedContext\.wbs/.test(body)) {
+      fail('scope-aware-wbs', 'the scoped branch of resolveSelectedIdFromContext must return sharedContext.wbs');
+    }
+  }
+
+  // 2. The wbsIsScope rule must be documented as the final three-case rule:
+  //    its comment has to mention the scope marker, not the stale absolute
+  //    "wbs alongside an item id is never a scope".
+  let ctx = '';
+  try {
+    ctx = await fs.readFile(path.join(repoRoot, 'suite-assets/suite-context.js'), 'utf8');
+  } catch {
+    fail('scope-aware-wbs', 'suite-assets/suite-context.js: unable to read');
+    return;
+  }
+  const fnIndex = ctx.indexOf('export function wbsIsScope');
+  const commentRegion = fnIndex === -1 ? '' : ctx.slice(Math.max(0, fnIndex - 700), fnIndex);
+  if (!/scope=1|scope marker/i.test(commentRegion)) {
+    fail('scope-aware-wbs', 'wbsIsScope must be documented with the scope=1 marker rule (three-case rule)');
+  }
+}
+
 const PROTECTED_PATTERN = /^(index\.html|index\.app\.html|js\/|css\/|server\.mjs|Gateway_Thumbnail|LICENSE|README)/;
 
 function resolveBaseBranch() {
@@ -467,6 +516,7 @@ async function main() {
   await checkNarrationBudget();
   await checkTopNavPurity();
   await checkItemLinkWbsPurity();
+  await checkScopeAwareWbsSelection();
   await checkDocumentScoping();
   checkProtectedFiles();
 
