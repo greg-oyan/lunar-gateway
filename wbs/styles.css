@@ -627,7 +627,14 @@ input:focus-visible {
 
 .structure-selected__actions {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* The scope arm control / pill sits inline with the Explorer button here. */
+.structure-selected__actions .scope-arm-row {
   justify-content: flex-end;
 }
 

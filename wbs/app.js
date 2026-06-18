@@ -14,6 +14,12 @@ import {
 const DATA_URL = './data/gateway-wbs.json';
 const CROSSWALK_URL = '../suite-assets/data/gateway-crosswalk.json';
 
+// Scope is explicit-only: selecting a unit (in either view) exposes the arm
+// control but does not scope on its own. Flip this to true to make a click on a
+// structure unit scope immediately - a deliberate exception to the rule, left
+// off by default. See the structure-svg click handler.
+const STRUCTURE_CLICK_SCOPES = false;
+
 const COST_AREA_LABELS = {
   ppe: 'PPE',
   halo: 'HALO',
@@ -813,6 +819,7 @@ function renderStructureSelectedSummary(node) {
     </div>
 
     <div class="structure-selected__actions">
+      ${renderScopeControl(node)}
       <button class="structure-selected__button" type="button" data-action="switch-explorer">
         Open full overview in Explorer View
       </button>
@@ -1381,6 +1388,19 @@ overviewContent.addEventListener('click', (event) => {
 });
 
 structureView.addEventListener('click', (event) => {
+  if (event.target.closest('[data-action="arm-scope"]')) {
+    state.scopeArmed = true;
+    render();
+    return;
+  }
+
+  if (event.target.closest('[data-action="clear-scope"]')) {
+    state.scopeArmed = false;
+    delete state.sharedContext.wbs;
+    render();
+    return;
+  }
+
   const control = event.target.closest('[data-action="switch-explorer"]');
   if (!control) return;
   state.activeDetail = null;
@@ -1391,7 +1411,14 @@ structureSvg.addEventListener('click', (event) => {
   const control = event.target.closest('[data-structure-node]');
   if (!control) return;
   const nodeId = control.dataset.id;
-  if (nodeId && state.nodesById.has(nodeId)) selectNode(nodeId);
+  if (!nodeId || !state.nodesById.has(nodeId)) return;
+  // Selecting never auto-scopes by default (scope is explicit-only). When the
+  // reviewer flips STRUCTURE_CLICK_SCOPES on, a structure click on a non-root
+  // unit arms scope immediately - a deliberate exception to the explicit rule.
+  if (STRUCTURE_CLICK_SCOPES && nodeId !== (state.data?.rootId || '')) {
+    state.scopeArmed = true;
+  }
+  selectNode(nodeId);
 });
 
 structureSvg.addEventListener('keydown', (event) => {
