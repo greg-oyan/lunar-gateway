@@ -9,6 +9,8 @@
   mergeQueryState,
   readSharedContext,
   resolveScope,
+  resolveScopeFromSelection,
+  wbsIsScope,
 } from '../suite-assets/suite-context.js';
 
 const CROSSWALK_URL = '../suite-assets/data/gateway-crosswalk.json';
@@ -310,6 +312,7 @@ function getAnchorContext(anchorId = state.selectedAnchorId) {
 }
 
 function getScope() {
+  if (!wbsIsScope(state.sharedContext)) return null;
   return resolveScope(state.crosswalk, state.sharedContext?.wbs);
 }
 
@@ -602,22 +605,26 @@ function renderAnchorConnections(anchor) {
       <div class="suite-context-actions">
         ${buildSuiteAction('wbs', 'Open in WBS', {
           from: 'cost',
-          wbs: context.wbsId,
+          wbs: getScope()?.id || '',
+          scope: getScope() ? '1' : '',
           module: context.moduleKey,
         })}
         ${buildSuiteAction('schedule', 'Open in Schedule', {
           from: 'cost',
-          wbs: context.wbsId,
+          wbs: getScope()?.id || '',
+          scope: getScope() ? '1' : '',
           milestone: context.milestoneId,
         })}
         ${buildSuiteAction('documents', 'Open in Documents', {
           from: 'cost',
-          wbs: context.wbsId,
+          wbs: getScope()?.id || '',
+          scope: getScope() ? '1' : '',
           doc: context.docId,
         })}
         ${buildSuiteAction('risk', 'Open in Risk', {
           from: 'cost',
-          wbs: context.wbsId,
+          wbs: getScope()?.id || '',
+          scope: getScope() ? '1' : '',
           risk: context.riskId,
         })}
       </div>
@@ -658,10 +665,28 @@ function setView(view) {
   render();
 }
 
+// A cost anchor's WBS home: the exact id when the anchor maps to a single WBS
+// branch (a clear primary). Multi-branch anchors (e.g. the program backbone)
+// have no single primary, so they do not auto-scope - rule 7.
+function scopeWbsForAnchor(anchorId) {
+  const wbsIds = state.crosswalk?.cost?.byAnchorId?.[anchorId]?.wbsIds || [];
+  return wbsIds.length === 1 ? wbsIds[0] : '';
+}
+
+// Selection drives the suite scope: selecting a cost anchor with a single clear
+// WBS home scopes the suite to that exact id (descendants included); otherwise
+// the current scope is left unchanged.
+function applySelectionScope(anchorId) {
+  const wbsId = resolveScopeFromSelection(state.crosswalk, scopeWbsForAnchor(anchorId));
+  if (!wbsId) return;
+  state.sharedContext = { wbs: wbsId, scope: '1' };
+}
+
 function setAnchor(anchorId) {
   if (!state.anchorsById.has(anchorId)) return;
   state.selectedAnchorId = anchorId;
   state.moduleViewMode = 'anchor';
+  applySelectionScope(anchorId);
   render();
 }
 
@@ -1945,6 +1970,7 @@ function render() {
 function clearScope() {
   if (!state.sharedContext?.wbs) return;
   delete state.sharedContext.wbs;
+  delete state.sharedContext.scope;
   state.yearSeriesMode = 'anchor';
   normalizeSelections();
   render();

@@ -9,6 +9,8 @@ import {
   mergeQueryState,
   readSharedContext,
   resolveScope,
+  resolveScopeFromSelection,
+  wbsIsScope,
 } from '../suite-assets/suite-context.js';
 
 const DATA_URL = './data/documents.json';
@@ -107,16 +109,32 @@ function buildDocumentUseNote(documentRecord) {
 }
 
 function getScope() {
+  if (!wbsIsScope(state.sharedContext)) return null;
   return resolveScope(state.crosswalk, state.sharedContext?.wbs);
 }
 
-// Union of crosswalk-linked source-doc ids over every WBS node in the scope's
-// subtree - the only WBS relation the source-library files carry.
-function collectScopedDocIds(scope) {
+// Selection drives the suite scope only for an explicitly element-specific
+// document: exactly one element WBS id. Program-wide docs (the whole current
+// library) and multi-element docs with no single primary never auto-scope, so
+// the current scope is left unchanged.
+function applySelectionScope(documentId) {
+  const elementWbsIds = state.crosswalk?.documents?.byId?.[documentId]?.elementWbsIds || [];
+  if (elementWbsIds.length !== 1) return;
+  const wbsId = resolveScopeFromSelection(state.crosswalk, elementWbsIds[0]);
+  if (!wbsId) return;
+  state.sharedContext = { wbs: wbsId, scope: '1' };
+}
+
+// Element-specific (linked) docs for a scope: only documents the crosswalk
+// classified as naming a WBS element in the scope's subtree (explicit signal,
+// never inferred). Everything else is program-wide. With the current source
+// library every document is program-wide, so this set is honestly empty.
+function collectElementDocIds(scope) {
   const linked = new Set();
-  Object.values(state.crosswalk?.wbs?.byId || {}).forEach((node) => {
-    if (!scope.has(node.id)) return;
-    (node.documents?.sourceDocIds || []).forEach((docId) => linked.add(docId));
+  Object.values(state.crosswalk?.documents?.byId || {}).forEach((documentRecord) => {
+    if ((documentRecord.elementWbsIds || []).some((wbsId) => scope.has(wbsId))) {
+      linked.add(documentRecord.id);
+    }
   });
   return linked;
 }
@@ -126,10 +144,12 @@ function deriveDocumentContext() {
   const docCatalog = state.crosswalk?.documents?.byId || {};
   if (!hasSharedContext(shared)) return null;
 
-  // An explicit WBS scope wins over derived contexts. Library files without a
+  // An active WBS scope wins over derived contexts. Library files without a
   // WBS relation stay visible under a labeled program-wide section instead of
-  // disappearing.
-  if (shared.wbs) {
+  // disappearing. A `wbs` is an active scope when it is bare or carries the
+  // `scope=1` marker; a `wbs` riding with an item id but no marker is a derived
+  // association, so we fall through and center on the item instead.
+  if (wbsIsScope(shared)) {
     const scope = getScope();
     const wbsContext = state.crosswalk?.wbs?.byId?.[shared.wbs];
     return {
@@ -137,7 +157,7 @@ function deriveDocumentContext() {
       title: `Documents linked to WBS ${shared.wbs}${scope?.name ? ` ${scope.name}` : ''}`,
       body: wbsContext?.documents.reason || `WBS ${shared.wbs} is not in the current crosswalk.`,
       sourceDocIds: [],
-      scopedDocIds: collectScopedDocIds(scope),
+      scopedDocIds: collectElementDocIds(scope),
       controlDocuments: wbsContext?.documents.controlDocuments || [],
       wbsId: shared.wbs,
       milestoneId: wbsContext?.schedule.primaryMilestoneId || '',
@@ -311,7 +331,12 @@ function renderContextBanner() {
 
   const scope = state.context.scoped ? getScope() : null;
   if (scope) {
-    elements.contextBannerHost.innerHTML = buildScopePillHtml(scope);
+    const linkedCount = (state.context.scopedDocIds || new Set()).size;
+    const programWideCount = Math.max(state.allDocuments.length - linkedCount, 0);
+    const note = linkedCount
+      ? `${linkedCount} linked, ${programWideCount} program-wide`
+      : 'No element-specific sources; the library is program-wide for this element';
+    elements.contextBannerHost.innerHTML = buildScopePillHtml(scope, { note });
     return;
   }
 
@@ -420,11 +445,30 @@ function renderList() {
   const linkedDocuments = documents.filter((documentRecord) => scopedDocIds.has(documentRecord.id));
   const programWideDocuments = documents.filter((documentRecord) => !scopedDocIds.has(documentRecord.id));
 
+  // With no element-specific docs, the program-wide library is all there is, so
+  // render it plainly and expanded - no "Linked (0)" header that would imply a
+  // filter that does not exist. Otherwise lead with the linked docs and tuck the
+  // program-wide library behind a collapsed, labeled summary.
+  if (!linkedDocuments.length) {
+    elements.documentList.innerHTML = `
+      <p class="list-group-label">Program-wide sources (${programWideDocuments.length})</p>
+      ${programWideDocuments.map(renderDocumentButton).join('')}
+    `;
+    return;
+  }
+
   elements.documentList.innerHTML = `
     <p class="list-group-label">Linked to WBS ${escapeHtml(scope.id)} (${linkedDocuments.length})</p>
-    ${linkedDocuments.length ? linkedDocuments.map(renderDocumentButton).join('') : buildScopeEmptyStateHtml(scope, 'documents')}
-    <p class="list-group-label">Program-wide sources (${programWideDocuments.length})</p>
-    ${programWideDocuments.map(renderDocumentButton).join('')}
+    ${linkedDocuments.map(renderDocumentButton).join('')}
+    <details class="doc-program-wide">
+      <summary class="doc-program-wide__summary">
+        <span class="list-group-label">Program-wide sources (${programWideDocuments.length})</span>
+        <span class="doc-program-wide__chevron" aria-hidden="true">▾</span>
+      </summary>
+      <div class="doc-program-wide__list">
+        ${programWideDocuments.map(renderDocumentButton).join('')}
+      </div>
+    </details>
   `;
 }
 
@@ -477,24 +521,28 @@ function renderDetailCard(documentRecord) {
               <div class="cross-app-collapsed__actions">
                 ${buildSuiteAction('wbs', 'Open in WBS', {
                   from: 'documents',
-                  wbs: state.context.wbsId || '',
+                  wbs: getScope()?.id || '',
+                  scope: getScope() ? '1' : '',
                   doc: documentRecord.id,
                 })}
                 ${buildSuiteAction('schedule', 'Open in Schedule', {
                   from: 'documents',
-                  wbs: state.context.wbsId || '',
+                  wbs: getScope()?.id || '',
+                  scope: getScope() ? '1' : '',
                   milestone: state.context.milestoneId || '',
                   doc: documentRecord.id,
                 })}
                 ${buildSuiteAction('cost', 'Open in Cost', {
                   from: 'documents',
-                  wbs: state.context.wbsId || '',
+                  wbs: getScope()?.id || '',
+                  scope: getScope() ? '1' : '',
                   doc: documentRecord.id,
                   view: 'module',
                 })}
                 ${buildSuiteAction('risk', 'Open in Risk', {
                   from: 'documents',
-                  wbs: state.context.wbsId || '',
+                  wbs: getScope()?.id || '',
+                  scope: getScope() ? '1' : '',
                   risk: state.context.riskId || '',
                   doc: documentRecord.id,
                 })}
@@ -653,6 +701,7 @@ function resetView() {
 function clearScope() {
   if (!state.sharedContext?.wbs) return;
   delete state.sharedContext.wbs;
+  delete state.sharedContext.scope;
   state.context = deriveDocumentContext();
   updateVisibleDocuments();
   render();
@@ -680,7 +729,14 @@ function handleListClick(event) {
   const button = event.target.closest('[data-document-id]');
   if (!button) return;
 
-  state.selectedDocumentId = button.getAttribute('data-document-id');
+  const documentId = button.getAttribute('data-document-id');
+  state.selectedDocumentId = documentId;
+  // Selection drives scope only for genuinely element-specific documents.
+  // Program-wide docs (the entire current library) never scope, and a doc with
+  // multiple element WBS ids and no single primary does not auto-scope either.
+  applySelectionScope(documentId);
+  state.context = deriveDocumentContext();
+  updateVisibleDocuments();
   syncSelectedDocumentId();
   render();
 }

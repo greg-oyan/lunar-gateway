@@ -9,6 +9,8 @@ import {
   mergeQueryState,
   readSharedContext,
   resolveScope,
+  resolveScopeFromSelection,
+  wbsIsScope,
 } from '../suite-assets/suite-context.js';
 
 const DATA_URL = './data/risks.json';
@@ -162,6 +164,7 @@ function clampText(text, maxLength = 120) {
 }
 
 function getScope() {
+  if (!wbsIsScope(state.sharedContext)) return null;
   return resolveScope(state.crosswalk, state.sharedContext?.wbs);
 }
 
@@ -169,9 +172,12 @@ function deriveRiskContext() {
   const shared = state.sharedContext || {};
   if (!hasSharedContext(shared)) return null;
 
-  // An explicit WBS scope wins over every derived context. The scoped base
-  // list is exactly the crosswalk node's risk union - never silently widened.
-  if (shared.wbs) {
+  // An active WBS scope wins over every derived context. The scoped base list
+  // is exactly the crosswalk node's risk union - never silently widened. A
+  // `wbs` is an active scope when it is bare or carries the `scope=1` marker;
+  // a `wbs` riding with an item id but no marker is a derived association
+  // (wbsIsScope is false), so we fall through and center on the item instead.
+  if (wbsIsScope(shared)) {
     const scope = getScope();
     const directContext = state.crosswalk?.wbs?.byId?.[shared.wbs];
     return {
@@ -247,10 +253,20 @@ function buildSuiteAction(route, label, params) {
   `;
 }
 
-// Item-level "Open in X" links only: an explicit scope wins, otherwise the
-// risk's own derived context fills in. Never used for the top suite nav.
-function navWbsValue(riskContext = null) {
-  return getScope()?.id || riskContext?.primaryWbsId || state.context?.wbsId || '';
+// Item-level "Open in X" links only: only an active scope travels. Item links
+// never inject a derived wbs (that would silently scope the destination), so an
+// unscoped link carries no wbs and the destination centers via the item id.
+// Never used for the top suite nav.
+function navWbsValue() {
+  return getScope()?.id || '';
+}
+
+// Explicit scope marker for item links. Only an active scope travels, and only
+// then does the link carry `scope=1` so the destination keeps the scope (a
+// `wbs` without this marker is treated as a derived item association, not a
+// scope). Empty when unscoped, so buildSuiteHref omits it entirely.
+function navScopeMarker() {
+  return getScope() ? '1' : '';
 }
 
 // Top suite nav carries only the origin and an explicitly set scope. It never
@@ -761,24 +777,28 @@ function renderRiskDetail(risk) {
         <div class="cross-app-collapsed__actions">
           ${buildSuiteAction('wbs', 'Open in WBS', {
             from: 'risk',
-            wbs: navWbsValue(riskContext),
+            wbs: navWbsValue(),
+            scope: navScopeMarker(),
             risk: risk.id,
           })}
           ${buildSuiteAction('schedule', 'Open in Schedule', {
             from: 'risk',
-            wbs: navWbsValue(riskContext),
+            wbs: navWbsValue(),
+            scope: navScopeMarker(),
             milestone: riskContext?.primaryMilestoneId || state.context?.milestoneId || '',
             risk: risk.id,
           })}
           ${buildSuiteAction('documents', 'Open in Documents', {
             from: 'risk',
-            wbs: navWbsValue(riskContext),
+            wbs: navWbsValue(),
+            scope: navScopeMarker(),
             risk: risk.id,
             doc: riskContext?.documents.sourceDocIds?.[0] || state.context?.docId || '',
           })}
           ${buildSuiteAction('cost', 'Open in Cost', {
             from: 'risk',
-            wbs: navWbsValue(riskContext),
+            wbs: navWbsValue(),
+            scope: navScopeMarker(),
             risk: risk.id,
             view: 'module',
           })}
@@ -841,6 +861,7 @@ function resetView() {
 function clearScope() {
   if (!state.sharedContext?.wbs) return;
   delete state.sharedContext.wbs;
+  delete state.sharedContext.scope;
   state.context = deriveRiskContext();
   state.selectedRiskId = null;
   updateVisibleRisks();
@@ -856,11 +877,27 @@ function setScope(wbsId) {
   render();
 }
 
+// Selection drives the suite scope: when the selected item has a clear primary
+// WBS home, that exact id becomes the active scope (descendants included). No
+// clear home -> the current scope is left unchanged. The marker keeps the scope
+// active in this app's own URL alongside the selected item id.
+function applySelectionScope(primaryWbsId) {
+  const wbsId = resolveScopeFromSelection(state.crosswalk, primaryWbsId);
+  if (!wbsId) return;
+  state.sharedContext = { wbs: wbsId, scope: '1' };
+}
+
 function handleRiskListClick(event) {
   const button = event.target.closest('[data-risk-id]');
   if (!button) return;
 
-  state.selectedRiskId = button.getAttribute('data-risk-id');
+  const riskId = button.getAttribute('data-risk-id');
+  state.selectedRiskId = riskId;
+  // A risk's primary WBS association (never overridden by its secondary linked
+  // WBS ids) is the auto-scope target.
+  applySelectionScope(state.crosswalk?.risk?.byId?.[riskId]?.primaryWbsId || '');
+  state.context = deriveRiskContext();
+  updateVisibleRisks();
   syncSelectedRiskId();
   render();
 }

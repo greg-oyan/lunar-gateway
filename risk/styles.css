@@ -20,7 +20,7 @@
   --shadow-md: 0 18px 34px rgba(0, 0, 0, 0.24);
   --radius-lg: 24px;
   --radius-md: 18px;
-  --pane-height: min(46rem, calc(100vh - 15rem));
+  --pane-height: clamp(28rem, calc(100vh - 11rem), 46rem);
   --max-width: 1600px;
   --sans: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --mono: "Consolas", "SFMono-Regular", "Roboto Mono", monospace;
@@ -138,7 +138,7 @@ code {
 .topbar {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(380px, 0.95fr);
+  grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.95fr);
   gap: 28px;
   align-items: end;
   padding: 16px 0 24px;
@@ -290,7 +290,7 @@ code {
 
 .summary-strip {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 160px)) minmax(320px, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 160px)) minmax(220px, 1fr);
   gap: 14px;
   margin-bottom: 24px;
 }
@@ -340,7 +340,7 @@ code {
 
 .workspace {
   display: grid;
-  grid-template-columns: minmax(340px, 430px) minmax(0, 1fr);
+  grid-template-columns: minmax(280px, 430px) minmax(0, 1fr);
   gap: 24px;
   align-items: start;
 }
@@ -353,7 +353,8 @@ code {
 .list-pane {
   display: flex;
   flex-direction: column;
-  height: var(--pane-height);
+  /* Flex to available space (capped by the adaptive --pane-height) and let the
+     inner body scroll, instead of locking to one fixed height. */
   max-height: var(--pane-height);
   background: var(--bg-panel);
   border: 1px solid var(--line);
@@ -1132,7 +1133,7 @@ code {
   }
 }
 
-@media (max-width: 980px) {
+@media (max-width: 820px) {
   .workspace {
     grid-template-columns: 1fr;
   }

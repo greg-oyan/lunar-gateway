@@ -181,9 +181,40 @@ function collectControlDocumentHints(controlDocuments, docCatalog, scoreMap) {
   });
 }
 
+// Explicit element-name signals (the PR #1 element map). A document is
+// element-specific for a WBS element ONLY when one of these names literally
+// appears in its filename, relativePath, category, title, or tags. Generic
+// program words (cost, schedule, risk, wbs) are deliberately absent: they are
+// not element signals and must never imply an association. A document that
+// matches none of these is program-wide.
+const ELEMENT_DOC_SIGNALS = [
+  { wbsId: '1.3', patterns: [/\bppe\b/, /power and propulsion/] },
+  { wbsId: '1.4', patterns: [/\bhalo\b/] },
+  { wbsId: '1.5', patterns: [/\bi-?hab\b/, /international habitat/] },
+  { wbsId: '1.6', patterns: [/\besprit\b/] },
+  { wbsId: '1.7', patterns: [/\bairlock\b/] },
+  { wbsId: '1.8', patterns: [/\bcanadarm\d*\b/] },
+];
+
+function classifyDocumentElements(documentRecord) {
+  const fingerprint = lowerText(
+    [
+      documentRecord.filename,
+      documentRecord.relativePath,
+      documentRecord.category,
+      documentRecord.title,
+      ...(Array.isArray(documentRecord.tags) ? documentRecord.tags : []),
+    ].join(' '),
+  );
+  return ELEMENT_DOC_SIGNALS.filter((signal) => signal.patterns.some((pattern) => pattern.test(fingerprint)))
+    .map((signal) => signal.wbsId)
+    .sort(compareWbsId);
+}
+
 function buildDocumentCatalog(documentsManifest) {
   const byId = {};
   const byFileName = {};
+  const programWideIds = [];
 
   (documentsManifest.documents || []).forEach((documentRecord) => {
     let preferredRoute = 'documents';
@@ -192,17 +223,24 @@ function buildDocumentCatalog(documentsManifest) {
     if (documentRecord.category === 'Schedule Dataset') preferredRoute = 'schedule';
     if (documentRecord.category === 'Risk Dataset') preferredRoute = 'risk';
 
+    const elementWbsIds = classifyDocumentElements(documentRecord);
+    if (!elementWbsIds.length) programWideIds.push(documentRecord.id);
+
     byId[documentRecord.id] = {
       id: documentRecord.id,
       title: documentRecord.title,
       filename: documentRecord.filename,
       category: documentRecord.category,
       preferredRoute,
+      // Element-specific only when an explicit element name was found; empty
+      // means program-wide. The Documents app reads this for its honest scope
+      // split (element-specific "linked" vs program-wide library).
+      elementWbsIds,
     };
     byFileName[documentRecord.filename] = documentRecord.id;
   });
 
-  return { byId, byFileName };
+  return { byId, byFileName, programWideIds: programWideIds.sort() };
 }
 
 function scoreWbsSourceDocs(node, docCatalog) {

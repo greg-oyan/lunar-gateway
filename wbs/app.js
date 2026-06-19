@@ -8,6 +8,8 @@ import {
   mergeQueryState,
   readSharedContext,
   resolveScope,
+  resolveScopeFromSelection,
+  wbsIsScope,
 } from '../suite-assets/suite-context.js';
 
 const DATA_URL = './data/gateway-wbs.json';
@@ -182,15 +184,16 @@ function getResolvedSharedContext(node) {
   const sharedContext = state.sharedContext || {};
   if (!node || !Object.keys(sharedContext).length) return null;
   if (!sharedContext.from || sharedContext.from === 'wbs') return null;
+  // `from` alone never banners: a plain top-nav arrival (e.g. ?from=risk with
+  // no value key) carries no cross-app context, so it must read as a clean
+  // root view, matching the shared hasSharedContext gate the other apps use.
+  if (!hasSharedContext(sharedContext)) return null;
   return sharedContext;
 }
 
-function resolveSelectedIdFromContext(sharedContext) {
-  const preferredWbsId = sharedContext.wbs;
-  if (preferredWbsId && state.nodesById.has(preferredWbsId)) {
-    return preferredWbsId;
-  }
-
+// The WBS branch an item context points at (risk/milestone/phase/module -> its
+// primary WBS element). Returns '' when no item context resolves to a node.
+function resolveItemDerivedWbsId(sharedContext) {
   const phaseContext = sharedContext.phase
     ? state.crosswalk?.schedule?.byPhaseId?.[sharedContext.phase]
     : null;
@@ -214,6 +217,30 @@ function resolveSelectedIdFromContext(sharedContext) {
   return candidates.find((nodeId) => state.nodesById.has(nodeId)) || '';
 }
 
+function resolveSelectedIdFromContext(sharedContext) {
+  const itemWbsId = resolveItemDerivedWbsId(sharedContext);
+
+  // An active scope (bare `wbs`, or `wbs` + item id + `scope=1`) owns the
+  // selected branch: the scope id IS the selection. An accompanying item id is
+  // context, never a command to re-home the scope - so we never select an
+  // item-derived branch here, not even an in-scope descendant. In WBS the scope
+  // follows the selection (getScope reads selectedId), so centering a descendant
+  // would silently narrow the user's explicit scope, and centering an
+  // out-of-scope item branch would replace it outright; both are forbidden. The
+  // cross-app banner surfaces which item brought the user in.
+  if (wbsIsScope(sharedContext)) {
+    return state.nodesById.has(sharedContext.wbs) ? sharedContext.wbs : '';
+  }
+
+  // Not actively scoped. A `wbs` deep link - or a derived `wbs` riding on an
+  // unscoped item link without the marker, e.g. a simulation module link -
+  // selects that node; otherwise an item id centers its resolved WBS branch.
+  if (sharedContext.wbs && state.nodesById.has(sharedContext.wbs)) {
+    return sharedContext.wbs;
+  }
+  return itemWbsId;
+}
+
 function buildSuiteAction(route, label, params) {
   return `
     <a class="suite-context-action" href="${escapeHtml(buildSuiteHref(route, params))}">
@@ -235,10 +262,12 @@ function syncSuiteNavigation() {
   applySuiteNav(buildTopNavContext(), { currentRoute: 'wbs' });
 }
 
-// Browsing is not scoping: a scope exists only when the user armed it via the
-// "Scope suite to this branch" control or arrived at a URL that already
-// carried `wbs`. While armed, the scope follows the current selection. The
-// root can never be a scope; it is the unscoped program view.
+// Selection drives the suite scope. Clicking any non-root node scopes the suite
+// to that exact node (descendants included); the root is the unscoped
+// full-program view. `scopeArmed` distinguishes a live selection-scope from a
+// plain cross-app arrival: it is set by selectNode on every user click and by
+// loadData when the URL arrives actively scoped (bare `wbs`, or `wbs` + the
+// `scope=1` marker - see wbsIsScope). The root can never be a scope.
 function getScope() {
   const rootId = state.data?.rootId || '';
   if (!state.scopeArmed) return null;
@@ -331,24 +360,28 @@ function renderConnectedViews(node) {
       <div class="connected-views__actions">
         ${buildSuiteAction('cost', 'Open in Cost', {
           from: 'wbs',
-          wbs: node.id,
+          wbs: getScope()?.id || '',
+          scope: getScope() ? '1' : '',
           anchor: nodeContext.cost.anchorId,
           view: 'module',
         })}
         ${buildSuiteAction('schedule', 'Open in Schedule', {
           from: 'wbs',
-          wbs: node.id,
+          wbs: getScope()?.id || '',
+          scope: getScope() ? '1' : '',
           milestone: nodeContext.schedule.primaryMilestoneId,
           phase: nodeContext.schedule.phaseId,
         })}
         ${buildSuiteAction('risk', 'Open in Risk', {
           from: 'wbs',
-          wbs: node.id,
+          wbs: getScope()?.id || '',
+          scope: getScope() ? '1' : '',
           risk: nodeContext.risks.primaryRiskId,
         })}
         ${buildSuiteAction('documents', 'Open in Documents', {
           from: 'wbs',
-          wbs: node.id,
+          wbs: getScope()?.id || '',
+          scope: getScope() ? '1' : '',
           doc: nodeContext.documents.sourceDocIds?.[0] || '',
         })}
       </div>
@@ -364,24 +397,28 @@ function renderFocusActions(node) {
     <div class="suite-context-actions">
       ${buildSuiteAction('cost', 'Open in Cost', {
         from: 'wbs',
-        wbs: node.id,
+        wbs: getScope()?.id || '',
+        scope: getScope() ? '1' : '',
         anchor: nodeContext.cost.anchorId,
         view: 'module',
       })}
       ${buildSuiteAction('schedule', 'Open in Schedule', {
         from: 'wbs',
-        wbs: node.id,
+        wbs: getScope()?.id || '',
+        scope: getScope() ? '1' : '',
         milestone: nodeContext.schedule.primaryMilestoneId,
         phase: nodeContext.schedule.phaseId,
       })}
       ${buildSuiteAction('risk', 'Open in Risk', {
         from: 'wbs',
-        wbs: node.id,
+        wbs: getScope()?.id || '',
+        scope: getScope() ? '1' : '',
         risk: nodeContext.risks.primaryRiskId,
       })}
       ${buildSuiteAction('documents', 'Open in Documents', {
         from: 'wbs',
-        wbs: node.id,
+        wbs: getScope()?.id || '',
+        scope: getScope() ? '1' : '',
         doc: nodeContext.documents.sourceDocIds?.[0] || '',
       })}
     </div>
@@ -596,7 +633,14 @@ function toggleNode(nodeId) {
 }
 
 function selectNode(nodeId) {
+  const rootId = state.data?.rootId || '';
   state.selectedId = nodeId;
+  // Selection drives scope: a non-root node arms the suite scope to that exact
+  // id, the root clears it. A live user selection also supersedes any cross-app
+  // arrival context (banner/derived params), so the URL becomes a clean
+  // `?wbs=<id>` (or no wbs at the root).
+  state.scopeArmed = Boolean(resolveScopeFromSelection(state.crosswalk, nodeId, rootId));
+  state.sharedContext = {};
   ensureAncestorsExpanded(nodeId);
   render();
   if (state.viewMode === 'structure') {
@@ -808,6 +852,7 @@ function renderStructureSelectedSummary(node) {
     </div>
 
     <div class="structure-selected__actions">
+      ${renderScopeControl(node)}
       <button class="structure-selected__button" type="button" data-action="switch-explorer">
         Open full overview in Explorer View
       </button>
@@ -1027,17 +1072,12 @@ function renderPreviewSection({ detailKey, title, items, renderItem, expandedLab
   `;
 }
 
-// Armed: the shared scope pill (with Clear). Not armed and on a non-root
-// branch: the control that arms scope on the current selection.
+// Selection auto-scopes, so there is no separate "arm" step: when a non-root
+// node is selected the suite is scoped and this renders the shared scope pill
+// (with Clear). At the root there is no scope, so nothing renders.
 function renderScopeControl(node) {
   const scope = getScope();
-  if (scope) return buildScopePillHtml(scope);
-  if (!node || node.id === (state.data?.rootId || '')) return '';
-  return `
-    <div class="scope-arm-row">
-      <button class="suite-context-action" type="button" data-action="arm-scope">Scope suite to this branch</button>
-    </div>
-  `;
+  return scope ? buildScopePillHtml(scope) : '';
 }
 
 function renderOverview() {
@@ -1276,9 +1316,14 @@ async function loadData() {
       (state.nodesById.has(state.sharedContext.wbs) ? state.sharedContext.wbs : '') ||
       decodeURIComponent(window.location.hash.replace(/^#/, ''));
     state.selectedId = state.nodesById.has(requestedId) ? requestedId : data.rootId;
-    // Arriving with `wbs` in the URL counts as an explicitly armed scope
-    // (deep link, sim module link, shared URL).
-    state.scopeArmed = Boolean(state.sharedContext.wbs) && state.selectedId !== data.rootId;
+    // Arriving actively scoped arms the scope: that is a bare `wbs` deep link,
+    // or a `wbs` carrying the explicit `scope=1` marker from an already-scoped
+    // app (scope travels with item links). A `wbs` riding alongside an item id
+    // WITHOUT the marker is a derived association, not a scope, and never arms -
+    // wbsIsScope encodes all three cases. resolveSelectedIdFromContext has
+    // already pinned the selection to the scope id in the scoped case, so the
+    // active scope is never re-homed to an item's branch.
+    state.scopeArmed = wbsIsScope(state.sharedContext) && state.selectedId !== data.rootId;
     state.activeDetail = DETAIL_META[urlParams.get('detail')] ? urlParams.get('detail') : null;
     state.viewMode = urlParams.get('mode') === 'structure' ? 'structure' : 'explorer';
     state.expandedIds = getDefaultExpandedIds();
@@ -1333,18 +1378,11 @@ treeElement.addEventListener('click', (event) => {
 });
 
 overviewContent.addEventListener('click', (event) => {
-  const armScopeControl = event.target.closest('[data-action="arm-scope"]');
-  if (armScopeControl) {
-    state.scopeArmed = true;
-    render();
-    return;
-  }
-
+  // Clear is the universal escape hatch: return to the full-program (root) view
+  // with no active scope. resetView() selects the root, which clears scope.
   const clearScopeControl = event.target.closest('[data-action="clear-scope"]');
   if (clearScopeControl) {
-    state.scopeArmed = false;
-    delete state.sharedContext.wbs;
-    render();
+    resetView();
     return;
   }
 
@@ -1374,6 +1412,11 @@ overviewContent.addEventListener('click', (event) => {
 });
 
 structureView.addEventListener('click', (event) => {
+  if (event.target.closest('[data-action="clear-scope"]')) {
+    resetView();
+    return;
+  }
+
   const control = event.target.closest('[data-action="switch-explorer"]');
   if (!control) return;
   state.activeDetail = null;
@@ -1384,7 +1427,10 @@ structureSvg.addEventListener('click', (event) => {
   const control = event.target.closest('[data-structure-node]');
   if (!control) return;
   const nodeId = control.dataset.id;
-  if (nodeId && state.nodesById.has(nodeId)) selectNode(nodeId);
+  if (!nodeId || !state.nodesById.has(nodeId)) return;
+  // Clicking a structure unit selects and scopes to it (selectNode auto-scopes,
+  // root clears) - the same behavior as Explorer view, no second click needed.
+  selectNode(nodeId);
 });
 
 structureSvg.addEventListener('keydown', (event) => {

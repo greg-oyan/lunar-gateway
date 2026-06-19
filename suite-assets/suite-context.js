@@ -6,8 +6,10 @@ export const SUITE_PORTS = {
   risk: 4573,
 };
 
-export const SHARED_CONTEXT_KEYS = ['from', 'wbs', 'module', 'milestone', 'phase', 'risk', 'doc'];
-const SHARED_CONTEXT_VALUE_KEYS = SHARED_CONTEXT_KEYS.filter((key) => key !== 'from');
+export const SHARED_CONTEXT_KEYS = ['from', 'wbs', 'module', 'milestone', 'phase', 'risk', 'doc', 'scope'];
+// `scope` is an intent marker, not content: it never counts as cross-app
+// context on its own and never establishes a banner.
+const SHARED_CONTEXT_VALUE_KEYS = SHARED_CONTEXT_KEYS.filter((key) => key !== 'from' && key !== 'scope');
 
 function cleanValue(value) {
   if (value === null || value === undefined) return '';
@@ -102,6 +104,40 @@ export function getSharedContextEntries(sharedContext = {}) {
 
 export function hasSharedContext(sharedContext = {}) {
   return SHARED_CONTEXT_VALUE_KEYS.some((key) => Boolean(cleanValue(sharedContext?.[key])));
+}
+
+const ITEM_ID_KEYS = ['module', 'milestone', 'phase', 'risk', 'doc'];
+
+// True when `wbs` arrives as a suite-wide scope. Two cases qualify:
+//   - a bare `wbs` with no accompanying item-id param (a deep link), or
+//   - a `wbs` riding alongside an item id but carrying the explicit `scope=1`
+//     marker, meaning an already-scoped app generated the link and the scope
+//     should travel with it.
+// A `wbs` riding alongside an item id WITHOUT the marker is a derived item
+// association ("go look at this specific thing"); it never establishes a scope
+// and the destination centers on the item instead.
+export function wbsIsScope(sharedContext = {}) {
+  const hasWbs = Boolean(cleanValue(sharedContext?.wbs));
+  if (!hasWbs) return false;
+  const hasItemId = ITEM_ID_KEYS.some((key) => Boolean(cleanValue(sharedContext?.[key])));
+  const hasScopeMarker = cleanValue(sharedContext?.scope) === '1';
+  return !hasItemId || hasScopeMarker;
+}
+
+// Selection drives the suite scope. Given the exact WBS id a selection resolves
+// to (any depth - 1.1, 1.1.1, 1.3.2 ...), return that id when it is a real
+// crosswalk node and not the program root; return '' to leave the current scope
+// unchanged or cleared. Descendants are always included downstream through
+// resolveScope's subtree test, so callers never flatten to top-level modules.
+export function resolveScopeFromSelection(crosswalk, wbsId, rootId = '') {
+  const id = cleanValue(wbsId);
+  if (!id || id === cleanValue(rootId)) return '';
+  const node = crosswalk?.wbs?.byId?.[id];
+  if (!node) return '';
+  // A root node (no parent) is the full-program view, never a scope - so an
+  // item that somehow homes to the program root clears rather than scopes.
+  if (!cleanValue(node.parentId)) return '';
+  return id;
 }
 
 export function mergeQueryState(
