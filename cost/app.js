@@ -9,6 +9,7 @@
   mergeQueryState,
   readSharedContext,
   resolveScope,
+  resolveScopeFromSelection,
   wbsIsScope,
 } from '../suite-assets/suite-context.js';
 
@@ -664,10 +665,28 @@ function setView(view) {
   render();
 }
 
+// A cost anchor's WBS home: the exact id when the anchor maps to a single WBS
+// branch (a clear primary). Multi-branch anchors (e.g. the program backbone)
+// have no single primary, so they do not auto-scope - rule 7.
+function scopeWbsForAnchor(anchorId) {
+  const wbsIds = state.crosswalk?.cost?.byAnchorId?.[anchorId]?.wbsIds || [];
+  return wbsIds.length === 1 ? wbsIds[0] : '';
+}
+
+// Selection drives the suite scope: selecting a cost anchor with a single clear
+// WBS home scopes the suite to that exact id (descendants included); otherwise
+// the current scope is left unchanged.
+function applySelectionScope(anchorId) {
+  const wbsId = resolveScopeFromSelection(state.crosswalk, scopeWbsForAnchor(anchorId));
+  if (!wbsId) return;
+  state.sharedContext = { wbs: wbsId, scope: '1' };
+}
+
 function setAnchor(anchorId) {
   if (!state.anchorsById.has(anchorId)) return;
   state.selectedAnchorId = anchorId;
   state.moduleViewMode = 'anchor';
+  applySelectionScope(anchorId);
   render();
 }
 

@@ -8,17 +8,12 @@ import {
   mergeQueryState,
   readSharedContext,
   resolveScope,
+  resolveScopeFromSelection,
   wbsIsScope,
 } from '../suite-assets/suite-context.js';
 
 const DATA_URL = './data/gateway-wbs.json';
 const CROSSWALK_URL = '../suite-assets/data/gateway-crosswalk.json';
-
-// Scope is explicit-only: selecting a unit (in either view) exposes the arm
-// control but does not scope on its own. Flip this to true to make a click on a
-// structure unit scope immediately - a deliberate exception to the rule, left
-// off by default. See the structure-svg click handler.
-const STRUCTURE_CLICK_SCOPES = false;
 
 const COST_AREA_LABELS = {
   ppe: 'PPE',
@@ -267,12 +262,12 @@ function syncSuiteNavigation() {
   applySuiteNav(buildTopNavContext(), { currentRoute: 'wbs' });
 }
 
-// Browsing is not scoping: a scope exists only when the user armed it via the
-// "Scope suite to this branch" control or arrived actively scoped (a bare `wbs`
-// deep link, or a `wbs` carrying the `scope=1` marker - see wbsIsScope). While
-// armed, the scope follows the current selection, and on a scoped item arrival
-// the selection is pinned to the scope id so the scope is never re-homed. The
-// root can never be a scope; it is the unscoped program view.
+// Selection drives the suite scope. Clicking any non-root node scopes the suite
+// to that exact node (descendants included); the root is the unscoped
+// full-program view. `scopeArmed` distinguishes a live selection-scope from a
+// plain cross-app arrival: it is set by selectNode on every user click and by
+// loadData when the URL arrives actively scoped (bare `wbs`, or `wbs` + the
+// `scope=1` marker - see wbsIsScope). The root can never be a scope.
 function getScope() {
   const rootId = state.data?.rootId || '';
   if (!state.scopeArmed) return null;
@@ -638,7 +633,14 @@ function toggleNode(nodeId) {
 }
 
 function selectNode(nodeId) {
+  const rootId = state.data?.rootId || '';
   state.selectedId = nodeId;
+  // Selection drives scope: a non-root node arms the suite scope to that exact
+  // id, the root clears it. A live user selection also supersedes any cross-app
+  // arrival context (banner/derived params), so the URL becomes a clean
+  // `?wbs=<id>` (or no wbs at the root).
+  state.scopeArmed = Boolean(resolveScopeFromSelection(state.crosswalk, nodeId, rootId));
+  state.sharedContext = {};
   ensureAncestorsExpanded(nodeId);
   render();
   if (state.viewMode === 'structure') {
@@ -1070,17 +1072,12 @@ function renderPreviewSection({ detailKey, title, items, renderItem, expandedLab
   `;
 }
 
-// Armed: the shared scope pill (with Clear). Not armed and on a non-root
-// branch: the control that arms scope on the current selection.
+// Selection auto-scopes, so there is no separate "arm" step: when a non-root
+// node is selected the suite is scoped and this renders the shared scope pill
+// (with Clear). At the root there is no scope, so nothing renders.
 function renderScopeControl(node) {
   const scope = getScope();
-  if (scope) return buildScopePillHtml(scope);
-  if (!node || node.id === (state.data?.rootId || '')) return '';
-  return `
-    <div class="scope-arm-row">
-      <button class="suite-context-action" type="button" data-action="arm-scope">Scope suite to this branch</button>
-    </div>
-  `;
+  return scope ? buildScopePillHtml(scope) : '';
 }
 
 function renderOverview() {
@@ -1381,19 +1378,11 @@ treeElement.addEventListener('click', (event) => {
 });
 
 overviewContent.addEventListener('click', (event) => {
-  const armScopeControl = event.target.closest('[data-action="arm-scope"]');
-  if (armScopeControl) {
-    state.scopeArmed = true;
-    render();
-    return;
-  }
-
+  // Clear is the universal escape hatch: return to the full-program (root) view
+  // with no active scope. resetView() selects the root, which clears scope.
   const clearScopeControl = event.target.closest('[data-action="clear-scope"]');
   if (clearScopeControl) {
-    state.scopeArmed = false;
-    delete state.sharedContext.wbs;
-    delete state.sharedContext.scope;
-    render();
+    resetView();
     return;
   }
 
@@ -1423,17 +1412,8 @@ overviewContent.addEventListener('click', (event) => {
 });
 
 structureView.addEventListener('click', (event) => {
-  if (event.target.closest('[data-action="arm-scope"]')) {
-    state.scopeArmed = true;
-    render();
-    return;
-  }
-
   if (event.target.closest('[data-action="clear-scope"]')) {
-    state.scopeArmed = false;
-    delete state.sharedContext.wbs;
-    delete state.sharedContext.scope;
-    render();
+    resetView();
     return;
   }
 
@@ -1448,12 +1428,8 @@ structureSvg.addEventListener('click', (event) => {
   if (!control) return;
   const nodeId = control.dataset.id;
   if (!nodeId || !state.nodesById.has(nodeId)) return;
-  // Selecting never auto-scopes by default (scope is explicit-only). When the
-  // reviewer flips STRUCTURE_CLICK_SCOPES on, a structure click on a non-root
-  // unit arms scope immediately - a deliberate exception to the explicit rule.
-  if (STRUCTURE_CLICK_SCOPES && nodeId !== (state.data?.rootId || '')) {
-    state.scopeArmed = true;
-  }
+  // Clicking a structure unit selects and scopes to it (selectNode auto-scopes,
+  // root clears) - the same behavior as Explorer view, no second click needed.
   selectNode(nodeId);
 });
 

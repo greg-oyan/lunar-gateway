@@ -341,10 +341,13 @@ async function checkTopNavPurity() {
 // destination). The only legal `wbs:` value in a navigation params object is an
 // active scope (getScope()?.id) or the risk app's navWbsValue() wrapper around
 // it. This flags derived-wbs fallbacks - node.id, primaryWbsId, context.wbsId -
-// wherever they are used as a `wbs:` value. The top-nav builder already uses
-// getScope()?.id, and getScope itself reads state.sharedContext?.wbs (never a
-// `wbs:` value), so both are excluded by construction.
-const DERIVED_WBS_VALUE = /wbs:\s*[^,\n}]*\b(node\.id|primaryWbsId|wbsId|context\.wbs)\b/;
+// wherever they are used as a `wbs:` value. It matches a derived *property
+// access* (`node.id`, `.primaryWbsId`, `.wbsId`), so a bare validated scope id
+// (e.g. `wbs: wbsId` in applySelectionScope, where wbsId came from
+// resolveScopeFromSelection) is not flagged. The top-nav builder already uses
+// getScope()?.id, and getScope reads state.sharedContext?.wbs (never a `wbs:`
+// value), so both are excluded by construction.
+const DERIVED_WBS_VALUE = /wbs:\s*[^,\n}]*(\bnode\.id\b|\.primaryWbsId\b|\.wbsId\b)/;
 
 // Documents scoping must be honest: a program-wide class has to exist, and no
 // WBS node may map to the entire library (which would make "scoping" a no-op).
@@ -471,6 +474,82 @@ async function checkScopeAwareWbsSelection() {
   }
 }
 
+// Selection drives an exact WBS scope across the suite. These string-level and
+// data-level guards pin the behavior: WBS node/structure selection auto-scopes,
+// the non-WBS apps auto-scope from a selection's primary WBS home, Schedule
+// never falls back to its default selection while actively scoped, scope
+// filtering supports exact ids at any depth, and Clear drops both wbs + scope.
+async function checkSelectionScoping() {
+  const read = async (rel) => {
+    try {
+      return await fs.readFile(path.join(repoRoot, rel), 'utf8');
+    } catch {
+      fail('selection-scope', `${rel}: unable to read`);
+      return '';
+    }
+  };
+
+  // WBS: selectNode auto-scopes (non-root) via resolveScopeFromSelection, and
+  // the old explicit-arm constant/control is gone.
+  const wbsApp = await read('wbs/app.js');
+  const selStart = wbsApp.indexOf('function selectNode');
+  const selBody = selStart === -1 ? '' : wbsApp.slice(selStart, wbsApp.indexOf('\n}', selStart));
+  if (!/scopeArmed\s*=\s*Boolean\(resolveScopeFromSelection\(/.test(selBody)) {
+    fail('selection-scope', 'wbs selectNode must auto-scope via resolveScopeFromSelection');
+  }
+  if (/STRUCTURE_CLICK_SCOPES/.test(wbsApp)) {
+    fail('selection-scope', 'STRUCTURE_CLICK_SCOPES must be removed - selection auto-scopes now');
+  }
+  if (!/structureSvg\.addEventListener\('click'[\s\S]*?selectNode\(nodeId\)/.test(wbsApp)) {
+    fail('selection-scope', 'structure-view node click must call selectNode (auto-scope)');
+  }
+
+  // Non-WBS apps auto-scope from a selection via resolveScopeFromSelection.
+  for (const appDir of ['risk', 'cost', 'schedule', 'documents']) {
+    const src = await read(`${appDir}/app.js`);
+    if (!/function applySelectionScope\(/.test(src) || !/resolveScopeFromSelection\(/.test(src)) {
+      fail('selection-scope', `${appDir}: missing applySelectionScope via resolveScopeFromSelection`);
+    }
+  }
+
+  // Schedule must not fall back to its default selection while actively scoped.
+  const sched = await read('schedule/app.js');
+  const riStart = sched.indexOf('function resolveInitialSelection');
+  const riBody = riStart === -1 ? '' : sched.slice(riStart, sched.indexOf('\n}\n', riStart));
+  const scopeIdx = riBody.indexOf('wbsIsScope(state.sharedContext)');
+  const defIdx = riBody.indexOf('defaultSelection');
+  if (scopeIdx === -1) {
+    fail('selection-scope', 'schedule resolveInitialSelection must branch on wbsIsScope(state.sharedContext)');
+  } else if (defIdx !== -1 && defIdx < scopeIdx) {
+    // defaultSelection must only appear in the unscoped tail (after the active-
+    // scope branch has already returned an in-scope item or null).
+    fail('selection-scope', 'schedule active-scope branch must not fall back to defaultSelection');
+  }
+
+  // Clear removes both wbs and scope everywhere a scope can be set.
+  for (const appDir of ['risk', 'cost', 'schedule', 'documents']) {
+    const src = await read(`${appDir}/app.js`);
+    if (!/delete state\.sharedContext\.wbs;[\s\S]{0,80}delete state\.sharedContext\.scope;/.test(src)) {
+      fail('selection-scope', `${appDir}: clearScope must delete both wbs and scope`);
+    }
+  }
+  // WBS clears via resetView, which wipes the whole shared context.
+  if (!/function resetView\(\)[\s\S]*?state\.sharedContext = \{\};/.test(wbsApp)) {
+    fail('selection-scope', 'wbs resetView must reset state.sharedContext (clears wbs + scope)');
+  }
+
+  // Scope filtering supports exact WBS ids at any depth (prefix subtree test).
+  const crosswalk = await readJson('suite-assets/data/gateway-crosswalk.json');
+  const has = (scopeId, candidate) => candidate === scopeId || candidate.startsWith(`${scopeId}.`);
+  const deep = Object.keys(crosswalk?.wbs?.byId || {}).find((id) => id.split('.').length >= 3);
+  if (deep) {
+    const parent = deep.split('.').slice(0, -1).join('.');
+    if (!has(deep, deep)) fail('selection-scope', `subtree for ${deep} must include itself`);
+    if (has(deep, parent)) fail('selection-scope', `exact scope ${deep} must not include its parent ${parent}`);
+    if (!has(parent, deep)) fail('selection-scope', `scope ${parent} must include descendant ${deep}`);
+  }
+}
+
 const PROTECTED_PATTERN = /^(index\.html|index\.app\.html|js\/|css\/|server\.mjs|Gateway_Thumbnail|LICENSE|README)/;
 
 function resolveBaseBranch() {
@@ -517,6 +596,7 @@ async function main() {
   await checkTopNavPurity();
   await checkItemLinkWbsPurity();
   await checkScopeAwareWbsSelection();
+  await checkSelectionScoping();
   await checkDocumentScoping();
   checkProtectedFiles();
 

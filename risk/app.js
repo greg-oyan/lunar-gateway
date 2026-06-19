@@ -9,6 +9,7 @@ import {
   mergeQueryState,
   readSharedContext,
   resolveScope,
+  resolveScopeFromSelection,
   wbsIsScope,
 } from '../suite-assets/suite-context.js';
 
@@ -876,11 +877,27 @@ function setScope(wbsId) {
   render();
 }
 
+// Selection drives the suite scope: when the selected item has a clear primary
+// WBS home, that exact id becomes the active scope (descendants included). No
+// clear home -> the current scope is left unchanged. The marker keeps the scope
+// active in this app's own URL alongside the selected item id.
+function applySelectionScope(primaryWbsId) {
+  const wbsId = resolveScopeFromSelection(state.crosswalk, primaryWbsId);
+  if (!wbsId) return;
+  state.sharedContext = { wbs: wbsId, scope: '1' };
+}
+
 function handleRiskListClick(event) {
   const button = event.target.closest('[data-risk-id]');
   if (!button) return;
 
-  state.selectedRiskId = button.getAttribute('data-risk-id');
+  const riskId = button.getAttribute('data-risk-id');
+  state.selectedRiskId = riskId;
+  // A risk's primary WBS association (never overridden by its secondary linked
+  // WBS ids) is the auto-scope target.
+  applySelectionScope(state.crosswalk?.risk?.byId?.[riskId]?.primaryWbsId || '');
+  state.context = deriveRiskContext();
+  updateVisibleRisks();
   syncSelectedRiskId();
   render();
 }

@@ -124,6 +124,22 @@ export function wbsIsScope(sharedContext = {}) {
   return !hasItemId || hasScopeMarker;
 }
 
+// Selection drives the suite scope. Given the exact WBS id a selection resolves
+// to (any depth - 1.1, 1.1.1, 1.3.2 ...), return that id when it is a real
+// crosswalk node and not the program root; return '' to leave the current scope
+// unchanged or cleared. Descendants are always included downstream through
+// resolveScope's subtree test, so callers never flatten to top-level modules.
+export function resolveScopeFromSelection(crosswalk, wbsId, rootId = '') {
+  const id = cleanValue(wbsId);
+  if (!id || id === cleanValue(rootId)) return '';
+  const node = crosswalk?.wbs?.byId?.[id];
+  if (!node) return '';
+  // A root node (no parent) is the full-program view, never a scope - so an
+  // item that somehow homes to the program root clears rather than scopes.
+  if (!cleanValue(node.parentId)) return '';
+  return id;
+}
+
 export function mergeQueryState(
   entries,
   options = {},

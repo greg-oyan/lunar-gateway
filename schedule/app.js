@@ -9,6 +9,7 @@ import {
   mergeQueryState,
   readSharedContext,
   resolveScope,
+  resolveScopeFromSelection,
   wbsIsScope,
 } from '../suite-assets/suite-context.js';
 
@@ -245,6 +246,29 @@ function syncUrlState() {
 }
 
 function resolveInitialSelection() {
+  // When a scope is active, the selection MUST stay inside it. We never fall
+  // back to the default PPE milestone (or any out-of-scope item) while scoped;
+  // if nothing in the scope resolves, we return null for an honest scoped empty
+  // state rather than showing unrelated content.
+  if (wbsIsScope(state.sharedContext)) {
+    const scopedIds = getScopedMilestoneIdSet();
+    const inScope = (milestoneId) => Boolean(milestoneId) && isMilestoneInScope(milestoneId, scopedIds);
+
+    const milestoneFromUrl = state.sharedContext.milestone;
+    if (milestoneFromUrl && state.milestonesById.has(milestoneFromUrl) && inScope(milestoneFromUrl)) {
+      return { type: 'milestone', id: milestoneFromUrl };
+    }
+
+    const wbsContext = state.crosswalk?.wbs?.byId?.[state.sharedContext.wbs];
+    const primaryMilestoneId = wbsContext?.schedule.primaryMilestoneId;
+    if (primaryMilestoneId && state.milestonesById.has(primaryMilestoneId) && inScope(primaryMilestoneId)) {
+      return { type: 'milestone', id: primaryMilestoneId };
+    }
+
+    const firstScoped = state.data.milestones.find((milestone) => inScope(milestone.id));
+    return firstScoped ? { type: 'milestone', id: firstScoped.id } : null;
+  }
+
   const milestoneFromUrl = state.sharedContext.milestone;
   if (milestoneFromUrl && state.milestonesById.has(milestoneFromUrl)) {
     return { type: 'milestone', id: milestoneFromUrl };
@@ -377,8 +401,30 @@ function syncActiveDriver(selection) {
   state.activeDriverId = state.data.defaultDriverId;
 }
 
+// The WBS home of a schedule selection: a milestone's or phase's primary WBS id
+// from the crosswalk. '' when the selection has no clear single home.
+function scopeWbsForSelection(selection) {
+  if (selection?.type === 'milestone') {
+    return state.crosswalk?.schedule?.byMilestoneId?.[selection.id]?.primaryWbsId || '';
+  }
+  if (selection?.type === 'phase') {
+    return state.crosswalk?.schedule?.byPhaseId?.[selection.id]?.primaryWbsId || '';
+  }
+  return '';
+}
+
+// Selection drives the suite scope: a selection with a clear primary WBS home
+// scopes the suite to that exact id (descendants included); otherwise the
+// current scope is left unchanged.
+function applySelectionScope(selection) {
+  const wbsId = resolveScopeFromSelection(state.crosswalk, scopeWbsForSelection(selection));
+  if (!wbsId) return;
+  state.sharedContext = { wbs: wbsId, scope: '1' };
+}
+
 function setSelection(selection) {
   state.selection = selection;
+  applySelectionScope(selection);
   syncActiveDriver(selection);
   renderApp();
 }

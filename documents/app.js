@@ -9,6 +9,7 @@ import {
   mergeQueryState,
   readSharedContext,
   resolveScope,
+  resolveScopeFromSelection,
   wbsIsScope,
 } from '../suite-assets/suite-context.js';
 
@@ -110,6 +111,18 @@ function buildDocumentUseNote(documentRecord) {
 function getScope() {
   if (!wbsIsScope(state.sharedContext)) return null;
   return resolveScope(state.crosswalk, state.sharedContext?.wbs);
+}
+
+// Selection drives the suite scope only for an explicitly element-specific
+// document: exactly one element WBS id. Program-wide docs (the whole current
+// library) and multi-element docs with no single primary never auto-scope, so
+// the current scope is left unchanged.
+function applySelectionScope(documentId) {
+  const elementWbsIds = state.crosswalk?.documents?.byId?.[documentId]?.elementWbsIds || [];
+  if (elementWbsIds.length !== 1) return;
+  const wbsId = resolveScopeFromSelection(state.crosswalk, elementWbsIds[0]);
+  if (!wbsId) return;
+  state.sharedContext = { wbs: wbsId, scope: '1' };
 }
 
 // Element-specific (linked) docs for a scope: only documents the crosswalk
@@ -716,7 +729,14 @@ function handleListClick(event) {
   const button = event.target.closest('[data-document-id]');
   if (!button) return;
 
-  state.selectedDocumentId = button.getAttribute('data-document-id');
+  const documentId = button.getAttribute('data-document-id');
+  state.selectedDocumentId = documentId;
+  // Selection drives scope only for genuinely element-specific documents.
+  // Program-wide docs (the entire current library) never scope, and a doc with
+  // multiple element WBS ids and no single primary does not auto-scope either.
+  applySelectionScope(documentId);
+  state.context = deriveDocumentContext();
+  updateVisibleDocuments();
   syncSelectedDocumentId();
   render();
 }
