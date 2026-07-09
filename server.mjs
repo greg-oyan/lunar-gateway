@@ -207,11 +207,6 @@ const server = http.createServer(async (request, response) => {
       return;
     }
 
-    if (pathname === '/index.app.html') {
-      await serveRepoFile(response, 'index.app.html');
-      return;
-    }
-
     if (pathname.startsWith('/suite-assets/')) {
       const relativePath = pathname.replace(/^\//, '');
       const absolutePath = path.join(repoRoot, relativePath);
