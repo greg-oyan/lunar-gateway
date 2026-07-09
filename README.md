@@ -2,7 +2,7 @@
 
 An interactive exploration of NASA's Lunar Gateway program — a 3D orbital simulation paired with five web apps that walk through the program's acquisition artifacts (work breakdown structure, cost estimate, schedule, risk register, and contract documents).
 
-Built as a demo for the AICamp San Diego talk **"Building A Story With AI"** (April 29, 2026).
+Built to demonstrate what one analyst working with AI coding tools can produce from a single public NASA technical document.
 
 **Live site:** https://greg-oyan.github.io/lunar-gateway/
 
