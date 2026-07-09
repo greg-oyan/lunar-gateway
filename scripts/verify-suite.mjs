@@ -337,7 +337,7 @@ async function checkTopNavPurity() {
   }
 }
 
-const PROTECTED_PATTERN = /^(index\.html|index\.app\.html|js\/|css\/|server\.mjs|Gateway_Thumbnail|LICENSE|README)/;
+const PROTECTED_PATTERN = /^(index\.html|Gateway_Thumbnail|LICENSE)/;
 
 function resolveBaseBranch() {
   try {
