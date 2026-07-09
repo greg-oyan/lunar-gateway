@@ -1,6 +1,5 @@
 import {
   applySuiteNav,
-  buildScopePillHtml,
   buildSuiteHref,
   getSharedContextEntries,
   hasSharedContext,
@@ -82,7 +81,6 @@ const state = {
   structureLayout: null,
   crosswalk: null,
   sharedContext: {},
-  scopeArmed: false,
 };
 
 function escapeHtml(value) {
@@ -222,8 +220,8 @@ function buildSuiteAction(route, label, params) {
   `;
 }
 
-// Top suite nav carries only the origin and an explicitly set scope. It never
-// derives wbs/milestone/risk/doc/module from the current selection.
+// Top suite nav carries the origin and the current selection as scope. A
+// non-root selection travels as `wbs`; the root carries no scope.
 function buildTopNavContext() {
   return {
     from: 'wbs',
@@ -235,32 +233,27 @@ function syncSuiteNavigation() {
   applySuiteNav(buildTopNavContext(), { currentRoute: 'wbs' });
 }
 
-// Browsing is not scoping: a scope exists only when the user armed it via the
-// "Scope suite to this branch" control or arrived at a URL that already
-// carried `wbs`. While armed, the scope follows the current selection. The
-// root can never be a scope; it is the unscoped program view.
+// The current selection IS the suite scope: what the user is viewing is what
+// travels across apps. Any non-root selection scopes the suite to that exact
+// node; the root (or no selection) is the unscoped program view.
 function getScope() {
   const rootId = state.data?.rootId || '';
-  if (!state.scopeArmed) return null;
   if (!state.selectedId || state.selectedId === rootId) return null;
   return resolveScope(state.crosswalk, state.selectedId);
 }
 
 function syncUrlState() {
-  const scope = getScope();
   const rootId = state.data?.rootId || '';
-  // Unarmed selections stay deep-linkable through the hash (loadData already
-  // reads it) without ever becoming a scope token.
-  const selectionHash = !scope && state.selectedId && state.selectedId !== rootId ? state.selectedId : '';
+  const scopedWbs = state.selectedId && state.selectedId !== rootId ? state.selectedId : '';
 
   mergeQueryState(
     {
       ...getSharedContextEntries(state.sharedContext),
-      wbs: scope ? scope.id : '',
+      wbs: scopedWbs,
       detail: state.activeDetail || '',
       mode: state.viewMode === 'structure' ? 'structure' : '',
     },
-    { hash: selectionHash },
+    { hash: '' },
   );
 }
 
@@ -522,7 +515,6 @@ function setViewMode(mode) {
 function resetView() {
   const rootNode = getRootNode();
   state.sharedContext = {};
-  state.scopeArmed = false;
   state.searchQuery = '';
   state.searchMatches = new Set();
   state.visibleIds = null;
@@ -1027,19 +1019,6 @@ function renderPreviewSection({ detailKey, title, items, renderItem, expandedLab
   `;
 }
 
-// Armed: the shared scope pill (with Clear). Not armed and on a non-root
-// branch: the control that arms scope on the current selection.
-function renderScopeControl(node) {
-  const scope = getScope();
-  if (scope) return buildScopePillHtml(scope);
-  if (!node || node.id === (state.data?.rootId || '')) return '';
-  return `
-    <div class="scope-arm-row">
-      <button class="suite-context-action" type="button" data-action="arm-scope">Scope suite to this branch</button>
-    </div>
-  `;
-}
-
 function renderOverview() {
   const node = state.nodesById.get(state.selectedId);
   if (!node) {
@@ -1050,7 +1029,6 @@ function renderOverview() {
   const lensCards = buildLensCards(node);
   overviewContent.innerHTML = `
     <section class="overview-shell">
-      ${renderScopeControl(node)}
       ${buildContextBanner(node)}
       <section class="overview-hero">
         <p class="overview-hero__code">${escapeHtml(node.id)}</p>
@@ -1276,9 +1254,6 @@ async function loadData() {
       (state.nodesById.has(state.sharedContext.wbs) ? state.sharedContext.wbs : '') ||
       decodeURIComponent(window.location.hash.replace(/^#/, ''));
     state.selectedId = state.nodesById.has(requestedId) ? requestedId : data.rootId;
-    // Arriving with `wbs` in the URL counts as an explicitly armed scope
-    // (deep link, sim module link, shared URL).
-    state.scopeArmed = Boolean(state.sharedContext.wbs) && state.selectedId !== data.rootId;
     state.activeDetail = DETAIL_META[urlParams.get('detail')] ? urlParams.get('detail') : null;
     state.viewMode = urlParams.get('mode') === 'structure' ? 'structure' : 'explorer';
     state.expandedIds = getDefaultExpandedIds();
@@ -1333,21 +1308,6 @@ treeElement.addEventListener('click', (event) => {
 });
 
 overviewContent.addEventListener('click', (event) => {
-  const armScopeControl = event.target.closest('[data-action="arm-scope"]');
-  if (armScopeControl) {
-    state.scopeArmed = true;
-    render();
-    return;
-  }
-
-  const clearScopeControl = event.target.closest('[data-action="clear-scope"]');
-  if (clearScopeControl) {
-    state.scopeArmed = false;
-    delete state.sharedContext.wbs;
-    render();
-    return;
-  }
-
   const resetControl = event.target.closest('[data-action="reset-view"]');
   if (resetControl) {
     resetView();

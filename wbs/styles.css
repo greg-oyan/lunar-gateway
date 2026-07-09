@@ -744,11 +744,6 @@ input:focus-visible {
   gap: 20px;
 }
 
-.scope-arm-row {
-  display: flex;
-  justify-content: flex-start;
-}
-
 .overview-hero {
   padding: 30px;
   border: 1px solid var(--line);
