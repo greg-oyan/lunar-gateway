@@ -1,0 +1,301 @@
+/* Presentation layer for the 3D simulation. Every rule is scoped to
+   html.sim-layer, which simulation-layer.js adds; without that class the
+   simulation renders exactly as index.html styles it. */
+
+html.sim-layer .sim-hidden {
+  display: none !important;
+}
+
+/* ---- Launch screen: one clear primary action ---- */
+html.sim-layer #launch #launch-start.sim-primary {
+  padding: 13px 22px;
+  border-color: #64c0e4;
+  background: #64c0e4;
+  color: #021424;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+html.sim-layer #launch #launch-start.sim-primary:hover {
+  border-color: #9bdcf5;
+  background: #9bdcf5;
+  color: #021424;
+}
+
+html.sim-layer #launch #launch-tour.sim-secondary {
+  padding: 13px 18px;
+  background: transparent;
+}
+
+html.sim-layer #launch .launch-actions {
+  align-items: center;
+  gap: 12px;
+}
+
+html.sim-layer #launch .launch-grid {
+  grid-template-columns: 1fr;
+}
+
+/* The controls read as one quiet reference line, not a panel. */
+html.sim-layer #launch .launch-grid .launch-block {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+html.sim-layer #launch .launch-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 22px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  opacity: 0.8;
+}
+
+html.sim-layer #launch .launch-suite-copy {
+  display: none;
+}
+
+html.sim-layer #launch .launch-suite {
+  padding: 14px 0 0;
+  border: 0;
+  border-top: 1px solid #0d2840;
+  background: none;
+}
+
+/* ---- HUD: telemetry first, fixed facts on request ---- */
+html.sim-layer #hud .sim-fact {
+  display: none;
+}
+
+html.sim-layer #hud.sim-facts-open .sim-fact {
+  display: flex;
+}
+
+html.sim-layer #hud.sim-facts-open hr.sim-fact {
+  display: block;
+}
+
+html.sim-layer .sim-facts-toggle {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 6px 0 2px;
+  border: 0;
+  background: none;
+  color: #3f7798;
+  font: 10px 'Courier New', monospace;
+  letter-spacing: 2px;
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+  pointer-events: all;
+  transition: color 0.2s;
+}
+
+html.sim-layer .sim-facts-toggle::after {
+  content: " +";
+}
+
+html.sim-layer .sim-facts-toggle[aria-expanded="true"]::after {
+  content: " \2212";
+}
+
+html.sim-layer .sim-facts-toggle:hover,
+html.sim-layer .sim-facts-toggle:focus-visible {
+  color: #72c0e0;
+  outline: none;
+}
+
+/* ---- Corners: hints on request, one legend line ---- */
+html.sim-layer #ht {
+  display: none;
+  bottom: 54px;
+}
+
+html.sim-layer.sim-controls-open #ht {
+  display: block;
+  color: #5f93b3;
+}
+
+html.sim-layer #oleg {
+  bottom: 54px;
+}
+
+html.sim-layer.sim-controls-open #oleg {
+  bottom: 126px;
+}
+
+html.sim-layer .sim-controls-toggle {
+  position: fixed;
+  left: 20px;
+  bottom: 18px;
+  z-index: 55;
+  padding: 7px 12px;
+  border: 1px solid #0e2840;
+  background: rgba(0, 6, 18, 0.85);
+  color: #3f7798;
+  font: 10px 'Courier New', monospace;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+html.sim-layer .sim-controls-toggle:hover,
+html.sim-layer .sim-controls-toggle:focus-visible,
+html.sim-layer .sim-controls-toggle[aria-expanded="true"] {
+  border-color: #1e6080;
+  color: #72c0e0;
+  outline: none;
+}
+
+html.sim-layer body.tour-mode .sim-controls-toggle,
+html.sim-layer body:has(#launch) .sim-controls-toggle,
+html.sim-layer body:has(#loading:not(.out)) .sim-controls-toggle {
+  display: none;
+}
+
+/* ---- Module panel: the same "Open in" row the explorers use ---- */
+html.sim-layer #i-links {
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #0d2840;
+}
+
+html.sim-layer #i-links .sim-open-in-label {
+  flex: 0 0 100%;
+  color: #2a5278;
+  font: 10px 'Courier New', monospace;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+html.sim-layer #i-links .suite-context-action {
+  padding: 6px 10px;
+}
+
+/* ---- First-run prompt ---- */
+html.sim-layer .sim-prompt {
+  position: fixed;
+  left: 50%;
+  bottom: 104px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: calc(100vw - 32px);
+  padding: 10px 10px 10px 18px;
+  transform: translateX(-50%);
+  border: 1px solid #1e6080;
+  background: rgba(0, 8, 22, 0.92);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  color: #9ccfe6;
+  font: 11px/1.4 'Courier New', monospace;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  animation: sim-prompt-in 0.5s ease 1.2s both;
+}
+
+html.sim-layer .sim-prompt[hidden] {
+  display: none;
+}
+
+@keyframes sim-prompt-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+html.sim-layer .sim-prompt__action {
+  flex: none;
+  padding: 9px 14px;
+  border: 1px solid #64c0e4;
+  background: #64c0e4;
+  color: #021424;
+  font: 700 11px/1 'Courier New', monospace;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+html.sim-layer .sim-prompt__action:hover {
+  border-color: #9bdcf5;
+  background: #9bdcf5;
+}
+
+html.sim-layer .sim-prompt__close {
+  flex: none;
+  padding: 6px 8px;
+  border: 0;
+  background: none;
+  color: #3f7798;
+  font: 12px/1 'Courier New', monospace;
+  cursor: pointer;
+}
+
+html.sim-layer .sim-prompt__close:hover {
+  color: #9ccfe6;
+}
+
+/* Phones: the corner text collides with itself in the original layout. The
+   orbit legend repeats the HUD and the hints are for mouse and keyboard, so
+   both step aside; the credits stay. */
+@media (max-width: 640px) {
+  html.sim-layer #oleg,
+  html.sim-layer #ht,
+  html.sim-layer .sim-controls-toggle {
+    display: none !important;
+  }
+
+  html.sim-layer .sim-prompt {
+    left: 16px;
+    right: 16px;
+    bottom: 96px;
+    flex-wrap: wrap;
+    gap: 10px;
+    max-width: none;
+    padding: 12px 40px 12px 14px;
+    transform: none;
+    animation-name: sim-prompt-in-narrow;
+  }
+
+  html.sim-layer .sim-prompt__action {
+    flex: 1 1 100%;
+    padding: 12px 14px;
+  }
+
+  html.sim-layer .sim-prompt__close {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    padding: 8px;
+  }
+}
+
+@keyframes sim-prompt-in-narrow {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.sim-layer .sim-prompt {
+    animation: none;
+  }
+}

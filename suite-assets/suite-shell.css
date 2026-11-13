@@ -1,0 +1,364 @@
+/* Suite-wide search and its nav trigger. Loaded last by every page, so the
+   small-screen nav rule at the bottom applies to every app. */
+
+.suite-nav__search {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 38px;
+  padding: 0 8px 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 184, 214, 0.22);
+  background: rgba(255, 255, 255, 0.03);
+  color: #a6b8c8;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
+}
+
+.suite-nav__search:hover,
+.suite-nav__search:focus-visible {
+  border-color: rgba(111, 207, 255, 0.4);
+  background: rgba(111, 207, 255, 0.08);
+  color: #eef6ff;
+}
+
+.suite-nav__search svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
+}
+
+.suite-nav__search-hint,
+.suite-search__kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  padding: 2px 7px;
+  border-radius: 7px;
+  border: 1px solid rgba(148, 184, 214, 0.24);
+  background: rgba(148, 184, 214, 0.08);
+  color: #a6b8c8;
+  font: 600 0.72rem/1.4 "JetBrains Mono", "Cascadia Code", "Consolas", monospace;
+  letter-spacing: 0.02em;
+}
+
+html.suite-search-open {
+  overflow: hidden;
+}
+
+.suite-search {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: grid;
+  justify-items: center;
+  align-items: start;
+  padding: min(14vh, 120px) 16px 24px;
+  font-family: "Aptos", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.suite-search[hidden] {
+  display: none;
+}
+
+.suite-search__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 8, 14, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.suite-search__dialog {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: min(720px, 100%);
+  max-height: min(70vh, 640px);
+  border-radius: 20px;
+  border: 1px solid rgba(148, 184, 214, 0.3);
+  background: linear-gradient(180deg, #111f2e 0%, #0b1620 100%);
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55);
+  color: #eef6ff;
+  overflow: hidden;
+  animation: suite-search-in 140ms ease-out;
+}
+
+@keyframes suite-search-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.suite-search__field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(148, 184, 214, 0.16);
+}
+
+.suite-search__icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  color: #67ccff;
+}
+
+.suite-search__input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #eef6ff;
+  font: inherit;
+  font-size: 1.08rem;
+}
+
+.suite-search__input:focus,
+.suite-search__input:focus-visible {
+  outline: none;
+}
+
+.suite-search__input::placeholder {
+  color: #778da2;
+}
+
+.suite-search__count {
+  flex: none;
+  color: #778da2;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.suite-search__list {
+  overflow-y: auto;
+  padding: 8px 10px 12px;
+  overscroll-behavior: contain;
+}
+
+.suite-search__status {
+  margin: 0;
+  padding: 26px 12px;
+  color: #a6b8c8;
+  text-align: center;
+}
+
+.suite-search__group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 10px 6px;
+  color: #778da2;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.suite-search__group-count {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.suite-search__more {
+  appearance: none;
+  border: 0;
+  padding: 2px 4px;
+  background: none;
+  color: #67ccff;
+  font: inherit;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.suite-search__more:hover {
+  color: #a7e4ff;
+}
+
+.suite-search__rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.suite-search__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.suite-search__row--active {
+  border-color: rgba(103, 204, 255, 0.32);
+  background: rgba(103, 204, 255, 0.1);
+}
+
+.suite-search__row-main {
+  min-width: 0;
+}
+
+.suite-search__title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0;
+  font-weight: 650;
+  font-size: 0.96rem;
+  line-height: 1.35;
+}
+
+.suite-search__id {
+  flex: none;
+  color: #a7e4ff;
+  font: 600 0.8rem/1.3 "JetBrains Mono", "Cascadia Code", "Consolas", monospace;
+}
+
+.suite-search__meta {
+  margin: 2px 0 0;
+  color: #8fa3b6;
+  font-size: 0.82rem;
+}
+
+.suite-search__body {
+  display: none;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
+  margin: 4px 0 0;
+  overflow: hidden;
+  color: #c5d3e0;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.suite-search__row--active .suite-search__body {
+  display: -webkit-box;
+}
+
+.suite-search__jumps {
+  display: none;
+  flex: none;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  max-width: 46%;
+}
+
+.suite-search__row--active .suite-search__jumps {
+  display: flex;
+}
+
+.suite-search__jump {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 184, 214, 0.26);
+  background: rgba(7, 16, 24, 0.6);
+  color: #dbe9f6;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.suite-search__jump:hover {
+  border-color: rgba(103, 204, 255, 0.55);
+  color: #ffffff;
+}
+
+.suite-search__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  padding: 10px 18px;
+  border-top: 1px solid rgba(148, 184, 214, 0.16);
+  color: #778da2;
+  font-size: 0.78rem;
+}
+
+.suite-search__foot span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.suite-search__foot-note {
+  margin-left: auto;
+}
+
+@media (max-width: 640px) {
+  .suite-search {
+    padding-top: 12px;
+  }
+
+  .suite-search__dialog {
+    max-height: calc(100dvh - 36px);
+  }
+
+  .suite-search__jumps,
+  .suite-search__foot-note,
+  .suite-nav__search-hint {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .suite-search__dialog {
+    animation: none;
+  }
+}
+
+/* Small screens: the nav is one swipeable row instead of four wrapped rows. */
+@media (max-width: 720px) {
+  .suite-nav {
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .suite-nav__links {
+    flex-wrap: nowrap;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 14px, #000 calc(100% - 14px), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 14px, #000 calc(100% - 14px), transparent);
+    padding: 0 6px;
+  }
+
+  .suite-nav__links::-webkit-scrollbar {
+    display: none;
+  }
+
+  .suite-nav__home,
+  .suite-nav__link,
+  .suite-nav__search {
+    flex: none;
+  }
+
+  .suite-nav__search span:not(.suite-nav__search-hint) {
+    display: none;
+  }
+
+  .suite-nav__search {
+    order: -1;
+    padding: 0 12px;
+  }
+}

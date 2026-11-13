@@ -278,6 +278,16 @@ const server = http.createServer(async (request, response) => {
       return;
     }
 
+    if (pathname.startsWith('/overview')) {
+      await serveAppStatic(response, pathname, 'overview');
+      return;
+    }
+
+    if (pathname.startsWith('/confidence')) {
+      await serveAppStatic(response, pathname, 'confidence');
+      return;
+    }
+
     sendText(response, 404, 'Not found');
   } catch (error) {
     sendText(

@@ -1,5 +1,6 @@
 import {
   applySuiteNav,
+  buildOpenInHtml,
   buildScopeEmptyStateHtml,
   buildScopePillHtml,
   buildSuiteHref,
@@ -17,11 +18,9 @@ const CROSSWALK_URL = '../suite-assets/data/gateway-crosswalk.json';
 const appTitle = document.getElementById('appTitle');
 const appSubtitle = document.getElementById('appSubtitle');
 const generatedAt = document.getElementById('generatedAt');
-const storySignals = document.getElementById('storySignals');
 const stageFrame = document.getElementById('stageFrame');
 const overviewContent = document.getElementById('overviewContent');
 const timelineChart = document.getElementById('timelineChart');
-const milestoneStrip = document.getElementById('milestoneStrip');
 const detailPanel = document.getElementById('detailPanel');
 const detailHeading = document.getElementById('detailHeading');
 const detailSubtitle = document.getElementById('detailSubtitle');
@@ -196,14 +195,6 @@ function getSelectedContext() {
   };
 }
 
-function buildSuiteAction(route, label, params) {
-  return `
-    <a class="suite-context-action" href="${escapeHtml(buildSuiteHref(route, params))}">
-      ${escapeHtml(label)}
-    </a>
-  `;
-}
-
 // Top suite nav carries only the origin and an explicitly set scope. It never
 // derives wbs/milestone/risk/doc/module from the current selection.
 function buildTopNavContext() {
@@ -306,33 +297,22 @@ function renderContextBanner() {
 
 function renderContextActions() {
   const context = getSelectedContext();
-  return `
-    <div class="suite-context-actions">
-      ${buildSuiteAction('wbs', 'Open in WBS', {
-        from: 'schedule',
-        wbs: context.wbsId,
-        milestone: context.milestone?.id || '',
-      })}
-      ${buildSuiteAction('cost', 'Open in Cost', {
-        from: 'schedule',
-        wbs: context.wbsId,
-        milestone: context.milestone?.id || '',
-        view: 'module',
-      })}
-      ${buildSuiteAction('risk', 'Open in Risk', {
-        from: 'schedule',
-        wbs: context.wbsId,
-        milestone: context.milestone?.id || '',
-        risk: context.riskId,
-      })}
-      ${buildSuiteAction('documents', 'Open in Documents', {
-        from: 'schedule',
-        wbs: context.wbsId,
-        milestone: context.milestone?.id || '',
-        doc: context.docId,
-      })}
-    </div>
-  `;
+  const milestoneId = context.milestone?.id || '';
+  return buildOpenInHtml([
+    { label: 'WBS', href: buildSuiteHref('wbs', { from: 'schedule', wbs: context.wbsId, milestone: milestoneId }) },
+    {
+      label: 'Cost',
+      href: buildSuiteHref('cost', { from: 'schedule', wbs: context.wbsId, milestone: milestoneId, view: 'module' }),
+    },
+    {
+      label: 'Risk',
+      href: buildSuiteHref('risk', { from: 'schedule', wbs: context.wbsId, milestone: milestoneId, risk: context.riskId }),
+    },
+    {
+      label: 'Documents',
+      href: buildSuiteHref('documents', { from: 'schedule', wbs: context.wbsId, milestone: milestoneId, doc: context.docId }),
+    },
+  ]);
 }
 
 function buildEmptyState(title, body) {
@@ -375,10 +355,6 @@ function setSelection(selection) {
   state.selection = selection;
   syncActiveDriver(selection);
   renderApp();
-}
-
-function buildSignalPills() {
-  storySignals.innerHTML = '';
 }
 
 function getKeyMilestoneIdSet() {
@@ -424,20 +400,9 @@ function getTimelinePosition(date) {
 
 function buildStageOverview() {
   const scope = getScope();
-  const totalMilestones = state.data.milestones.length;
-  const inScopeCount = getScopedMilestoneCount();
-  const milestonePill = scope
-    ? `${inScopeCount} of ${totalMilestones} milestones in scope`
-    : pluralize(totalMilestones, 'milestone');
-
   overviewContent.innerHTML = `
     ${scope ? buildScopePillHtml(scope) : ''}
     ${renderContextBanner()}
-    <div class="stage-strip" aria-label="Schedule overview key">
-      <span class="stage-pill stage-pill--primary mono">${escapeHtml(state.data.overview.spanValue)}</span>
-      <span class="stage-pill">${escapeHtml(pluralize(state.data.phases.length, 'major phase'))}</span>
-      <span class="stage-pill">${escapeHtml(milestonePill)}</span>
-    </div>
   `;
 }
 
@@ -596,29 +561,6 @@ function renderTimeline() {
   `;
 }
 
-function renderMilestoneStrip() {
-  const milestone = getSelectedMilestone();
-
-  if (!milestone) {
-    milestoneStrip.innerHTML = `
-      <p class="milestone-strip__empty">No milestone selected.</p>
-    `;
-    return;
-  }
-
-  const confidenceTone = (milestone.confidenceLabel || 'unknown')
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/-confidence$/, '');
-
-  milestoneStrip.innerHTML = `
-    <span class="milestone-strip__date mono">${escapeHtml(milestone.dateLabel)}</span>
-    <strong class="milestone-strip__name">${escapeHtml(milestone.shortName)}</strong>
-    <span class="milestone-strip__phase">${escapeHtml(milestone.phaseName)}</span>
-    <span class="milestone-slim__pill milestone-slim__pill--${escapeHtml(confidenceTone)}">${escapeHtml(milestone.confidenceLabel)}</span>
-  `;
-}
-
 function buildPhaseMilestoneRows(phase) {
   const scopedIds = getScopedMilestoneIdSet();
   const keyIds = getKeyMilestoneIdSet();
@@ -727,18 +669,21 @@ function buildMilestoneSupport(milestone) {
 
   const evidenceParts = [taskStory, driverStory, riskStory, docStory, sourceStory].filter(Boolean);
 
+  const confidenceTone = (milestone.confidenceLabel || 'unknown')
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/-confidence$/, '');
+
   return `
     <div class="milestone-slim">
-      <header class="milestone-slim__header">
-        <div>
-          <p class="milestone-slim__eyebrow">${escapeHtml(phase?.name || milestone.phaseName)} · ${escapeHtml(milestone.dateLabel)}</p>
-          <h3 class="milestone-slim__title">${escapeHtml(milestone.shortName)}</h3>
-          <p class="milestone-slim__fullname">${escapeHtml(milestone.name)}</p>
-        </div>
-        <span class="milestone-slim__pill milestone-slim__pill--${escapeHtml((milestone.confidenceLabel || 'unknown').toLowerCase().replace(/\s+/g, '-').replace(/-confidence$/, ''))}">${escapeHtml(milestone.confidenceLabel)}</span>
-      </header>
+      <div class="milestone-slim__meta">
+        ${milestone.name !== milestone.shortName ? `<p class="milestone-slim__fullname">${escapeHtml(milestone.name)}</p>` : ''}
+        <span class="milestone-slim__pill milestone-slim__pill--${escapeHtml(confidenceTone)}">${escapeHtml(milestone.confidenceLabel)}</span>
+      </div>
 
-      <p class="milestone-slim__why"><strong>What this is:</strong> ${escapeHtml(explanation)}</p>
+      ${renderContextActions()}
+
+      <p class="milestone-slim__why">${escapeHtml(explanation)}</p>
 
       ${evidenceParts.length ? `
         <div class="milestone-slim__evidence-inline">
@@ -755,8 +700,6 @@ function buildMilestoneSupport(milestone) {
           <p>${escapeHtml(milestone.whyItMatters)}</p>
         </details>
       ` : ''}
-
-      ${renderContextActions()}
     </div>
   `;
 }
@@ -786,7 +729,7 @@ function renderDetail() {
 }
 
 function renderApp() {
-  appTitle.textContent = state.data.appTitle;
+  appTitle.textContent = 'Schedule Explorer';
   appSubtitle.textContent = 'Visual schedule map of Gateway across major phases and milestone dates.';
   generatedAt.textContent = `Updated ${dateTimeFormatter.format(new Date(state.data.generatedAt))}`;
 
@@ -796,10 +739,8 @@ function renderApp() {
     getScope() ? `${inScopeCount} of ${totalMilestones} milestones in scope.` : `${pluralize(totalMilestones, 'milestone')}.`
   }`;
 
-  buildSignalPills();
   buildStageOverview();
   renderTimeline();
-  renderMilestoneStrip();
   renderDetail();
   syncUrlState();
   syncSuiteNavigation();
@@ -891,7 +832,6 @@ function renderError(error) {
     </section>
   `;
   timelineChart.innerHTML = '';
-  milestoneStrip.innerHTML = '';
   detailPanel.hidden = true;
   generatedAt.textContent = 'Schedule data unavailable';
 }

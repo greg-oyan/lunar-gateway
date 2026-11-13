@@ -1,5 +1,6 @@
 import {
   applySuiteNav,
+  buildOpenInHtml,
   buildScopeEmptyStateHtml,
   buildScopePillHtml,
   buildSuiteHref,
@@ -36,6 +37,9 @@ const SOURCE_LABELS = {
   cost: 'Cost',
   risk: 'Risk',
   documents: 'Documents',
+  overview: 'Overview',
+  confidence: 'Confidence',
+  search: 'Search',
 };
 
 function normalizeText(value) {
@@ -211,14 +215,6 @@ function deriveDocumentContext() {
   };
 }
 
-function buildSuiteAction(route, label, params) {
-  return `
-    <a class="suite-context-action" href="${escapeHtml(buildSuiteHref(route, params))}">
-      ${escapeHtml(label)}
-    </a>
-  `;
-}
-
 // Top suite nav carries only the origin and an explicitly set scope. It never
 // derives wbs/milestone/risk/doc/module from the current selection.
 function buildTopNavContext() {
@@ -276,30 +272,17 @@ function renderFilters(documents) {
       .map((category) => `<option value="${category}">${category}</option>`)
       .join('');
 
-  elements.categoryCount.textContent = String(categories.length);
-  elements.fileTypeCount.textContent = String(fileTypes.length);
   elements.typeFilter.value = state.fileType;
   elements.categoryFilter.value = state.category;
 }
 
+// The search box and selects show their own state; this only decides whether
+// there is anything to clear.
 function renderActiveFilters() {
-  const chips = [];
-
-  if (state.searchQuery) chips.push(`Search: ${state.searchQuery}`);
-  if (state.fileType) chips.push(`Type: ${state.fileType}`);
-  if (state.category) chips.push(`Category: ${state.category}`);
-  if (state.context?.wbsId) chips.push(`Context: WBS ${state.context.wbsId}`);
-  if (state.context?.milestoneId) chips.push(`Milestone: ${state.context.milestoneId}`);
-  if (state.context?.riskId) chips.push(`Risk: ${state.context.riskId}`);
-
-  if (!chips.length) {
-    elements.activeFilters.innerHTML = '';
-    return;
-  }
-
-  elements.activeFilters.innerHTML = chips
-    .map((label) => `<span class="filter-chip">${label}</span>`)
-    .join('');
+  const active = Boolean(
+    state.searchQuery || state.fileType || state.category || hasSharedContext(state.sharedContext),
+  );
+  elements.clearFiltersButton.hidden = !active;
 }
 
 function renderContextBanner() {
@@ -352,16 +335,6 @@ function renderList() {
   const selectedDocument = getSelectedDocument();
   const documents = state.visibleDocuments;
 
-  elements.visibleCount.textContent = documents.length
-    ? documents.length === state.allDocuments.length
-      ? String(documents.length)
-      : `${documents.length}/${state.allDocuments.length}`
-    : '0';
-  elements.headerCount.textContent =
-    documents.length === state.allDocuments.length
-      ? `${state.allDocuments.length} documents`
-      : `${documents.length} of ${state.allDocuments.length} documents`;
-
   elements.resultsLabel.textContent =
     documents.length === 1 ? '1 result' : `${documents.length} results`;
 
@@ -387,8 +360,6 @@ function renderList() {
 
   const renderDocumentButton = (documentRecord) => {
     const isSelected = selectedDocument?.id === documentRecord.id;
-    const summaryTags = documentRecord.tags.slice(0, 3);
-
     return `
       <button
         class="document-item${isSelected ? ' is-selected' : ''}"
@@ -399,13 +370,9 @@ function renderList() {
       >
         <div class="document-item__meta">
           <span class="file-badge">${documentRecord.fileType}</span>
-          <span class="meta-chip">${documentRecord.category}</span>
+          <span class="document-item__category">${documentRecord.category}</span>
         </div>
         <h3 class="document-item__title">${documentRecord.title}</h3>
-        <p class="document-item__description">${documentRecord.shortDescription}</p>
-        <div class="document-item__footer">
-          ${summaryTags.map((tag) => `<span class="tag-chip">${tag}</span>`).join('')}
-        </div>
       </button>
     `;
   };
@@ -442,8 +409,42 @@ function renderDetailEmptyState(eyebrow, title, body) {
 
 function renderDetailCard(documentRecord) {
   const tags = Array.isArray(documentRecord.tags) ? documentRecord.tags : [];
-  const detailUseNote = buildDocumentUseNote(documentRecord);
   const trackedRecords = Array.isArray(state.context?.controlDocuments) ? state.context.controlDocuments : [];
+  const openIn = state.context?.title
+    ? buildOpenInHtml([
+        {
+          label: 'WBS',
+          href: buildSuiteHref('wbs', { from: 'documents', wbs: state.context.wbsId || '', doc: documentRecord.id }),
+        },
+        {
+          label: 'Schedule',
+          href: buildSuiteHref('schedule', {
+            from: 'documents',
+            wbs: state.context.wbsId || '',
+            milestone: state.context.milestoneId || '',
+            doc: documentRecord.id,
+          }),
+        },
+        {
+          label: 'Cost',
+          href: buildSuiteHref('cost', {
+            from: 'documents',
+            wbs: state.context.wbsId || '',
+            doc: documentRecord.id,
+            view: 'module',
+          }),
+        },
+        {
+          label: 'Risk',
+          href: buildSuiteHref('risk', {
+            from: 'documents',
+            wbs: state.context.wbsId || '',
+            risk: state.context.riskId || '',
+            doc: documentRecord.id,
+          }),
+        },
+      ])
+    : '';
 
   elements.detailPaneContent.innerHTML = `
     <article class="detail-card">
@@ -452,93 +453,32 @@ function renderDetailCard(documentRecord) {
           <p class="detail-card__eyebrow">${escapeHtml(documentRecord.category)}</p>
           <h2>${escapeHtml(documentRecord.title)}</h2>
           <p class="detail-card__description">${escapeHtml(documentRecord.shortDescription)}</p>
+          ${openIn}
         </div>
         <div class="detail-card__hero-actions">
-          <span class="file-badge">${escapeHtml(documentRecord.fileType)}</span>
           <a
             class="primary-button"
             href="${escapeHtml(openDocumentHref(documentRecord.relativePath))}"
             target="_blank"
             rel="noreferrer"
           >
-            Open Document
+            Open ${escapeHtml(documentRecord.fileType)} file
           </a>
         </div>
       </header>
 
-      ${
-        state.context?.title
-          ? `
-            <details class="cross-app-collapsed">
-              <summary class="cross-app-collapsed__summary">
-                <span>Open this document elsewhere</span>
-                <span class="cross-app-collapsed__chevron" aria-hidden="true">▾</span>
-              </summary>
-              <div class="cross-app-collapsed__actions">
-                ${buildSuiteAction('wbs', 'Open in WBS', {
-                  from: 'documents',
-                  wbs: state.context.wbsId || '',
-                  doc: documentRecord.id,
-                })}
-                ${buildSuiteAction('schedule', 'Open in Schedule', {
-                  from: 'documents',
-                  wbs: state.context.wbsId || '',
-                  milestone: state.context.milestoneId || '',
-                  doc: documentRecord.id,
-                })}
-                ${buildSuiteAction('cost', 'Open in Cost', {
-                  from: 'documents',
-                  wbs: state.context.wbsId || '',
-                  doc: documentRecord.id,
-                  view: 'module',
-                })}
-                ${buildSuiteAction('risk', 'Open in Risk', {
-                  from: 'documents',
-                  wbs: state.context.wbsId || '',
-                  risk: state.context.riskId || '',
-                  doc: documentRecord.id,
-                })}
-              </div>
-            </details>
-          `
-          : ''
-      }
-
-      <section class="detail-grid" aria-label="Document metadata">
-        <div class="detail-meta-card">
-          <p class="detail-meta-card__label">Filename</p>
-          <code>${escapeHtml(documentRecord.filename)}</code>
-        </div>
-        <div class="detail-meta-card">
-          <p class="detail-meta-card__label">Relative Path</p>
-          <code>${escapeHtml(documentRecord.relativePath)}</code>
-        </div>
-        <div class="detail-meta-card">
-          <p class="detail-meta-card__label">Category</p>
-          <span>${escapeHtml(documentRecord.category)}</span>
-        </div>
-        <div class="detail-meta-card">
-          <p class="detail-meta-card__label">Document ID</p>
-          <code>${escapeHtml(documentRecord.id)}</code>
-        </div>
-      </section>
-
-      <section class="detail-section">
-        <div class="detail-section__header">
-          <p class="detail-section__eyebrow">Program use</p>
-          <h3>Why this document matters</h3>
-        </div>
-        <p class="detail-section__body">${escapeHtml(detailUseNote)}</p>
-      </section>
+      <dl class="detail-facts">
+        <div><dt>File</dt><dd><code>${escapeHtml(documentRecord.filename)}</code></dd></div>
+        <div><dt>Location</dt><dd><code>${escapeHtml(documentRecord.relativePath.slice(0, documentRecord.relativePath.lastIndexOf('/') + 1))}</code></dd></div>
+        <div><dt>Used for</dt><dd>${escapeHtml(buildDocumentUseNote(documentRecord))}</dd></div>
+        ${tags.length ? `<div><dt>Tags</dt><dd><span class="tag-row">${tags.map((tag) => `<span class="tag-chip">${escapeHtml(tag)}</span>`).join('')}</span></dd></div>` : ''}
+      </dl>
 
       ${
         trackedRecords.length
           ? `
             <section class="detail-section">
-              <div class="detail-section__header">
-                <p class="detail-section__eyebrow">Tracked records</p>
-                <h3>Controlled records behind this context</h3>
-              </div>
+              <h3 class="detail-section__title">Controlled records linked to this context</h3>
               <div class="suite-context-list">
                 ${trackedRecords
                   .slice(0, 6)
@@ -557,16 +497,6 @@ function renderDetailCard(documentRecord) {
           `
           : ''
       }
-
-      <section class="detail-section">
-        <div class="detail-section__header">
-          <p class="detail-section__eyebrow">Tags</p>
-          <h3>Search tags</h3>
-        </div>
-        <div class="tag-row">
-          ${tags.map((tag) => `<span class="tag-chip">${escapeHtml(tag)}</span>`).join('')}
-        </div>
-      </section>
     </article>
   `;
 }
@@ -627,11 +557,25 @@ function updateVisibleDocuments() {
   syncSelectedDocumentId();
 }
 
+// Keeps the selected row in view when the selection came from a link or a
+// search result rather than a click in the list.
+function revealSelectedRow() {
+  const list = elements.documentList;
+  const selected = list?.querySelector('.is-selected');
+  if (!list || !selected) return;
+  const top = selected.offsetTop - list.offsetTop;
+  const bottom = top + selected.offsetHeight;
+  if (top < list.scrollTop || bottom > list.scrollTop + list.clientHeight) {
+    list.scrollTop = Math.max(0, top - 48);
+  }
+}
+
 function render() {
   renderContextBanner();
   renderActiveFilters();
   renderList();
   renderDetail();
+  revealSelectedRow();
   syncUrlState();
   syncSuiteNavigation();
 }
@@ -722,15 +666,10 @@ function attachEvents() {
 function cacheElements() {
   elements.appTitle = document.getElementById('appTitle');
   elements.searchInput = document.getElementById('searchInput');
-  elements.headerCount = document.getElementById('headerCount');
   elements.typeFilter = document.getElementById('typeFilter');
   elements.categoryFilter = document.getElementById('categoryFilter');
   elements.clearFiltersButton = document.getElementById('clearFiltersButton');
-  elements.visibleCount = document.getElementById('visibleCount');
-  elements.categoryCount = document.getElementById('categoryCount');
-  elements.fileTypeCount = document.getElementById('fileTypeCount');
   elements.resultsLabel = document.getElementById('resultsLabel');
-  elements.activeFilters = document.getElementById('activeFilters');
   elements.contextBannerHost = document.getElementById('contextBannerHost');
   elements.listState = document.getElementById('listState');
   elements.documentList = document.getElementById('documentList');
@@ -755,7 +694,7 @@ function initializeFromManifest(manifest) {
       : state.allDocuments[0]?.id || null;
   state.loadState = 'ready';
   state.loadError = '';
-  elements.appTitle.textContent = manifest.appTitle || 'Documents Explorer';
+  elements.appTitle.textContent = 'Documents Explorer';
   renderFilters(state.allDocuments);
   updateVisibleDocuments();
   render();

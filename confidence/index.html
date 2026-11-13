@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Confidence Lab | Lunar Gateway</title>
+  <meta
+    name="description"
+    content="Simulated cost and schedule confidence for Lunar Gateway."
+  />
+  <meta name="theme-color" content="#0b1624" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Lunar Gateway Application Ecosystem" />
+  <meta property="og:title" content="Confidence Lab | Lunar Gateway" />
+  <meta
+    property="og:description"
+    content="Simulated cost and schedule confidence for Lunar Gateway."
+  />
+  <meta property="og:url" content="./" />
+  <meta property="og:image" content="../suite-assets/lunar-gateway-share-card.svg" />
+  <meta property="og:image:alt" content="Lunar Gateway Confidence Lab" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Confidence Lab | Lunar Gateway" />
+  <meta
+    name="twitter:description"
+    content="Simulated cost and schedule confidence for Lunar Gateway."
+  />
+  <meta name="twitter:image" content="../suite-assets/lunar-gateway-share-card.svg" />
+  <link rel="icon" type="image/svg+xml" href="../suite-assets/lunar-gateway-favicon.svg" />
+  <link rel="stylesheet" href="../suite-assets/suite-context.css" />
+  <link rel="stylesheet" href="../suite-assets/suite-kit.css" />
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="../suite-assets/suite-shell.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <nav class="suite-nav" aria-label="Gateway suite navigation">
+      <a class="suite-nav__home" href="../" data-suite-route="simulation">Simulation</a>
+      <div class="suite-nav__links">
+        <a class="suite-nav__link" href="../overview/" data-suite-route="overview">Overview</a>
+        <a class="suite-nav__link" href="../documents/" data-suite-route="documents">Documents</a>
+        <a class="suite-nav__link" href="../wbs/" data-suite-route="wbs">WBS</a>
+        <a class="suite-nav__link" href="../schedule/" data-suite-route="schedule">Schedule</a>
+        <a class="suite-nav__link" href="../cost/" data-suite-route="cost">Cost</a>
+        <a class="suite-nav__link" href="../risk/" data-suite-route="risk">Risk</a>
+        <a class="suite-nav__link suite-nav__link--active" href="./" data-suite-route="confidence" aria-current="page">Confidence</a>
+        <button class="suite-nav__search" type="button" data-suite-search aria-label="Search the Gateway suite">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13.2 13.2 17 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span>Search</span>
+          <span class="suite-nav__search-hint" data-suite-search-hint>Ctrl K</span>
+        </button>
+      </div>
+    </nav>
+
+    <header class="page-head">
+      <div>
+        <p class="eyebrow">Lunar Gateway</p>
+        <h1>Confidence Lab</h1>
+        <p id="pageSub" class="page-head__sub">Simulated outcomes for program cost and the first launch date.</p>
+      </div>
+      <div id="headActions" class="page-head__aside"></div>
+    </header>
+
+    <main id="main">
+      <p class="state-message">Loading model inputs...</p>
+    </main>
+
+    <p class="footnote">
+      Illustrative model on illustrative data built from public NASA material. Not a NASA estimate, an official joint confidence level, or a forecast.
+    </p>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+  <script type="module" src="../suite-assets/suite-shell.js"></script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 import {
   applySuiteNav,
+  buildOpenInHtml,
   buildScopeEmptyStateHtml,
   buildScopePillHtml,
   buildSuiteHref,
@@ -22,6 +23,7 @@ const state = {
   category: '',
   status: '',
   priorityBand: '',
+  matrixCell: null,
   sortBy: 'priority_desc',
   loadState: 'loading',
   loadError: '',
@@ -38,6 +40,9 @@ const SOURCE_LABELS = {
   cost: 'Cost',
   risk: 'Risk',
   documents: 'Documents',
+  overview: 'Overview',
+  confidence: 'Confidence',
+  search: 'Search',
 };
 
 function normalizeText(value) {
@@ -101,14 +106,6 @@ function priorityBandLabel(band) {
   }
 }
 
-function scoreFormulaText() {
-  return 'Priority score = Likelihood x Impact';
-}
-
-function bandThresholdText() {
-  return 'Band logic: Critical 16-25, High 12-15, Moderate 8-11, Watch 1-7. Within a band, risks order by impact, then likelihood, then id.';
-}
-
 function bandRangeText(band) {
   switch (band) {
     case 'critical':
@@ -120,10 +117,6 @@ function bandRangeText(band) {
     default:
       return '1-7 score range';
   }
-}
-
-function statusLabel(status) {
-  return String(status ?? '');
 }
 
 function confidenceLabel(confidenceLevel) {
@@ -153,12 +146,6 @@ function riskSearchIndex(risk) {
   ]
     .map((value) => normalizeText(value))
     .join(' ');
-}
-
-function clampText(text, maxLength = 120) {
-  const value = String(text ?? '').trim();
-  if (value.length <= maxLength) return value;
-  return `${value.slice(0, maxLength - 1).trim()}...`;
 }
 
 function getScope() {
@@ -239,14 +226,6 @@ function deriveRiskContext() {
   return null;
 }
 
-function buildSuiteAction(route, label, params) {
-  return `
-    <a class="suite-context-action" href="${escapeHtml(buildSuiteHref(route, params))}">
-      ${escapeHtml(label)}
-    </a>
-  `;
-}
-
 // Item-level "Open in X" links only: an explicit scope wins, otherwise the
 // risk's own derived context fills in. Never used for the top suite nav.
 function navWbsValue(riskContext = null) {
@@ -274,34 +253,15 @@ function syncUrlState() {
     Boolean(state.category) ||
     Boolean(state.status) ||
     Boolean(state.priorityBand) ||
+    Boolean(state.matrixCell) ||
     state.sortBy !== 'priority_desc' ||
     (state.selectedRiskId && state.selectedRiskId !== defaultRiskId);
 
   mergeQueryState({
     ...getSharedContextEntries(state.sharedContext),
     risk: shouldPersistRiskId ? state.selectedRiskId || '' : '',
+    cell: state.matrixCell ? `${state.matrixCell.likelihood}x${state.matrixCell.impact}` : '',
   });
-}
-
-function buildConsequenceCue(risk) {
-  const description = clampText(risk.description, 112);
-  return description;
-}
-
-function renderRiskScale(label, value, band) {
-  const numericValue = Math.max(0, Math.min(5, Number(value) || 0));
-  const cells = Array.from({ length: 5 }, (_, index) => {
-    const filled = index < numericValue;
-    return `<span class="risk-scale__cell risk-scale__cell--${band}${filled ? ' is-filled' : ''}"></span>`;
-  }).join('');
-
-  return `
-    <div class="risk-scale">
-      <span class="risk-scale__label">${escapeHtml(label)}</span>
-      <div class="risk-scale__track" aria-hidden="true">${cells}</div>
-      <span class="risk-scale__value">${escapeHtml(numericValue)}</span>
-    </div>
-  `;
 }
 
 export function filterRisks(risks, filters = {}) {
@@ -316,8 +276,11 @@ export function filterRisks(risks, filters = {}) {
     const matchesStatus = !status || normalizeText(risk.status) === status;
     const matchesPriority =
       !selectedPriorityBand || priorityBand(Number(risk.priority)) === selectedPriorityBand;
+    const matchesCell =
+      !filters.cell ||
+      (Number(risk.likelihood) === filters.cell.likelihood && Number(risk.impact) === filters.cell.impact);
 
-    return matchesQuery && matchesCategory && matchesStatus && matchesPriority;
+    return matchesQuery && matchesCategory && matchesStatus && matchesPriority && matchesCell;
   });
 }
 
@@ -393,66 +356,58 @@ function updateVisibleRisks() {
       ? state.allRisks.filter((risk) => state.context.riskIds.includes(risk.id))
       : state.allRisks;
 
-  const filtered = filterRisks(baseRisks, {
+  const filters = {
     searchQuery: state.searchQuery,
     category: state.category,
     status: state.status,
     priorityBand: state.priorityBand,
-  });
+  };
+  // The matrix counts every other active filter, so each cell shows what
+  // picking it would return.
+  state.matrixRisks = filterRisks(baseRisks, filters);
+  const filtered = filterRisks(baseRisks, { ...filters, cell: state.matrixCell });
 
   state.visibleRisks = sortRisks(filtered, state.sortBy);
   syncSelectedRiskId();
 }
 
-function renderHeaderCount() {
-  const visible = state.visibleRisks.length;
-  const total = state.allRisks.length;
-  const scope = getScope();
-
-  elements.headerCount.textContent = scope
-    ? `${visible} of ${total} risks linked to WBS ${scope.id}${scope.name ? ` ${scope.name}` : ''}`
-    : `${visible} of ${total} risks`;
+function parseMatrixCell(value) {
+  const match = /^([1-5])x([1-5])$/.exec(String(value || ''));
+  return match ? { likelihood: Number(match[1]), impact: Number(match[2]) } : null;
 }
 
-function renderSummary() {
-  const risks = state.visibleRisks;
-  const attentionCount = risks.filter((risk) => Number(risk.priority) >= 12).length;
-  const openCount = risks.filter((risk) => normalizeText(risk.status).startsWith('open')).length;
-  const categoryCount = new Set(risks.map((risk) => risk.category).filter(Boolean)).size;
-  const topRisk = risks[0] || null;
-
-  elements.totalRisksStat.textContent = String(risks.length);
-  elements.attentionStat.textContent = String(attentionCount);
-  elements.openStat.textContent = String(openCount);
-  elements.categoryStat.textContent = String(categoryCount);
-
-  if (!risks.length) {
-    elements.summaryNarrative.textContent = state.context?.scoped
-      ? `${state.context.title}.`
-      : 'No risks are visible with the current filters. Clear or broaden the filter set to repopulate the review surface.';
-    elements.summaryMethod.textContent =
-      `Scoring: ${scoreFormulaText()}. ${bandThresholdText()}`;
-    return;
+// Likelihood x impact grid. Each cell is a filter toggle.
+function renderMatrix() {
+  if (!elements.riskMatrix) return;
+  const risks = state.matrixRisks || [];
+  const cells = [];
+  for (let likelihood = 5; likelihood >= 1; likelihood -= 1) {
+    for (let impact = 1; impact <= 5; impact += 1) {
+      const count = risks.filter(
+        (risk) => Number(risk.likelihood) === likelihood && Number(risk.impact) === impact,
+      ).length;
+      const band = priorityBand(likelihood * impact);
+      const selected =
+        state.matrixCell && state.matrixCell.likelihood === likelihood && state.matrixCell.impact === impact;
+      cells.push(`
+        <button
+          class="risk-matrix__cell risk-matrix__cell--${band}${count ? ' has-risks' : ''}${selected ? ' is-selected' : ''}"
+          type="button"
+          data-likelihood="${likelihood}"
+          data-impact="${impact}"
+          aria-pressed="${String(Boolean(selected))}"
+          aria-label="Likelihood ${likelihood}, impact ${impact}, ${priorityBandLabel(band)}: ${count} ${count === 1 ? 'risk' : 'risks'}"
+          title="Likelihood ${likelihood} x Impact ${impact} = ${likelihood * impact} (${priorityBandLabel(band)})"
+          ${count || selected ? '' : 'disabled'}
+        >${count || ''}</button>`);
+    }
   }
 
-  if (!topRisk) {
-    elements.summaryNarrative.textContent =
-      state.context?.title
-        ? `${state.context.title}. ${state.context.body}`
-        : 'The current risk set keeps priority, ownership, and mitigation visible without overwhelming the first screen.';
-    elements.summaryMethod.textContent =
-      `Scoring: ${scoreFormulaText()}. ${bandThresholdText()}`;
-    return;
-  }
-
-  const contextLead =
-    state.context?.title && (state.context.wbsId || state.context.milestoneId || state.sharedContext.from)
-      ? `${state.context.title}. `
-      : '';
-  elements.summaryNarrative.textContent =
-    `${contextLead}${topRisk.title} currently sets the tone for this view at ${priorityLabel(topRisk.priority)} priority, while ${attentionCount} visible risks still sit in the high-attention range.`;
-  elements.summaryMethod.textContent =
-    `Scoring: ${scoreFormulaText()}. ${bandThresholdText()}`;
+  elements.riskMatrix.innerHTML = `
+    <span class="risk-matrix__axis risk-matrix__axis--y">Likelihood</span>
+    <div class="risk-matrix__grid">${cells.join('')}</div>
+    <span class="risk-matrix__axis risk-matrix__axis--x">Impact</span>
+  `;
 }
 
 function renderContextBanner() {
@@ -516,17 +471,19 @@ function renderFilters(allRisks) {
   elements.sortSelect.value = state.sortBy;
 }
 
+// The search box, selects and matrix show their own state; this only decides
+// whether there is anything to clear.
 function renderActiveFilters() {
-  const chips = [];
-
-  if (state.searchQuery) chips.push(`Search: ${state.searchQuery}`);
-  if (state.category) chips.push(`Category: ${state.category}`);
-  if (state.status) chips.push(`Status: ${state.status}`);
-  if (state.priorityBand) chips.push(`Priority: ${priorityBandLabel(state.priorityBand)}`);
-
-  elements.activeFilters.innerHTML = chips
-    .map((label) => `<span class="filter-chip">${escapeHtml(label)}</span>`)
-    .join('');
+  const active = Boolean(
+    state.searchQuery ||
+      state.category ||
+      state.status ||
+      state.priorityBand ||
+      state.matrixCell ||
+      state.sortBy !== 'priority_desc' ||
+      hasSharedContext(state.sharedContext),
+  );
+  elements.clearFiltersButton.hidden = !active;
 }
 
 function renderListState(message, isError = false) {
@@ -541,7 +498,6 @@ function renderRiskList() {
   const selectedRisk = getSelectedRisk();
   const risks = state.visibleRisks;
 
-  renderHeaderCount();
   elements.resultsLabel.textContent = state.loadState === 'error'
     ? 'Load error'
     : risks.length === 1
@@ -593,40 +549,22 @@ function renderRiskList() {
       }
       const isSelected = selectedRisk?.id === risk.id;
       const band = priorityBand(Number(risk.priority));
-      const categoryTone = categoryBand(risk.category);
-      const ownerLabel = risk.owner.length > 36 ? `${risk.owner.slice(0, 36)}...` : risk.owner;
-      const consequenceCue = buildConsequenceCue(risk);
 
       return `
         ${sectionHeader}
         <button
-          class="risk-item risk-item--${band} risk-item--${categoryTone}${isSelected ? ' is-selected' : ''}"
+          class="risk-item risk-item--${band}${isSelected ? ' is-selected' : ''}"
           type="button"
           data-risk-id="${escapeHtml(risk.id)}"
           role="option"
           aria-selected="${String(isSelected)}"
         >
           <div class="risk-item__topline">
-            <div class="risk-item__identity">
-              <span class="risk-category risk-category--${categoryTone}">${escapeHtml(risk.category)}</span>
-              <span class="risk-code">${escapeHtml(risk.id)}</span>
-            </div>
-            <div class="risk-item__severity">
-              <span class="risk-pill risk-pill--${band}">${priorityLabel(risk.priority)}</span>
-              <span class="score-pill score-pill--${band}">Score ${escapeHtml(risk.priority)}</span>
-            </div>
+            <span class="risk-code">${escapeHtml(risk.id)}</span>
+            <span class="score-pill score-pill--${band}">${priorityLabel(risk.priority)} ${escapeHtml(risk.priority)}</span>
           </div>
           <h3 class="risk-item__title">${escapeHtml(risk.title)}</h3>
-          <p class="risk-item__cue">${escapeHtml(consequenceCue)}</p>
-          <div class="risk-item__profile">
-            ${renderRiskScale('L', risk.likelihood, band)}
-            ${renderRiskScale('I', risk.impact, band)}
-          </div>
-          <div class="risk-item__footer">
-            <span class="meta-chip">${escapeHtml(risk.status)}</span>
-            ${confidenceLabel(risk.confidenceLevel) ? `<span class="meta-chip confidence-chip">${escapeHtml(confidenceLabel(risk.confidenceLevel))}</span>` : ''}
-            <span class="risk-item__owner">${escapeHtml(ownerLabel)}</span>
-          </div>
+          <p class="risk-item__meta">${escapeHtml(risk.category)} · ${escapeHtml(risk.status)}</p>
         </button>
       `;
     })
@@ -669,11 +607,37 @@ function renderRiskDetail(risk) {
   const likelihood = Number(risk.likelihood) || 0;
   const impact = Number(risk.impact) || 0;
   const score = Number(risk.priority) || 0;
-  const summary =
-    `${priorityLabel(risk.priority)} ${risk.category.toLowerCase()} risk owned by ${risk.owner}. The current posture is ${statusLabel(risk.status).toLowerCase()}.`;
   const plainLanguage = risk.plainLanguage || risk.description;
-  const driverTags = (Array.isArray(risk.tags) ? risk.tags : []).slice(0, 4);
   const riskContext = state.crosswalk?.risk?.byId?.[risk.id];
+
+  const openIn = buildOpenInHtml([
+    {
+      label: 'WBS',
+      href: buildSuiteHref('wbs', { from: 'risk', wbs: navWbsValue(riskContext), risk: risk.id }),
+    },
+    {
+      label: 'Schedule',
+      href: buildSuiteHref('schedule', {
+        from: 'risk',
+        wbs: navWbsValue(riskContext),
+        milestone: riskContext?.primaryMilestoneId || state.context?.milestoneId || '',
+        risk: risk.id,
+      }),
+    },
+    {
+      label: 'Cost',
+      href: buildSuiteHref('cost', { from: 'risk', wbs: navWbsValue(riskContext), risk: risk.id, view: 'module' }),
+    },
+    {
+      label: 'Documents',
+      href: buildSuiteHref('documents', {
+        from: 'risk',
+        wbs: navWbsValue(riskContext),
+        risk: risk.id,
+        doc: riskContext?.documents.sourceDocIds?.[0] || state.context?.docId || '',
+      }),
+    },
+  ]);
 
   elements.detailPaneContent.innerHTML = `
     <article class="risk-card risk-card--${band} risk-card--${categoryTone}">
@@ -684,55 +648,44 @@ function renderRiskDetail(risk) {
             <span class="risk-code">${escapeHtml(risk.id)}</span>
           </div>
           <h2>${escapeHtml(risk.title)}</h2>
+          ${openIn}
         </div>
         <aside class="risk-signature risk-signature--${band}">
           <span class="risk-signature__score-value">${escapeHtml(risk.priority)}</span>
           <div class="risk-signature__score-copy">
             <strong>${priorityLabel(risk.priority)}</strong>
-            <span>L ${escapeHtml(risk.likelihood)} · I ${escapeHtml(risk.impact)}</span>
+            <span>Likelihood ${escapeHtml(risk.likelihood)} × impact ${escapeHtml(risk.impact)}</span>
           </div>
         </aside>
       </header>
 
       <section class="risk-story">
-        <p class="risk-story__lede"><strong>In plain terms:</strong> ${escapeHtml(plainLanguage)}</p>
-        ${risk.plainLanguage ? `<details class="risk-story__technical">
-          <summary><span>Technical framing</span><span class="risk-disclosure__chevron" aria-hidden="true">▾</span></summary>
-          <p class="risk-story__what">${escapeHtml(risk.description)}</p>
-        </details>` : ''}
+        <p class="risk-story__lede">${escapeHtml(plainLanguage)}</p>
       </section>
 
-      <section class="risk-status-line">
-        <span class="risk-status-line__item"><span class="risk-status-line__label">Status</span> ${escapeHtml(risk.status)}</span>
-        <span class="risk-status-line__sep">·</span>
-        <span class="risk-status-line__item"><span class="risk-status-line__label">Owner</span> ${escapeHtml(risk.owner)}</span>
-        ${confidenceLabel(risk.confidenceLevel) ? `
-          <span class="risk-status-line__sep">·</span>
-          <span class="risk-status-line__item"><span class="risk-status-line__label">Confidence</span> <span class="meta-chip confidence-chip">${escapeHtml(confidenceLabel(risk.confidenceLevel))}</span></span>
-        ` : ''}
-        ${basisLabel(risk.basisType) ? `
-          <span class="risk-status-line__sep">·</span>
-          <span class="risk-status-line__item"><span class="risk-status-line__label">Basis</span> ${escapeHtml(basisLabel(risk.basisType))}</span>
-        ` : ''}
-        ${driverTags.length ? `
-          <span class="risk-status-line__sep">·</span>
-          <span class="risk-status-line__item">
-            ${driverTags.map(t => `<span class="tag-chip tag-chip--inline">${escapeHtml(t)}</span>`).join(' ')}
-          </span>
-        ` : ''}
+      <dl class="risk-facts">
+        <div><dt>Status</dt><dd>${escapeHtml(risk.status)}</dd></div>
+        <div><dt>Owner</dt><dd>${escapeHtml(risk.owner)}</dd></div>
+        ${confidenceLabel(risk.confidenceLevel) ? `<div><dt>Confidence</dt><dd>${escapeHtml(confidenceLabel(risk.confidenceLevel).replace(/ confidence$/, ''))}</dd></div>` : ''}
+        ${basisLabel(risk.basisType) ? `<div><dt>Basis</dt><dd>${escapeHtml(basisLabel(risk.basisType))}</dd></div>` : ''}
+      </dl>
+
+      <section class="risk-section">
+        <h3 class="risk-section__title">Mitigation</h3>
+        <p class="risk-section__body">${escapeHtml(risk.mitigation)}</p>
       </section>
 
-      <details class="risk-disclosure">
+      ${risk.plainLanguage ? `<details class="risk-disclosure">
         <summary>
-          <span>Mitigation and current response</span>
+          <span>Technical framing</span>
           <span class="risk-disclosure__chevron" aria-hidden="true">▾</span>
         </summary>
-        <p class="risk-disclosure__body">${escapeHtml(risk.mitigation)}</p>
-      </details>
+        <p class="risk-disclosure__body">${escapeHtml(risk.description)}</p>
+      </details>` : ''}
 
       <details class="risk-disclosure">
         <summary>
-          <span>How this score is computed</span>
+          <span>How the score is computed</span>
           <span class="risk-disclosure__chevron" aria-hidden="true">▾</span>
         </summary>
         <div class="risk-disclosure__body">
@@ -750,38 +703,6 @@ function renderRiskDetail(risk) {
               <span class="score-breakdown__band"><strong>${priorityLabel(score)}</strong> band (${escapeHtml(bandRangeText(band))})</span>
             </div>
           </div>
-        </div>
-      </details>
-
-      <details class="cross-app-collapsed">
-        <summary class="cross-app-collapsed__summary">
-          <span>Open this risk elsewhere</span>
-          <span class="cross-app-collapsed__chevron" aria-hidden="true">▾</span>
-        </summary>
-        <div class="cross-app-collapsed__actions">
-          ${buildSuiteAction('wbs', 'Open in WBS', {
-            from: 'risk',
-            wbs: navWbsValue(riskContext),
-            risk: risk.id,
-          })}
-          ${buildSuiteAction('schedule', 'Open in Schedule', {
-            from: 'risk',
-            wbs: navWbsValue(riskContext),
-            milestone: riskContext?.primaryMilestoneId || state.context?.milestoneId || '',
-            risk: risk.id,
-          })}
-          ${buildSuiteAction('documents', 'Open in Documents', {
-            from: 'risk',
-            wbs: navWbsValue(riskContext),
-            risk: risk.id,
-            doc: riskContext?.documents.sourceDocIds?.[0] || state.context?.docId || '',
-          })}
-          ${buildSuiteAction('cost', 'Open in Cost', {
-            from: 'risk',
-            wbs: navWbsValue(riskContext),
-            risk: risk.id,
-            view: 'module',
-          })}
         </div>
       </details>
     </article>
@@ -808,12 +729,26 @@ function renderDetailPane() {
   renderRiskDetail(selectedRisk);
 }
 
+// Keeps the selected row in view when the selection came from a link or a
+// search result rather than a click in the list.
+function revealSelectedRow() {
+  const list = elements.riskList;
+  const selected = list?.querySelector('.is-selected');
+  if (!list || !selected) return;
+  const top = selected.offsetTop - list.offsetTop;
+  const bottom = top + selected.offsetHeight;
+  if (top < list.scrollTop || bottom > list.scrollTop + list.clientHeight) {
+    list.scrollTop = Math.max(0, top - 48);
+  }
+}
+
 function render() {
   renderContextBanner();
   renderActiveFilters();
-  renderSummary();
+  renderMatrix();
   renderRiskList();
   renderDetailPane();
+  revealSelectedRow();
   syncUrlState();
   syncSuiteNavigation();
 }
@@ -823,6 +758,7 @@ function resetView() {
   state.category = '';
   state.status = '';
   state.priorityBand = '';
+  state.matrixCell = null;
   state.sortBy = 'priority_desc';
   state.sharedContext = {};
   state.context = null;
@@ -898,6 +834,18 @@ function attachEvents() {
 
   elements.clearFiltersButton.addEventListener('click', resetView);
 
+  elements.riskMatrix?.addEventListener('click', (event) => {
+    const cell = event.target.closest('.risk-matrix__cell');
+    if (!cell) return;
+    const likelihood = Number(cell.getAttribute('data-likelihood'));
+    const impact = Number(cell.getAttribute('data-impact'));
+    const same =
+      state.matrixCell && state.matrixCell.likelihood === likelihood && state.matrixCell.impact === impact;
+    state.matrixCell = same ? null : { likelihood, impact };
+    updateVisibleRisks();
+    render();
+  });
+
   elements.contextBannerHost.addEventListener('click', (event) => {
     if (event.target.closest('[data-action="clear-scope"]')) {
       clearScope();
@@ -922,23 +870,15 @@ function attachEvents() {
 
 function cacheElements() {
   elements.appTitle = document.getElementById('appTitle');
-  elements.appSubtitle = document.getElementById('appSubtitle');
-  elements.headerCount = document.getElementById('headerCount');
   elements.searchInput = document.getElementById('searchInput');
   elements.categoryFilter = document.getElementById('categoryFilter');
   elements.statusFilter = document.getElementById('statusFilter');
   elements.priorityFilter = document.getElementById('priorityFilter');
   elements.clearFiltersButton = document.getElementById('clearFiltersButton');
-  elements.totalRisksStat = document.getElementById('totalRisksStat');
-  elements.attentionStat = document.getElementById('attentionStat');
-  elements.openStat = document.getElementById('openStat');
-  elements.categoryStat = document.getElementById('categoryStat');
-  elements.summaryNarrative = document.getElementById('summaryNarrative');
-  elements.summaryMethod = document.getElementById('summaryMethod');
+  elements.riskMatrix = document.getElementById('riskMatrix');
   elements.contextBannerHost = document.getElementById('contextBannerHost');
   elements.resultsLabel = document.getElementById('resultsLabel');
   elements.sortSelect = document.getElementById('sortSelect');
-  elements.activeFilters = document.getElementById('activeFilters');
   elements.listState = document.getElementById('listState');
   elements.riskList = document.getElementById('riskList');
   elements.detailPaneContent = document.getElementById('detailPaneContent');
@@ -961,10 +901,7 @@ function initializeFromManifest(manifest) {
   state.loadState = 'ready';
   state.loadError = '';
 
-  elements.appTitle.textContent = manifest.appTitle || 'Risk Explorer';
-  elements.appSubtitle.textContent =
-    manifest.appSubtitle ||
-    'Focus on the risks that matter most, then inspect why they matter and what mitigation is in motion.';
+  elements.appTitle.textContent = 'Risk Explorer';
 
   renderFilters(state.allRisks);
   updateVisibleRisks();
@@ -991,6 +928,7 @@ async function initializeApp() {
     ]);
     state.crosswalk = crosswalk;
     state.sharedContext = readSharedContext();
+    state.matrixCell = parseMatrixCell(new URLSearchParams(window.location.search).get('cell'));
     initializeFromManifest(manifest);
   } catch (error) {
     console.error('Failed to load risks.json', error);
