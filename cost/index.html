@@ -29,17 +29,25 @@
   <link rel="icon" type="image/svg+xml" href="../suite-assets/lunar-gateway-favicon.svg" />
   <link rel="stylesheet" href="../suite-assets/suite-context.css" />
   <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="../suite-assets/suite-shell.css" />
 </head>
 <body>
   <div class="app-shell">
     <nav class="suite-nav" aria-label="Gateway suite navigation">
       <a class="suite-nav__home" href="../" data-suite-route="simulation">Simulation</a>
       <div class="suite-nav__links">
+        <a class="suite-nav__link" href="../overview/" data-suite-route="overview">Overview</a>
         <a class="suite-nav__link" href="../documents/" data-suite-route="documents">Documents</a>
         <a class="suite-nav__link" href="../wbs/" data-suite-route="wbs">WBS</a>
         <a class="suite-nav__link" href="../schedule/" data-suite-route="schedule">Schedule</a>
         <a class="suite-nav__link suite-nav__link--active" href="./" data-suite-route="cost" aria-current="page">Cost</a>
         <a class="suite-nav__link" href="../risk/" data-suite-route="risk">Risk</a>
+        <a class="suite-nav__link" href="../confidence/" data-suite-route="confidence">Confidence</a>
+        <button class="suite-nav__search" type="button" data-suite-search aria-label="Search the Gateway suite">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13.2 13.2 17 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span>Search</span>
+          <span class="suite-nav__search-hint" data-suite-search-hint>Ctrl K</span>
+        </button>
       </div>
     </nav>
 
@@ -51,22 +59,17 @@
           Where the money sits across Gateway, by module and by year.
         </p>
       </div>
-
-      <div class="hero__meta">
-        <div id="storySignals" class="story-signals" aria-label="Cost signals"></div>
-        <div id="viewSwitcher" class="view-switcher" aria-label="Cost view navigation"></div>
-        <p id="snapshotStamp" class="hero-stamp">Loading…</p>
-      </div>
     </header>
 
     <main class="page">
       <section class="panel story-panel" aria-labelledby="activeViewHeading">
         <div class="story-panel__heading">
-          <div>
-            <p id="activeViewKicker" class="section-kicker">Gateway Cost Map</p>
+          <div id="viewSwitcher" class="view-switcher" role="group" aria-label="Cost view"></div>
+          <div class="sr-only">
+            <p id="activeViewKicker">Gateway Cost Map</p>
             <h2 id="activeViewHeading">Loading…</h2>
+            <p id="activeViewSubcopy"></p>
           </div>
-          <p id="activeViewSubcopy" class="section-subcopy"></p>
         </div>
 
         <div id="activeViewContent" class="active-view-content">
@@ -75,6 +78,7 @@
           </section>
         </div>
       </section>
+      <p id="snapshotStamp" class="page-stamp">Loading…</p>
     </main>
   </div>
 
@@ -97,5 +101,6 @@
     })();
   </script>
   <script type="module" src="./app.js"></script>
+  <script type="module" src="../suite-assets/suite-shell.js"></script>
 </body>
 </html>

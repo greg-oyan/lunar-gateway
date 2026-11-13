@@ -29,33 +29,36 @@
   <link rel="icon" type="image/svg+xml" href="../suite-assets/lunar-gateway-favicon.svg" />
   <link rel="stylesheet" href="../suite-assets/suite-context.css" />
   <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="../suite-assets/suite-shell.css" />
 </head>
 <body>
   <div class="app-shell">
     <nav class="suite-nav" aria-label="Gateway suite navigation">
       <a class="suite-nav__home" href="../" data-suite-route="simulation">Simulation</a>
       <div class="suite-nav__links">
+        <a class="suite-nav__link" href="../overview/" data-suite-route="overview">Overview</a>
         <a class="suite-nav__link" href="../documents/" data-suite-route="documents">Documents</a>
         <a class="suite-nav__link" href="../wbs/" data-suite-route="wbs">WBS</a>
         <a class="suite-nav__link suite-nav__link--active" href="./" data-suite-route="schedule" aria-current="page">Schedule</a>
         <a class="suite-nav__link" href="../cost/" data-suite-route="cost">Cost</a>
         <a class="suite-nav__link" href="../risk/" data-suite-route="risk">Risk</a>
+        <a class="suite-nav__link" href="../confidence/" data-suite-route="confidence">Confidence</a>
+        <button class="suite-nav__search" type="button" data-suite-search aria-label="Search the Gateway suite">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13.2 13.2 17 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span>Search</span>
+          <span class="suite-nav__search-hint" data-suite-search-hint>Ctrl K</span>
+        </button>
       </div>
     </nav>
 
     <header class="hero">
       <div class="hero__copy">
         <p class="eyebrow">Gateway Schedule Lens</p>
-        <h1 id="appTitle">Gateway Schedule Explorer</h1>
+        <h1 id="appTitle">Schedule Explorer</h1>
         <p id="appSubtitle" class="hero__subtitle">
           This is how the Gateway program unfolds over time, what moments matter most, and which
           schedule branches drive everything else.
         </p>
-      </div>
-
-      <div class="hero__meta">
-        <div id="storySignals" class="story-signals" aria-label="Schedule signals"></div>
-        <p id="generatedAt" class="generated-at">Loading schedule data...</p>
       </div>
     </header>
 
@@ -63,7 +66,7 @@
       <section class="panel stage-panel" aria-labelledby="stageHeading">
         <div class="stage-panel__header">
           <div>
-            <h2 id="stageHeading">Visual schedule overview</h2>
+            <h2 id="stageHeading">Program timeline</h2>
             <p id="stageFrame" class="section-lead">
               2017 to 2031. 7 phases. 37 milestones.
             </p>
@@ -76,8 +79,6 @@
         </div>
 
         <div id="timelineChart" class="timeline-chart" aria-label="Gateway schedule timeline"></div>
-
-        <div id="milestoneStrip" class="milestone-strip" aria-live="polite"></div>
       </section>
 
       <section id="detailPanel" class="panel focus-layer" hidden aria-labelledby="detailHeading">
@@ -87,12 +88,13 @@
             <p id="detailSubtitle" class="section-lead"></p>
           </div>
           <button class="text-action" type="button" data-action="clear-focus">
-            Back to big picture
+            Close
           </button>
         </div>
 
         <div id="detailContent" class="focus-content"></div>
       </section>
+      <p id="generatedAt" class="page-stamp">Loading schedule data...</p>
     </main>
   </div>
 
@@ -115,5 +117,6 @@
     })();
   </script>
   <script type="module" src="./app.js"></script>
+  <script type="module" src="../suite-assets/suite-shell.js"></script>
 </body>
 </html>

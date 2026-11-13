@@ -222,7 +222,7 @@ async function checkMilestonePhaseCoverage() {
   });
 }
 
-const APP_DIRS = ['wbs', 'schedule', 'cost', 'risk', 'documents'];
+const APP_DIRS = ['wbs', 'schedule', 'cost', 'risk', 'documents', 'overview', 'confidence'];
 const SOURCE_EXTENSIONS = new Set(['.js', '.html', '.css', '.json', '.mjs']);
 
 // Flipped to true by the WS5 de-narration commit; the copy checks below only
@@ -337,6 +337,146 @@ async function checkTopNavPurity() {
   }
 }
 
+// Every app page must list every suite route and the search trigger, so the
+// nav reads the same wherever the reader is.
+const NAV_ROUTES = ['simulation', 'overview', 'documents', 'wbs', 'schedule', 'cost', 'risk', 'confidence'];
+
+async function checkNavParity() {
+  for (const appDir of APP_DIRS) {
+    const file = `${appDir}/index.html`;
+    let contents = '';
+    try {
+      contents = await fs.readFile(path.join(repoRoot, file), 'utf8');
+    } catch {
+      fail('nav-parity', `${file}: unable to read`);
+      continue;
+    }
+    NAV_ROUTES.forEach((route) => {
+      if (!contents.includes(`data-suite-route="${route}"`)) {
+        fail('nav-parity', `${file}: nav is missing the ${route} route`);
+      }
+    });
+    if (!contents.includes('data-suite-search')) {
+      fail('nav-parity', `${file}: nav is missing the search trigger`);
+    }
+    if (!contents.includes('suite-assets/suite-shell.js')) {
+      fail('nav-parity', `${file}: suite-shell.js is not loaded`);
+    }
+  }
+
+  const rootServer = await fs.readFile(path.join(repoRoot, 'server.mjs'), 'utf8');
+  ['overview', 'confidence'].forEach((appDir) => {
+    if (!rootServer.includes(`serveAppStatic(response, pathname, '${appDir}')`)) {
+      fail('nav-parity', `server.mjs does not serve /${appDir}/`);
+    }
+  });
+}
+
+// The Overview reads the Cost Explorer payload directly. These are the
+// identities its headline figures rely on, checked against the source CSVs.
+async function checkOverviewReconciliation() {
+  const cost = await readJson('cost/data/gateway-cost.json');
+  const estimateRows = parseCsv(
+    await fs.readFile(path.join(repoRoot, 'Contract_Cost_Schedule Documents/data/gateway_cost_estimate.csv'), 'utf8'),
+  );
+  const csvById = new Map(estimateRows.map((row) => [row.wbs_id, row]));
+  const root = cost.categories.find((item) => item.level === 0);
+  const levelOne = cost.categories.filter((item) => item.level === 1);
+
+  cost.categories.forEach((item) => {
+    const row = csvById.get(item.id);
+    if (!row) {
+      fail('overview-reconcile', `Cost category ${item.id} has no row in gateway_cost_estimate.csv`);
+      return;
+    }
+    [
+      ['baseUsd', 'base_cost_usd'],
+      ['lowUsd', 'low_cost_usd'],
+      ['highUsd', 'high_cost_usd'],
+    ].forEach(([jsonKey, csvKey]) => {
+      if (Number(item[jsonKey]) !== Number(row[csvKey])) {
+        fail('overview-reconcile', `${item.id} ${jsonKey} ${item[jsonKey]} !== CSV ${csvKey} ${row[csvKey]}`);
+      }
+    });
+  });
+
+  const yearsTotal = cost.years.reduce((sum, year) => sum + year.totalUsd, 0);
+  if (yearsTotal !== root.baseUsd) {
+    fail('overview-reconcile', `Yearly spend sums to ${yearsTotal}, program total is ${root.baseUsd}`);
+  }
+  cost.years.forEach((year) => {
+    const parts = year.laborUsd + year.materialUsd + year.integrationUsd + year.reserveUsd;
+    if (Math.abs(parts - year.totalUsd) > 1) {
+      fail('overview-reconcile', `${year.fy}: components sum to ${parts}, total is ${year.totalUsd}`);
+    }
+  });
+  levelOne.forEach((item) => {
+    const phased = item.yearly.reduce((sum, year) => sum + year.totalUsd, 0);
+    if (phased !== item.baseUsd) {
+      fail('overview-reconcile', `${item.id}: yearly phasing sums to ${phased}, base is ${item.baseUsd}`);
+    }
+  });
+  const reserve = cost.years.reduce((sum, year) => sum + year.reserveUsd, 0);
+  const levelOneTotal = levelOne.reduce((sum, item) => sum + item.baseUsd, 0);
+  if (levelOneTotal + reserve !== root.baseUsd) {
+    fail('overview-reconcile', `Level-1 elements ${levelOneTotal} + reserve ${reserve} !== program total ${root.baseUsd}`);
+  }
+}
+
+// Sanity checks on the Confidence Lab model: it must be reproducible, its
+// growth decomposition must add up, and with risk events off and no
+// correlation its mean must match the closed-form triangular mean.
+async function checkConfidenceModel() {
+  const model = await import('../confidence/model.js');
+  const inputs = model.buildModelInputs({
+    cost: await readJson('cost/data/gateway-cost.json'),
+    risks: await readJson('risk/data/risks.json'),
+    schedule: await readJson('schedule/data/gateway-schedule.json'),
+    crosswalk: await readJson('suite-assets/data/gateway-crosswalk.json'),
+  });
+  const riskIds = new Set(inputs.risks.map((risk) => risk.id));
+  model.MODEL_DEFAULTS.excludedRiskIds.forEach((id) => {
+    if (!riskIds.has(id)) fail('confidence-model', `Default-excluded risk ${id} is not in the register`);
+  });
+  if (inputs.elements.length !== 12) {
+    fail('confidence-model', `Expected 12 level-1 elements, found ${inputs.elements.length}`);
+  }
+
+  const first = model.runModel(inputs);
+  const second = model.runModel(inputs);
+  if (first.mean !== second.mean || first.sortedTotals[5000] !== second.sortedTotals[5000]) {
+    fail('confidence-model', 'Two runs of the default scenario returned different results');
+  }
+
+  const growth = first.mean - first.pointEstimate;
+  const decomposed = first.sources.reduce((sum, source) => sum + source.meanUsd, 0);
+  if (Math.abs(growth - decomposed) > 1000) {
+    fail('confidence-model', `Mean growth ${growth} does not equal the sum of its sources ${decomposed}`);
+  }
+
+  const rangesOnly = model.runModel(inputs, { disabledRiskIds: [...riskIds], correlation: 0 });
+  const analytic = inputs.elements.reduce((sum, item) => sum + (item.low + item.base + item.high) / 3, 0);
+  if (Math.abs(rangesOnly.mean - analytic) / analytic > 0.005) {
+    fail('confidence-model', `Ranges-only mean ${rangesOnly.mean} is more than 0.5% from the analytic mean ${analytic}`);
+  }
+  if (rangesOnly.sortedSlips.at(-1) !== 0) {
+    fail('confidence-model', 'Launch slip is non-zero with every risk event off');
+  }
+}
+
+// The simulation's presentation layer works from outside index.html, so it
+// depends on a handful of ids and classes staying in that file. If one goes
+// missing after an edit to the simulation, the layer needs the same update.
+async function checkSimulationLayerHooks() {
+  const { SIMULATION_LAYER_HOOKS } = await import('../suite-assets/simulation-layer.js');
+  const simulation = await fs.readFile(path.join(repoRoot, 'index.html'), 'utf8');
+  SIMULATION_LAYER_HOOKS.forEach((hook) => {
+    if (!simulation.includes(hook)) {
+      fail('simulation-layer', `index.html no longer contains ${hook}, which suite-assets/simulation-layer.js relies on`);
+    }
+  });
+}
+
 const PROTECTED_PATTERN = /^(index\.html|Gateway_Thumbnail|LICENSE)/;
 
 function resolveBaseBranch() {
@@ -381,6 +521,10 @@ async function main() {
   await checkForbiddenLayerStrings();
   await checkNarrationBudget();
   await checkTopNavPurity();
+  await checkNavParity();
+  await checkOverviewReconciliation();
+  await checkConfidenceModel();
+  await checkSimulationLayerHooks();
   checkProtectedFiles();
 
   if (failures.length) {

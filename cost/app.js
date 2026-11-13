@@ -1,5 +1,6 @@
 ﻿import {
   applySuiteNav,
+  buildOpenInHtml,
   buildScopeEmptyStateHtml,
   buildScopePillHtml,
   buildSuiteHref,
@@ -34,7 +35,6 @@ const state = {
 const elements = {
   appTitle: document.querySelector('#appTitle'),
   appSubtitle: document.querySelector('#appSubtitle'),
-  storySignals: document.querySelector('#storySignals'),
   viewSwitcher: document.querySelector('#viewSwitcher'),
   snapshotStamp: document.querySelector('#snapshotStamp'),
   activeViewKicker: document.querySelector('#activeViewKicker'),
@@ -514,14 +514,6 @@ function buildCurrentContext(anchor = getCurrentAnchor()) {
   };
 }
 
-function buildSuiteAction(route, label, params) {
-  return `
-    <a class="suite-context-action" href="${escapeHtml(buildSuiteHref(route, params))}">
-      ${escapeHtml(label)}
-    </a>
-  `;
-}
-
 function renderContextBanner(anchor = getCurrentAnchor()) {
   const scope = getScope();
   if (scope) {
@@ -578,51 +570,24 @@ function renderAnchorConnections(anchor) {
   const context = buildCurrentContext(anchor);
   if (!context.anchor) return '';
 
-  return `
-    <section class="suite-context-card">
-      <h4 class="suite-context-card__title">Open ${escapeHtml(context.anchor.label)} elsewhere</h4>
-      <div class="suite-context-card__grid">
-        <div class="suite-context-stat">
-          <span class="suite-context-stat__label">Mapped WBS</span>
-          <span class="suite-context-stat__value">${escapeHtml(context.wbsId ? `${context.wbsId}${context.wbsName ? ` - ${context.wbsName}` : ''}` : 'No direct WBS branch')}</span>
-        </div>
-        <div class="suite-context-stat">
-          <span class="suite-context-stat__label">Schedule anchor</span>
-          <span class="suite-context-stat__value">${escapeHtml(context.milestoneId || 'No direct schedule anchor')}</span>
-        </div>
-        <div class="suite-context-stat">
-          <span class="suite-context-stat__label">Linked risks</span>
-          <span class="suite-context-stat__value">${escapeHtml(String(context.riskCount))}</span>
-        </div>
-        <div class="suite-context-stat">
-          <span class="suite-context-stat__label">Source docs</span>
-          <span class="suite-context-stat__value">${escapeHtml(String(context.documentCount))}</span>
-        </div>
-      </div>
-      <div class="suite-context-actions">
-        ${buildSuiteAction('wbs', 'Open in WBS', {
-          from: 'cost',
-          wbs: context.wbsId,
-          module: context.moduleKey,
-        })}
-        ${buildSuiteAction('schedule', 'Open in Schedule', {
-          from: 'cost',
-          wbs: context.wbsId,
-          milestone: context.milestoneId,
-        })}
-        ${buildSuiteAction('documents', 'Open in Documents', {
-          from: 'cost',
-          wbs: context.wbsId,
-          doc: context.docId,
-        })}
-        ${buildSuiteAction('risk', 'Open in Risk', {
-          from: 'cost',
-          wbs: context.wbsId,
-          risk: context.riskId,
-        })}
-      </div>
-    </section>
-  `;
+  return buildOpenInHtml([
+    {
+      label: 'WBS',
+      href: buildSuiteHref('wbs', { from: 'cost', wbs: context.wbsId, module: context.moduleKey }),
+    },
+    {
+      label: 'Schedule',
+      href: buildSuiteHref('schedule', { from: 'cost', wbs: context.wbsId, milestone: context.milestoneId }),
+    },
+    {
+      label: context.riskCount ? `Risk (${context.riskCount})` : 'Risk',
+      href: buildSuiteHref('risk', { from: 'cost', wbs: context.wbsId, risk: context.riskId }),
+    },
+    {
+      label: 'Documents',
+      href: buildSuiteHref('documents', { from: 'cost', wbs: context.wbsId, doc: context.docId }),
+    },
+  ]);
 }
 
 function normalizeSelections() {
@@ -683,71 +648,27 @@ function setMethod(methodId) {
   render();
 }
 
-function buildHeroSignals() {
-  const scope = getScope();
-  const scopeCategory = getScopeCategory(scope);
-  if (scope && scopeCategory) {
-    return [
-      { label: `Scoped estimate (${scope.id})`, value: formatCompactCurrency(scopeCategory.baseUsd) },
-      {
-        label: 'Time span',
-        value: scopeCategory.startFy && scopeCategory.endFy
-          ? `FY${scopeCategory.startFy} - FY${scopeCategory.endFy}`
-          : 'Not stated',
-      },
-      {
-        label: 'Peak year',
-        value: scopeCategory.topYear
-          ? `${scopeCategory.topYear.fy} - ${formatCompactCurrency(scopeCategory.topYear.totalUsd)}`
-          : 'Not stated',
-      },
-    ];
-  }
-
-  const busiestYear = state.data.overview.busiestYear;
-  return [
-    { label: 'Current estimate', value: formatCompactCurrency(state.data.overview.totalCostUsd) },
-    { label: 'Time span', value: `FY${state.data.overview.startFy} - FY${state.data.overview.endFy}` },
-    {
-      label: 'Peak year',
-      value: busiestYear ? `${busiestYear.fy} - ${formatCompactCurrency(busiestYear.totalUsd)}` : 'Not stated',
-    },
-  ];
-}
-
 function renderViewSwitcher() {
-  const primaryViews = [
-    { id: 'module', label: 'Gateway cost map' },
+  const views = [
+    { id: 'module', label: 'Cost map' },
     { id: 'year', label: 'Yearly spend' },
+    { id: 'method', label: 'Defensibility' },
   ];
 
-  elements.viewSwitcher.innerHTML = `
-    <div class="view-switcher__main">
-      ${primaryViews
-        .map(
-          (view) => `
-            <button
-              class="view-switcher__button${state.view === view.id ? ' is-active' : ''}"
-              type="button"
-              data-view="${view.id}"
-              aria-pressed="${String(state.view === view.id)}"
-            >
-              ${escapeHtml(view.label)}
-            </button>
-          `,
-        )
-        .join('')}
-    </div>
-
-    <button
-      class="view-switcher__support${state.view === 'method' ? ' is-active' : ''}"
-      type="button"
-      data-view="method"
-      aria-pressed="${String(state.view === 'method')}"
-    >
-      Defensibility
-    </button>
-  `;
+  elements.viewSwitcher.innerHTML = views
+    .map(
+      (view) => `
+        <button
+          class="view-switcher__button${state.view === view.id ? ' is-active' : ''}"
+          type="button"
+          data-view="${view.id}"
+          aria-pressed="${String(state.view === view.id)}"
+        >
+          ${escapeHtml(view.label)}
+        </button>
+      `,
+    )
+    .join('');
 }
 
 function renderHero() {
@@ -755,16 +676,6 @@ function renderHero() {
   elements.appSubtitle.textContent =
     'Where the money sits across Gateway, by module and by year.';
   elements.snapshotStamp.textContent = `Updated ${new Date(state.data.generatedAt).toLocaleString()}`;
-  elements.storySignals.innerHTML = buildHeroSignals()
-    .map(
-      (signal) => `
-        <article class="signal-pill">
-          <span class="signal-pill__label">${escapeHtml(signal.label)}</span>
-          <span class="signal-pill__value">${escapeHtml(signal.value)}</span>
-        </article>
-      `,
-    )
-    .join('');
   renderViewSwitcher();
 }
 
@@ -1047,48 +958,37 @@ function buildProjectOverviewContributors() {
 }
 
 function renderProjectOverviewFocus(contextAnchor) {
-  const busiestYear = state.data.overview.busiestYear;
-  const summary = contextAnchor
-    ? `${contextAnchor.label} is broader than any single Gateway module, so the cost map stays at the project level until you pick a specific element.`
-    : hasSharedContext(state.sharedContext)
-      ? 'This handoff does not map to a single Gateway module, so the cost map stays at the project level until you pick a specific element.'
-      : 'No module is selected, so the cost map stays at the project level until you pick a specific element.';
+  const overview = state.data.overview;
+  const busiestYear = overview.busiestYear;
+  const note = contextAnchor
+    ? `${contextAnchor.label} spans more than one module, so the whole program is shown.`
+    : '';
 
   return `
     <aside class="focus-panel detail-panel">
       <div>
-        <h3>Lunar Gateway project</h3>
-        <p class="focus-panel__summary">${escapeHtml(summary)}</p>
+        <p class="focus-panel__eyebrow">Whole program</p>
+        <h3>Lunar Gateway</h3>
       </div>
 
-      <div class="focus-panel__value mono">${formatCurrency(state.data.overview.totalCostUsd)}</div>
+      <div class="focus-panel__value mono">${formatCurrency(overview.totalCostUsd)}</div>
 
       ${buildMetricStrip([
-        { label: 'Project scope', value: 'Full program view' },
+        { label: 'Range', value: `${formatCompactCurrency(overview.lowCostUsd)} to ${formatCompactCurrency(overview.highCostUsd)}` },
         {
           label: 'Peak year',
           value: busiestYear ? `${busiestYear.fy} - ${formatCompactCurrency(busiestYear.totalUsd)}` : 'Not stated',
         },
-        { label: 'Mapped cost area', value: contextAnchor?.label || 'No single module' },
-        { label: 'Top drivers shown', value: String(Math.min(state.data.overview.majorDrivers.length, 4)) },
       ])}
 
-      <section class="focus-statement">
-        <h4>Why it matters</h4>
-        <p>${escapeHtml(state.data.overview.includedSummary)}</p>
-      </section>
+      <p class="focus-panel__summary">${escapeHtml(overview.includedSummary)}${note ? ` ${escapeHtml(note)}` : ''}</p>
 
-      <details class="focus-disclosure">
-        <summary class="focus-disclosure__summary">
-          <span class="focus-disclosure__title">Main cost drivers</span>
-          <span class="focus-disclosure__chevron" aria-hidden="true">▾</span>
-        </summary>
-        <div class="focus-disclosure__body">
-          <div class="detail-list">
-            ${buildContributors(buildProjectOverviewContributors().slice(0, 4), 'No cost drivers.')}
-          </div>
+      <section class="focus-section">
+        <h4>Largest cost areas</h4>
+        <div class="detail-list">
+          ${buildContributors(buildProjectOverviewContributors().slice(0, 4), 'No cost drivers.')}
         </div>
-      </details>
+      </section>
     </aside>
   `;
 }
@@ -1105,7 +1005,7 @@ function renderProjectOverviewSupport() {
       </div>
 
       ${buildEvidenceDisclosure(
-        'Show evidence',
+        'Evidence',
         `
           <div class="support-grid support-grid--wide">
             <section class="support-block">
@@ -1119,7 +1019,7 @@ function renderProjectOverviewSupport() {
       )}
 
       ${buildEvidenceDisclosure(
-        'Show source support',
+        'Sources',
         `
           <div class="support-source-list">
             ${buildSourceCards(buildCategorySourceList(sourceIds))}
@@ -1157,38 +1057,31 @@ function renderAnchorFocus(anchor) {
   return `
     <aside class="focus-panel detail-panel">
       <div>
+        <p class="focus-panel__eyebrow">Cost area</p>
         <h3>${escapeHtml(anchor.label)}</h3>
-        <p class="focus-panel__summary">${escapeHtml(anchor.primaryNote)}</p>
+        <p class="focus-panel__lead">${escapeHtml(anchor.why)}</p>
       </div>
 
       <div class="focus-panel__value mono">${formatCurrency(anchor.totalUsd)}</div>
 
+      ${renderAnchorConnections(anchor)}
+
       ${buildMetricStrip([
-        { label: 'Share of total', value: formatPercent(anchor.shareOfProgram) },
+        { label: 'Share of program', value: formatPercent(anchor.shareOfProgram) },
         {
           label: 'Peak year',
           value: anchor.topYear ? `${anchor.topYear.fy} - ${formatCompactCurrency(anchor.topYear.totalUsd)}` : 'Not stated',
         },
-        { label: 'Linked categories', value: String(anchor.categories.length) },
-        { label: 'Source links', value: String(anchor.linkedSources.length) },
       ])}
 
-      <section class="focus-statement">
-        <h4>Why it matters</h4>
-        <p>${escapeHtml(anchor.why)}</p>
-      </section>
+      <p class="focus-panel__summary">${escapeHtml(anchor.primaryNote)}</p>
 
-      <details class="focus-disclosure">
-        <summary class="focus-disclosure__summary">
-          <span class="focus-disclosure__title">Main cost drivers</span>
-          <span class="focus-disclosure__chevron" aria-hidden="true">▾</span>
-        </summary>
-        <div class="focus-disclosure__body">
-          <div class="detail-list">
-            ${buildContributors(topDrivers, 'No cost drivers.')}
-          </div>
+      <section class="focus-section">
+        <h4>Main cost drivers</h4>
+        <div class="detail-list">
+          ${buildContributors(topDrivers, 'No cost drivers.')}
         </div>
-      </details>
+      </section>
 
       <details class="focus-disclosure">
         <summary class="focus-disclosure__summary">
@@ -1201,8 +1094,6 @@ function renderAnchorFocus(anchor) {
           </div>
         </div>
       </details>
-
-      ${renderAnchorConnections(anchor)}
     </aside>
   `;
 }
@@ -1217,7 +1108,7 @@ function renderAnchorSupport(anchor) {
       </div>
 
       ${buildEvidenceDisclosure(
-        'Show evidence',
+        'Evidence',
         `
           <div class="support-grid support-grid--wide">
             <section class="support-block">
@@ -1252,7 +1143,7 @@ function renderAnchorSupport(anchor) {
       )}
 
       ${buildEvidenceDisclosure(
-        'Show source support',
+        'Sources',
         `
           <div class="support-source-list">
             ${buildSourceCards(anchor.linkedSources)}
@@ -1286,12 +1177,6 @@ function renderModuleView() {
         ${renderContextBanner(selectedAnchor)}
         <div class="module-story__primary">
           <section class="hero-map">
-            <div class="hero-map__topline">
-              <div>
-                <h3>Where the money sits across Gateway</h3>
-              </div>
-            </div>
-
             ${renderGatewayScene(selectedAnchor, selectedAnchor.id, scopedAnchors)}
           </section>
 
@@ -1313,12 +1198,6 @@ function renderModuleView() {
       ${renderContextBanner(bannerAnchor)}
       <div class="module-story__primary">
         <section class="hero-map">
-          <div class="hero-map__topline">
-            <div>
-              <h3>Where the money sits across Gateway</h3>
-            </div>
-          </div>
-
           ${renderGatewayScene(selection.selectedAnchor, selection.activeAnchorId)}
         </section>
 
@@ -1357,7 +1236,6 @@ function renderYearChartRows(years, segmented = false) {
             >
               <div class="year-row__head">
                 <span class="year-row__fy">${escapeHtml(year.fy)}</span>
-                ${year.fy === state.selectedYearId ? '<span class="row-flag">Selected year</span>' : ''}
               </div>
 
               <div class="year-row__track">
@@ -1400,8 +1278,8 @@ function renderYearFocus(year) {
   return `
     <aside class="focus-panel detail-panel">
       <div>
+        <p class="focus-panel__eyebrow">Fiscal year</p>
         <h3>${escapeHtml(year.fy)}</h3>
-        <p class="focus-panel__summary">${escapeHtml(year.narrative)}</p>
       </div>
 
       <div class="focus-panel__value mono">${formatCurrency(year.totalUsd)}</div>
@@ -1409,47 +1287,16 @@ function renderYearFocus(year) {
       ${buildMetricStrip([
         { label: 'Direct cost', value: formatCompactCurrency(year.directUsd) },
         { label: 'Reserve', value: formatCompactCurrency(year.reserveUsd) },
-        { label: 'Labor', value: formatCompactCurrency(year.laborUsd) },
-        { label: 'Top driver', value: drivers[0] ? drivers[0].name : 'Not stated' },
       ])}
 
-      <section class="focus-statement">
-        <h4>Why this year matters</h4>
-        <p>${escapeHtml(year.narrative)}</p>
+      <p class="focus-panel__summary">${escapeHtml(year.narrative)}</p>
+
+      <section class="focus-section">
+        <h4>Main drivers</h4>
+        <div class="detail-list">
+          ${buildContributors(drivers, 'No cost drivers.')}
+        </div>
       </section>
-
-      <details class="focus-disclosure">
-        <summary class="focus-disclosure__summary">
-          <span class="focus-disclosure__title">Main drivers in ${escapeHtml(year.fy)}</span>
-          <span class="focus-disclosure__chevron" aria-hidden="true">▾</span>
-        </summary>
-        <div class="focus-disclosure__body">
-          <div class="detail-list">
-            ${buildContributors(drivers, 'No cost drivers.')}
-          </div>
-        </div>
-      </details>
-
-      <details class="focus-disclosure">
-        <summary class="focus-disclosure__summary">
-          <span class="focus-disclosure__title">Reserve and timing</span>
-          <span class="focus-disclosure__chevron" aria-hidden="true">▾</span>
-        </summary>
-        <div class="focus-disclosure__body">
-          <div class="detail-list">
-            <div class="detail-item">
-              <p class="detail-item__title">
-                ${year.reserveUsd
-                  ? `Reserve carries ${formatCurrency(year.reserveUsd)} in ${year.fy}.`
-                  : `No explicit reserve is carried in ${year.fy}.`}
-              </p>
-            </div>
-            <div class="detail-item">
-              <p class="detail-item__title">Direct cost in ${escapeHtml(year.fy)} is ${formatCurrency(year.directUsd)}.</p>
-            </div>
-          </div>
-        </div>
-      </details>
     </aside>
   `;
 }
@@ -1471,7 +1318,7 @@ function renderYearSupport(year) {
       </div>
 
       ${buildEvidenceDisclosure(
-        'Show evidence',
+        'Evidence',
         `
           <div class="support-grid support-grid--wide">
             <section class="support-block">
@@ -1490,7 +1337,7 @@ function renderYearSupport(year) {
       )}
 
       ${buildEvidenceDisclosure(
-        'Show source support',
+        'Sources',
         `
           <div class="support-source-list">
             ${buildSourceCards(yearSources)}
@@ -1678,7 +1525,7 @@ function renderContextualYearSupport(series) {
       </div>
 
       ${buildEvidenceDisclosure(
-        'Show evidence',
+        'Evidence',
         `
           <div class="support-grid support-grid--wide">
             <section class="support-block">
@@ -1690,7 +1537,7 @@ function renderContextualYearSupport(series) {
       )}
 
       ${buildEvidenceDisclosure(
-        'Show source support',
+        'Sources',
         `
           <div class="support-source-list">
             ${buildSourceCards(series.sources)}
@@ -1776,12 +1623,6 @@ function renderYearView() {
       ${renderContextBanner(anchor)}
       <div class="year-story__primary">
         <section class="year-panel">
-          <div class="year-panel__topline">
-            <div>
-              <h3>How annual spend moves over time</h3>
-            </div>
-          </div>
-
           <div class="year-legend">
             <span class="legend-pill"><span class="legend-pill__swatch legend-pill__swatch--labor"></span>Labor</span>
             <span class="legend-pill"><span class="legend-pill__swatch legend-pill__swatch--material"></span>Material</span>
@@ -1883,7 +1724,7 @@ function renderMethodView() {
         </div>
 
         ${buildEvidenceDisclosure(
-          'Show source support',
+          'Sources',
           `
             <div class="support-source-list">
               ${buildSourceCards(supportFiles)}
@@ -1916,7 +1757,6 @@ function renderActiveView() {
 
 function renderError(message) {
   const safeMessage = escapeHtml(message);
-  elements.storySignals.innerHTML = '';
   elements.viewSwitcher.innerHTML = '';
   elements.snapshotStamp.textContent = 'Data unavailable';
   elements.activeViewKicker.textContent = 'Cost Explorer';

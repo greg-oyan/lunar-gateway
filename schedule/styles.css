@@ -83,8 +83,8 @@ a {
 }
 
 .app-shell {
-  width: min(1700px, calc(100% - 24px));
-  margin: 14px auto 30px;
+  width: min(1560px, calc(100% - 32px));
+  margin: 16px auto 32px;
 }
 
 .suite-nav {
@@ -148,7 +148,7 @@ a {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 18px;
   align-items: end;
-  padding: 18px 22px;
+  padding: 20px 26px;
   border: 1px solid var(--line);
   border-radius: var(--radius-xl);
   background:
@@ -158,19 +158,13 @@ a {
   backdrop-filter: blur(14px);
 }
 
-.hero__copy,
-.hero__meta {
+.hero__copy {
   display: grid;
   align-content: start;
 }
 
 .hero__copy {
   gap: 8px;
-}
-
-.hero__meta {
-  gap: 10px;
-  justify-items: end;
 }
 
 .eyebrow,
@@ -208,9 +202,9 @@ a {
 
 .hero h1 {
   margin: 0;
-  font-size: clamp(2rem, 3.1vw, 2.85rem);
-  line-height: 0.96;
-  letter-spacing: -0.04em;
+  font-size: clamp(1.9rem, 3vw, 2.7rem);
+  line-height: 1;
+  letter-spacing: -0.035em;
 }
 
 .hero__subtitle {
@@ -221,29 +215,12 @@ a {
   line-height: 1.5;
 }
 
-.generated-at,
 .section-meta,
 .panel-meta,
 .section-lead {
   margin: 0;
   color: var(--ink-soft);
   line-height: 1.58;
-}
-
-.generated-at {
-  color: var(--ink-faint);
-  font-size: 0.94rem;
-}
-
-.story-signals {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.story-signals:empty {
-  display: none;
 }
 
 .signal-pill,
@@ -749,34 +726,6 @@ button.support-item {
   align-self: center;
 }
 
-.stage-strip {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.stage-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 10px 14px;
-  border: 1px solid rgba(111, 207, 255, 0.14);
-  border-radius: 999px;
-  background: rgba(10, 20, 29, 0.86);
-  color: var(--brand-strong);
-  font-size: 0.92rem;
-  font-weight: 700;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
-}
-
-.stage-pill--primary {
-  background: linear-gradient(135deg, rgba(111, 207, 255, 0.18), rgba(13, 24, 36, 0.96));
-}
-
-.stage-pill--ghost {
-  color: var(--ink-soft);
-}
-
 .timeline-chart {
   margin: 0;
   min-height: min(78vh, 980px);
@@ -792,14 +741,16 @@ button.support-item {
   display: grid;
   grid-template-rows: auto auto 1fr auto;
   gap: 22px;
-  min-width: 1500px;
+  /* Fits the panel on desktop widths so the full span and the density toggle
+     are visible without a horizontal scroll. */
+  min-width: 1040px;
   min-height: min(76vh, 940px);
   padding: 26px 28px 30px;
 }
 
 .schedule-map__heading {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   align-items: center;
   gap: 12px;
 }
@@ -1073,37 +1024,6 @@ button.support-item {
   background: rgba(111, 207, 255, 0.16);
   border-color: rgba(111, 207, 255, 0.4);
   color: var(--brand-strong);
-}
-
-.milestone-strip {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-  margin-top: 14px;
-  padding: 12px 16px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: rgba(13, 24, 36, 0.86);
-}
-
-.milestone-strip__date {
-  color: var(--ink-soft);
-  font-size: 0.88rem;
-}
-
-.milestone-strip__name {
-  line-height: 1.25;
-}
-
-.milestone-strip__phase {
-  color: var(--ink-soft);
-  font-size: 0.88rem;
-}
-
-.milestone-strip__empty {
-  margin: 0;
-  color: var(--ink-soft);
 }
 
 .key-badge {
@@ -1618,31 +1538,24 @@ details > summary::-webkit-details-marker {
     grid-template-columns: 1fr;
   }
 
-  .story-signals,
   .fact-grid,
-  .driver-grid,
-  .method-stack,
-  .evidence-grid,
-  .related-moments,
-  .milestone-choice-grid,
-  .phase-summary-strip {
+.driver-grid,
+.method-stack,
+.evidence-grid,
+.related-moments,
+.milestone-choice-grid,
+.phase-summary-strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .hero__meta,
-  .stage-strip {
-    justify-items: start;
-    justify-content: flex-start;
-  }
-
   .schedule-map {
-    min-width: 1320px;
+    min-width: 1040px;
   }
 }
 
 @media (max-width: 900px) {
   .app-shell {
-    width: min(100%, calc(100% - 20px));
+    width: calc(100% - 20px);
     margin: 10px auto 24px;
   }
 
@@ -1673,26 +1586,34 @@ details > summary::-webkit-details-marker {
     padding-right: 22px;
   }
 
-  .story-signals,
   .fact-grid,
-  .driver-grid,
-  .method-stack,
-  .evidence-grid,
-  .related-moments,
-  .milestone-choice-grid,
-  .phase-summary-strip,
-  .artifact-list,
-  .source-list {
+.driver-grid,
+.method-stack,
+.evidence-grid,
+.related-moments,
+.milestone-choice-grid,
+.phase-summary-strip,
+.artifact-list,
+.source-list {
     grid-template-columns: 1fr;
   }
 
   .schedule-map {
-    min-width: 1160px;
+    min-width: 980px;
   }
 
   .schedule-axis,
   .schedule-lane {
-    grid-template-columns: 180px minmax(0, 1fr);
+    grid-template-columns: 150px minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .schedule-lane__label strong {
+    font-size: 1rem;
+  }
+
+  .schedule-lane__label span {
+    font-size: 0.8rem;
   }
 }
 
@@ -1710,7 +1631,6 @@ details > summary::-webkit-details-marker {
     padding-right: 18px;
   }
 
-  .hero,
   .section-heading,
   .focus-content,
   .support-tabs,
@@ -1725,10 +1645,6 @@ details > summary::-webkit-details-marker {
     padding-right: 18px;
   }
 
-  .hero h1 {
-    font-size: clamp(2.2rem, 10vw, 3.1rem);
-  }
-
   .stage-panel {
     padding: 18px;
   }
@@ -1737,18 +1653,12 @@ details > summary::-webkit-details-marker {
     gap: 12px;
   }
 
-  .story-signals,
-  .stage-strip {
-    width: 100%;
-  }
-
-  .signal-pill,
-  .stage-pill {
+  .signal-pill {
     width: 100%;
   }
 
   .schedule-map {
-    min-width: 1040px;
+    min-width: 900px;
     padding: 22px 20px 24px;
   }
 
@@ -1812,29 +1722,6 @@ details > summary::-webkit-details-marker {
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 14px;
   background: rgba(13, 24, 36, 0.85);
-}
-
-.milestone-slim__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.milestone-slim__eyebrow {
-  margin: 0 0 6px;
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgba(103, 180, 255, 0.85);
-  font-weight: 600;
-}
-
-.milestone-slim__title {
-  margin: 0;
-  font-size: 22px;
-  line-height: 1.2;
-  color: rgba(255, 255, 255, 0.97);
 }
 
 .milestone-slim__pill {
@@ -2073,4 +1960,134 @@ details > summary::-webkit-details-marker {
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.72);
   font-style: italic;
+}
+
+/* ---------------------------------------------------------------------------
+   Layout: title line, the timeline, then the selected phase or milestone
+   directly under it. The timeline is compact enough that the detail lands on
+   the same screen as the click that opened it.
+   --------------------------------------------------------------------------- */
+.hero {
+  display: block;
+  padding: 4px 4px 16px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.stage-panel {
+  min-height: 0;
+  gap: 12px;
+  padding: 20px 24px 22px;
+}
+
+.stage-overview {
+  padding: 0;
+}
+
+.timeline-chart {
+  min-height: 0;
+  border-radius: 0;
+  background: none;
+}
+
+.schedule-map {
+  min-height: 0;
+  gap: 12px;
+  padding: 0 18px 0 0;
+}
+
+.schedule-lane-stack {
+  gap: 8px;
+}
+
+.schedule-lane__plot {
+  height: 50px;
+  border-radius: 14px;
+}
+
+.schedule-lane__bar {
+  top: 8px;
+  bottom: 8px;
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.schedule-lane__label {
+  gap: 2px;
+}
+
+.schedule-lane__label strong {
+  font-size: 1rem;
+}
+
+.schedule-lane__label span {
+  font-size: 0.78rem;
+}
+
+.section-heading {
+  padding: 22px 28px 0;
+}
+
+.focus-content {
+  padding: 0 28px 24px;
+}
+
+/* Milestone detail: one surface. */
+.milestone-slim {
+  gap: 16px;
+  padding: 14px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+.milestone-slim__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.milestone-slim__meta .milestone-slim__fullname {
+  margin: 0;
+}
+
+.milestone-slim__why {
+  max-width: 90ch;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font-size: 1.04rem;
+  line-height: 1.62;
+}
+
+.milestone-slim__evidence-inline {
+  padding: 16px 0 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: none;
+}
+
+.milestone-slim__technical {
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: none;
+}
+
+.milestone-slim__technical summary {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.page-stamp {
+  margin: 14px 6px 0;
+  color: var(--ink-faint, var(--ink-soft));
+  font-size: 0.8rem;
+  text-align: right;
 }

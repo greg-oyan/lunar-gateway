@@ -1,5 +1,6 @@
 import {
   applySuiteNav,
+  buildOpenInHtml,
   buildSuiteHref,
   getSharedContextEntries,
   hasSharedContext,
@@ -30,6 +31,9 @@ const SOURCE_LABELS = {
   schedule: 'Schedule',
   cost: 'Cost',
   risk: 'Risk',
+  overview: 'Overview',
+  confidence: 'Confidence',
+  search: 'Search',
 };
 
 const DETAIL_META = {
@@ -41,7 +45,6 @@ const DETAIL_META = {
 
 const appTitle = document.getElementById('appTitle');
 const appSubtitle = document.getElementById('appSubtitle');
-const appSignals = document.getElementById('appSignals');
 const workspace = document.getElementById('workspace');
 const searchInput = document.getElementById('searchInput');
 const expandTopBtn = document.getElementById('expandTopBtn');
@@ -94,6 +97,13 @@ function escapeHtml(value) {
 
 function formatMillions(value) {
   return `$${moneyFormatter.format(Math.round(Number(value) || 0))}M`;
+}
+
+// $1.12B, $208M. Input is USD millions, as carried in the WBS dataset.
+function formatCompactMillions(value) {
+  const millions = Number(value) || 0;
+  if (millions >= 1000) return `$${(millions / 1000).toFixed(2).replace(/\.?0+$/, '')}B`;
+  return `$${moneyFormatter.format(Math.round(millions))}M`;
 }
 
 function formatNumber(value) {
@@ -164,8 +174,117 @@ function joinPhrases(items) {
   return `${items.slice(0, -1).join(', ')}, and ${items.at(-1)}`;
 }
 
+function countByLabel(items, key) {
+  const counts = new Map();
+  items.forEach((item) => {
+    const label = String(item[key] ?? '').trim();
+    if (label) counts.set(label, (counts.get(label) || 0) + 1);
+  });
+  return [...counts.entries()]
+    .map(([label, count]) => ({ label, count }))
+    .sort((left, right) => right.count - left.count || left.label.localeCompare(right.label));
+}
+
+// The dataset links risks, documents, milestones, and tasks to the branch that
+// owns them, which leaves the program root with almost none. The root is the
+// whole program, so it shows every unique item found anywhere in the hierarchy.
+function rollUpRootLinks(data) {
+  const root = state.nodesById.get(data.rootId);
+  if (!root || root.related.risks.totalCount || root.related.documents.count) return;
+
+  const risks = new Map();
+  const documents = new Map();
+  const milestones = new Map();
+  const tasks = new Map();
+  data.nodes.forEach((node) => {
+    node.related.risks.items.forEach((item) => risks.set(item.id, item));
+    node.related.documents.items.forEach((item) => documents.set(item.id, item));
+    node.related.schedule.milestones.forEach((item) => milestones.set(item.id, item));
+    node.related.schedule.tasks.forEach((item) => tasks.set(item.id, item));
+  });
+
+  const milestoneItems = [...milestones.values()].sort((left, right) => String(left.date).localeCompare(String(right.date)));
+  const taskItems = [...tasks.values()].sort((left, right) => String(left.startDate).localeCompare(String(right.startDate)));
+  const criticalCount = taskItems.filter((item) => item.criticalFlag).length;
+  root.related.schedule = {
+    ...root.related.schedule,
+    taskCount: taskItems.length,
+    criticalCount,
+    milestoneCount: milestoneItems.length,
+    tasks: taskItems,
+    milestones: milestoneItems,
+  };
+  root.metrics.taskCount = taskItems.length;
+  root.metrics.criticalTaskCount = criticalCount;
+
+  const riskItems = [...risks.values()].sort(
+    (left, right) => right.riskScore - left.riskScore || String(left.id).localeCompare(String(right.id)),
+  );
+  const activeCount = riskItems.filter((item) => !/closed|retired/i.test(item.status)).length;
+  root.related.risks = {
+    totalCount: riskItems.length,
+    activeCount,
+    highestScore: riskItems[0]?.riskScore || 0,
+    owners: countByLabel(riskItems, 'owner'),
+    byStatus: countByLabel(riskItems, 'status'),
+    items: riskItems,
+  };
+
+  const documentItems = [...documents.values()].sort((left, right) => String(left.id).localeCompare(String(right.id)));
+  root.related.documents = {
+    count: documentItems.length,
+    byType: countByLabel(documentItems, 'type'),
+    byStatus: countByLabel(documentItems, 'status'),
+    items: documentItems,
+  };
+
+  root.metrics.riskCount = riskItems.length;
+  root.metrics.activeRiskCount = activeCount;
+  root.metrics.documentCount = documentItems.length;
+}
+
+// The suite crosswalk is the shared source for which risks belong to a WBS
+// branch: risks homed in the branch plus risks tied to it as an affected
+// element. The Risk Explorer and the Overview scope by it, so the branch
+// counts and lists here follow it too. Without this, 1.3 showed 5 risks here
+// and 8 after the handoff to the Risk Explorer.
+function alignRisksToCrosswalk(data) {
+  const crosswalkNodes = state.crosswalk?.wbs?.byId;
+  if (!crosswalkNodes) return;
+
+  const riskById = new Map();
+  data.nodes.forEach((node) => {
+    node.related.risks.items.forEach((item) => riskById.set(item.id, item));
+  });
+
+  data.nodes.forEach((node) => {
+    const ids = crosswalkNodes[node.id]?.risks?.ids;
+    if (!Array.isArray(ids)) return;
+    const current = node.related.risks.items.map((item) => item.id);
+    if (ids.length === current.length && ids.every((id) => current.includes(id))) return;
+
+    const items = ids
+      .map((id) => riskById.get(id))
+      .filter(Boolean)
+      .sort((left, right) => right.riskScore - left.riskScore || String(left.id).localeCompare(String(right.id)));
+    const activeCount = items.filter((item) => !/closed|retired/i.test(item.status)).length;
+    node.related.risks = {
+      totalCount: items.length,
+      activeCount,
+      highestScore: items[0]?.riskScore || 0,
+      owners: countByLabel(items, 'owner'),
+      byStatus: countByLabel(items, 'status'),
+      items,
+    };
+    node.metrics.riskCount = items.length;
+    node.metrics.activeRiskCount = activeCount;
+  });
+}
+
 function buildClientIndex(data) {
   state.nodesById = new Map(data.nodes.map((node) => [node.id, node]));
+  alignRisksToCrosswalk(data);
+  rollUpRootLinks(data);
 }
 
 function getRootNode() {
@@ -210,14 +329,6 @@ function resolveSelectedIdFromContext(sharedContext) {
   ].filter(Boolean);
 
   return candidates.find((nodeId) => state.nodesById.has(nodeId)) || '';
-}
-
-function buildSuiteAction(route, label, params) {
-  return `
-    <a class="suite-context-action" href="${escapeHtml(buildSuiteHref(route, params))}">
-      ${escapeHtml(label)}
-    </a>
-  `;
 }
 
 // Top suite nav carries the origin and the current selection as scope. A
@@ -280,6 +391,39 @@ function buildContextChips(sharedContext, nodeContext) {
   return chips.join('');
 }
 
+// The handoff row under the branch title. Always visible, same component as
+// every other app.
+function renderOpenIn(node) {
+  const nodeContext = getNodeContext(node.id);
+  if (!nodeContext) return '';
+  const riskCount = node.related.risks.totalCount;
+
+  return buildOpenInHtml([
+    {
+      label: 'Cost',
+      href: buildSuiteHref('cost', { from: 'wbs', wbs: node.id, anchor: nodeContext.cost.anchorId, view: 'module' }),
+    },
+    {
+      label: 'Schedule',
+      href: buildSuiteHref('schedule', {
+        from: 'wbs',
+        wbs: node.id,
+        milestone: nodeContext.schedule.primaryMilestoneId,
+        phase: nodeContext.schedule.phaseId,
+      }),
+    },
+    {
+      label: riskCount ? `Risk (${riskCount})` : 'Risk',
+      href: buildSuiteHref('risk', { from: 'wbs', wbs: node.id, risk: nodeContext.risks.primaryRiskId }),
+    },
+    {
+      label: 'Documents',
+      href: buildSuiteHref('documents', { from: 'wbs', wbs: node.id, doc: nodeContext.documents.sourceDocIds?.[0] || '' }),
+    },
+    { label: 'Overview', href: buildSuiteHref('overview', { from: 'wbs', wbs: node.id }) },
+  ]);
+}
+
 function buildContextBanner(node) {
   const sharedContext = getResolvedSharedContext(node);
   const nodeContext = getNodeContext(node?.id);
@@ -311,76 +455,6 @@ function buildContextBanner(node) {
   `;
 }
 
-function renderConnectedViews(node) {
-  const nodeContext = getNodeContext(node.id);
-  if (!nodeContext) return '';
-
-  return `
-    <details class="connected-views">
-      <summary class="connected-views__summary">
-        <span class="connected-views__title">Open WBS ${escapeHtml(node.id)} elsewhere</span>
-        <span class="connected-views__chevron" aria-hidden="true">▾</span>
-      </summary>
-      <div class="connected-views__actions">
-        ${buildSuiteAction('cost', 'Open in Cost', {
-          from: 'wbs',
-          wbs: node.id,
-          anchor: nodeContext.cost.anchorId,
-          view: 'module',
-        })}
-        ${buildSuiteAction('schedule', 'Open in Schedule', {
-          from: 'wbs',
-          wbs: node.id,
-          milestone: nodeContext.schedule.primaryMilestoneId,
-          phase: nodeContext.schedule.phaseId,
-        })}
-        ${buildSuiteAction('risk', 'Open in Risk', {
-          from: 'wbs',
-          wbs: node.id,
-          risk: nodeContext.risks.primaryRiskId,
-        })}
-        ${buildSuiteAction('documents', 'Open in Documents', {
-          from: 'wbs',
-          wbs: node.id,
-          doc: nodeContext.documents.sourceDocIds?.[0] || '',
-        })}
-      </div>
-    </details>
-  `;
-}
-
-function renderFocusActions(node) {
-  const nodeContext = getNodeContext(node.id);
-  if (!nodeContext) return '';
-
-  return `
-    <div class="suite-context-actions">
-      ${buildSuiteAction('cost', 'Open in Cost', {
-        from: 'wbs',
-        wbs: node.id,
-        anchor: nodeContext.cost.anchorId,
-        view: 'module',
-      })}
-      ${buildSuiteAction('schedule', 'Open in Schedule', {
-        from: 'wbs',
-        wbs: node.id,
-        milestone: nodeContext.schedule.primaryMilestoneId,
-        phase: nodeContext.schedule.phaseId,
-      })}
-      ${buildSuiteAction('risk', 'Open in Risk', {
-        from: 'wbs',
-        wbs: node.id,
-        risk: nodeContext.risks.primaryRiskId,
-      })}
-      ${buildSuiteAction('documents', 'Open in Documents', {
-        from: 'wbs',
-        wbs: node.id,
-        doc: nodeContext.documents.sourceDocIds?.[0] || '',
-      })}
-    </div>
-  `;
-}
-
 function getDefaultExpandedIds() {
   const rootNode = getRootNode();
   return new Set(rootNode ? [rootNode.id] : []);
@@ -390,34 +464,6 @@ function ensureAncestorsExpanded(nodeId) {
   const node = state.nodesById.get(nodeId);
   if (!node) return;
   node.ancestorIds.forEach((ancestorId) => state.expandedIds.add(ancestorId));
-}
-
-function buildIntroSignals() {
-  const rootNode = getRootNode();
-  const scope = getScope();
-  const scopedNode = scope ? state.nodesById.get(scope.id) : null;
-  const signals = scopedNode
-    ? [
-        { label: 'Scoped to', value: scopedNode.id },
-        { label: 'Direct branches', value: formatNumber(scopedNode.childIds.length) },
-        { label: 'Subtree elements', value: formatNumber(scopedNode.metrics.descendantCount + 1) },
-      ]
-    : [
-        { label: 'Major parts', value: formatNumber(rootNode?.childIds.length || 0) },
-        { label: 'Full hierarchy', value: formatNumber(state.data?.overview.totalNodes || 0) },
-        { label: 'Detail lenses', value: '4 guided views' },
-      ];
-
-  appSignals.innerHTML = signals
-    .map(
-      (signal) => `
-        <div class="signal-pill">
-          <span class="signal-pill__label">${escapeHtml(signal.label)}</span>
-          <span class="signal-pill__value">${escapeHtml(signal.value)}</span>
-        </div>
-      `,
-    )
-    .join('');
 }
 
 function buildShortExplanation(node) {
@@ -451,41 +497,78 @@ function buildWhyItMatters(node) {
 }
 
 function buildTreeHint(node) {
-  if (node.id === state.data.rootId) return `${pluralize(node.childIds.length, 'major branch')} at the top level`;
-  if (node.childIds.length > 0) return `${pluralize(node.childIds.length, 'child branch')} below this point`;
-  if (node.metrics.activeRiskCount > 0) return `${pluralize(node.metrics.activeRiskCount, 'active risk')} linked here`;
-  if (node.metrics.documentCount > 0) return `${pluralize(node.metrics.documentCount, 'supporting file')} linked here`;
+  if (node.childIds.length > 0) return pluralize(node.childIds.length, 'branch', 'branches');
+  if (node.metrics.activeRiskCount > 0) return pluralize(node.metrics.activeRiskCount, 'risk');
+  if (node.metrics.documentCount > 0) return pluralize(node.metrics.documentCount, 'file');
   return '';
 }
 
 function buildLensCards(node) {
+  const isRoot = node.id === state.data.rootId;
+  const cost = node.related.cost;
+  const schedule = node.related.schedule;
+  const risks = node.related.risks;
+  const documents = node.related.documents;
   const activeRiskCount = node.metrics.activeRiskCount || node.metrics.riskCount;
-  const scheduleValue = node.related.schedule.milestones.length
-    ? pluralize(node.related.schedule.milestones.length, 'milestone')
+
+  const costMeta = [];
+  if (cost.estimates.length) costMeta.push(pluralize(cost.estimates.length, 'line item'));
+  if (cost.totalBaseCost && cost.totalHighCost > cost.totalLowCost) {
+    costMeta.push(`range ${formatCompactMillions(cost.totalLowCost)} to ${formatCompactMillions(cost.totalHighCost)}`);
+  }
+  // The element rollup excludes the program reserve, which the Cost Explorer adds.
+  if (isRoot && cost.totalBaseCost) costMeta.push('before program reserve');
+
+  const scheduleValue = schedule.milestones.length
+    ? pluralize(schedule.milestones.length, 'milestone')
     : node.metrics.taskCount
       ? pluralize(node.metrics.taskCount, 'scheduled activity', 'scheduled activities')
       : 'No scheduled activity';
+  const scheduleMeta = [];
+  if (node.metrics.taskCount) {
+    scheduleMeta.push(formatDateRange(schedule.startDate, schedule.endDate));
+    if (schedule.milestones.length) scheduleMeta.push(pluralize(node.metrics.taskCount, 'task'));
+    if (schedule.criticalCount) scheduleMeta.push(`${formatNumber(schedule.criticalCount)} critical`);
+  }
+
+  const riskMeta = [];
+  if (risks.totalCount) {
+    riskMeta.push(`top score ${formatNumber(risks.highestScore)}`);
+    if (risks.items[0]?.title) riskMeta.push(risks.items[0].title);
+  }
+
+  const documentMeta = [];
+  if (documents.byType[0]?.label) documentMeta.push(`mostly ${documents.byType[0].label}`);
+  if (node.metrics.glossaryCount) documentMeta.push(pluralize(node.metrics.glossaryCount, 'glossary term'));
 
   return [
     {
       key: 'cost',
       label: 'Cost',
-      value: node.related.cost.estimates.length ? pluralize(node.related.cost.estimates.length, 'related item') : 'No linked items',
+      value: cost.totalBaseCost
+        ? formatCompactMillions(cost.totalBaseCost)
+        : cost.estimates.length
+          ? pluralize(cost.estimates.length, 'related item')
+          : 'No linked items',
+      meta: costMeta.join(' · '),
     },
     {
       key: 'schedule',
       label: 'Schedule',
       value: scheduleValue,
+      meta: scheduleMeta.join(' · '),
     },
     {
       key: 'risks',
       label: 'Risks',
       value: activeRiskCount ? pluralize(activeRiskCount, 'notable risk') : 'No notable risks',
+      meta: riskMeta.join(' · '),
     },
     {
       key: 'documents',
       label: 'Documents',
       value: node.metrics.documentCount ? pluralize(node.metrics.documentCount, 'supporting file') : 'No supporting files',
+      meta: documentMeta.join(' · '),
     },
   ];
 }
@@ -754,7 +837,7 @@ function renderStructureSelectedSummary(node) {
       value: node.metrics.descendantCount
         ? pluralize(node.metrics.descendantCount, 'lower-level part')
         : node.childIds.length
-          ? pluralize(node.childIds.length, 'direct branch')
+          ? pluralize(node.childIds.length, 'direct branch', 'direct branches')
           : 'Leaf branch',
     },
     {
@@ -819,7 +902,7 @@ function renderStructureView() {
   const hasMatches = state.searchMatches.size > 0;
   treeStatus.textContent = queryActive
     ? hasMatches
-      ? `${pluralize(state.searchMatches.size, 'matching branch')} highlighted in Structure View while the full hierarchy remains visible.`
+      ? `${pluralize(state.searchMatches.size, 'matching branch', 'matching branches')} highlighted in Structure View while the full hierarchy remains visible.`
       : 'No matches. Full hierarchy still shown.'
     : '';
 
@@ -918,7 +1001,7 @@ function renderTree() {
   }
 
   treeStatus.textContent = queryActive
-    ? `${pluralize(state.searchMatches.size, 'matching branch')} shown with its context.`
+    ? `${pluralize(state.searchMatches.size, 'matching branch', 'matching branches')} shown with its context.`
     : '';
 
   treeElement.innerHTML = renderTreeBranch(rootNode);
@@ -945,9 +1028,11 @@ function renderTreeBranch(node) {
           ${hasChildren ? (expanded ? '-' : '+') : '.'}
         </button>
         <button class="tree-select ${selected ? 'tree-select--selected' : ''}" type="button" data-action="select" data-id="${escapeHtml(node.id)}">
-          <span class="tree-select__code">${escapeHtml(node.id)}</span>
+          <span class="tree-select__head">
+            <span class="tree-select__code">${escapeHtml(node.id)}</span>
+            ${hint ? `<span class="tree-select__hint">${escapeHtml(hint)}</span>` : ''}
+          </span>
           <span class="tree-select__label">${highlightText(node.name, state.searchQuery)}</span>
-          ${hint ? `<span class="tree-select__hint">${escapeHtml(hint)}</span>` : ''}
         </button>
       </div>
       ${childrenMarkup ? `<div class="tree-branch">${childrenMarkup}</div>` : ''}
@@ -1034,6 +1119,7 @@ function renderOverview() {
         <p class="overview-hero__code">${escapeHtml(node.id)}</p>
         <h2 class="overview-hero__title">${escapeHtml(node.name)}</h2>
         <p class="overview-hero__summary">${escapeHtml(buildShortExplanation(node))}</p>
+        ${renderOpenIn(node)}
         <details class="overview-why">
           <summary class="overview-why__summary">
             <span>Why it matters</span>
@@ -1047,14 +1133,15 @@ function renderOverview() {
           .map(
             (card) => `
               <button class="lens-card ${state.activeDetail === card.key ? 'lens-card--active' : ''}" type="button" data-action="open-detail" data-detail="${escapeHtml(card.key)}" aria-expanded="${String(state.activeDetail === card.key)}">
-                <span class="lens-card__label">${escapeHtml(card.label)}</span>
+                <span class="lens-card__label">${escapeHtml(card.label)}<span class="lens-card__chevron" aria-hidden="true">›</span></span>
                 <span class="lens-card__value">${escapeHtml(card.value)}</span>
+                ${card.meta ? `<span class="lens-card__meta">${escapeHtml(card.meta)}</span>` : ''}
               </button>
             `,
           )
           .join('')}
       </section>
-      ${state.activeDetail ? renderLensDetail(node) : renderConnectedViews(node)}
+      ${state.activeDetail ? renderLensDetail(node) : ''}
     </section>
   `;
 }
@@ -1195,7 +1282,6 @@ function renderLensDetail(node) {
           <button class="focus-close" type="button" data-action="close-detail">Close</button>
         </div>
         <p class="focus-summary">${escapeHtml(buildLensStatLine(node, detailKey))}</p>
-        ${renderFocusActions(node)}
       </header>
       ${detailRenderers[detailKey](node)}
     </section>
@@ -1224,7 +1310,6 @@ function renderNavigationMode() {
 }
 
 function render() {
-  buildIntroSignals();
   renderOverview();
   renderNavigationMode();
   syncUrlState();
@@ -1243,9 +1328,8 @@ async function loadData() {
     state.data = data;
     state.crosswalk = crosswalk;
     buildClientIndex(data);
-    appTitle.textContent = data.app.title;
+    appTitle.textContent = 'WBS Explorer';
     appSubtitle.textContent = 'How Gateway is organized, from detailed work up to the full program.';
-    buildIntroSignals();
 
     const urlParams = new URLSearchParams(window.location.search);
     state.sharedContext = readSharedContext();

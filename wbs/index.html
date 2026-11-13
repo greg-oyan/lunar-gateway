@@ -29,42 +29,41 @@
   <link rel="icon" type="image/svg+xml" href="../suite-assets/lunar-gateway-favicon.svg" />
   <link rel="stylesheet" href="../suite-assets/suite-context.css" />
   <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="../suite-assets/suite-shell.css" />
 </head>
 <body>
   <div class="app-shell">
     <nav class="suite-nav" aria-label="Gateway suite navigation">
       <a class="suite-nav__home" href="../" data-suite-route="simulation">Simulation</a>
       <div class="suite-nav__links">
+        <a class="suite-nav__link" href="../overview/" data-suite-route="overview">Overview</a>
         <a class="suite-nav__link" href="../documents/" data-suite-route="documents">Documents</a>
         <a class="suite-nav__link suite-nav__link--active" href="./" data-suite-route="wbs" aria-current="page">WBS</a>
         <a class="suite-nav__link" href="../schedule/" data-suite-route="schedule">Schedule</a>
         <a class="suite-nav__link" href="../cost/" data-suite-route="cost">Cost</a>
         <a class="suite-nav__link" href="../risk/" data-suite-route="risk">Risk</a>
+        <a class="suite-nav__link" href="../confidence/" data-suite-route="confidence">Confidence</a>
+        <button class="suite-nav__search" type="button" data-suite-search aria-label="Search the Gateway suite">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13.2 13.2 17 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span>Search</span>
+          <span class="suite-nav__search-hint" data-suite-search-hint>Ctrl K</span>
+        </button>
       </div>
     </nav>
 
     <header class="intro">
       <div class="intro__copy">
         <p class="eyebrow">Gateway Program Map</p>
-        <h1 id="appTitle">Work Breakdown Structure</h1>
+        <h1 id="appTitle">WBS Explorer</h1>
         <p id="appSubtitle" class="intro__subtitle">
           How Gateway is organized, from detailed work up to the full program.
         </p>
-      </div>
-
-      <div class="intro__guide">
-        <p class="guide__label">At a glance</p>
-
-        <div id="appSignals" class="intro__signals" aria-label="Program signals"></div>
       </div>
     </header>
 
     <main id="workspace" class="workspace">
       <aside class="nav-zone" aria-label="WBS navigation">
-        <div class="nav-zone__header">
-          <h2>Program structure</h2>
-          <p id="treeStatus" class="nav-zone__hint">Loading hierarchy...</p>
-        </div>
+        <h2 class="sr-only">Program structure</h2>
 
         <div class="view-switch" role="tablist" aria-label="Navigation view mode">
           <button
@@ -74,7 +73,7 @@
             data-view-mode="explorer"
             aria-selected="true"
           >
-            Explorer View
+            Tree
           </button>
           <button
             id="structureViewBtn"
@@ -83,12 +82,12 @@
             data-view-mode="structure"
             aria-selected="false"
           >
-            Structure View
+            Diagram
           </button>
         </div>
 
         <label class="search-field" for="searchInput">
-          <span class="search-field__label">Search</span>
+          <span class="search-field__label sr-only">Search the structure</span>
           <input
             id="searchInput"
             type="search"
@@ -98,6 +97,7 @@
         </label>
 
         <div class="nav-zone__actions">
+          <p id="treeStatus" class="nav-zone__hint">Loading hierarchy...</p>
           <button id="expandTopBtn" class="toolbar-button" type="button">Expand all</button>
           <button id="collapseBtn" class="toolbar-button" type="button">Collapse all</button>
         </div>
@@ -149,5 +149,6 @@
     })();
   </script>
   <script type="module" src="./app.js"></script>
+  <script type="module" src="../suite-assets/suite-shell.js"></script>
 </body>
 </html>

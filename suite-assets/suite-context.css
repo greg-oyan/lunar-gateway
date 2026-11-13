@@ -268,3 +268,128 @@
     width: 100%;
   }
 }
+
+/* Handoff row: the same component under every selected item, in every app. */
+.suite-open-in {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+}
+
+.suite-open-in__label {
+  margin-right: 4px;
+  color: rgba(155, 175, 201, 0.82);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.suite-open-in__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(120, 183, 255, 0.26);
+  background: rgba(120, 183, 255, 0.07);
+  color: #dcecfb;
+  font-weight: 650;
+  text-decoration: none;
+  transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
+}
+
+.suite-open-in__link::after {
+  content: "\2192";
+  color: rgba(143, 195, 255, 0.8);
+  transition: transform 140ms ease;
+}
+
+.suite-open-in__link:hover,
+.suite-open-in__link:focus-visible {
+  border-color: rgba(147, 202, 255, 0.6);
+  background: rgba(120, 183, 255, 0.16);
+  color: #ffffff;
+}
+
+.suite-open-in__link:hover::after {
+  transform: translateX(2px);
+}
+
+/* Arrival context is one quiet line, the same shape as the scope pill: what
+   you are looking at and a way back. The longer explanation, chips and
+   eyebrow stay in the markup for assistive tech but are not drawn. */
+.suite-context-host {
+  width: auto;
+  margin: 0 0 14px;
+}
+
+.suite-context-host:empty {
+  display: none;
+}
+
+.suite-context-banner {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  max-width: 100%;
+  margin: 0 0 14px;
+  padding: 7px 8px 7px 16px;
+  border-radius: 999px;
+  border-color: rgba(103, 204, 255, 0.28);
+  background: rgba(103, 204, 255, 0.1);
+  box-shadow: none;
+}
+
+/* In a grid or flex parent the pill keeps its own width. */
+.suite-context-banner,
+.suite-scope-pill {
+  justify-self: start;
+  align-self: flex-start;
+}
+
+.suite-context-host .suite-context-banner,
+.suite-context-host .suite-scope-pill {
+  margin-bottom: 0;
+}
+
+.suite-context-banner__eyebrow,
+.suite-context-banner__body,
+.suite-context-banner__chips {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.suite-context-banner__title {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.suite-context-banner .suite-context-actions {
+  flex-direction: row;
+  margin: 0;
+}
+
+.suite-context-banner .suite-context-action {
+  width: auto;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+}
+
+/* A wrapped pill reads as a blob; on narrow screens it becomes a soft box. */
+@media (max-width: 720px) {
+  .suite-scope-pill,
+  .suite-context-banner {
+    border-radius: 16px;
+  }
+}
