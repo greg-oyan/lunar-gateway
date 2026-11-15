@@ -477,6 +477,30 @@ async function checkSimulationLayerHooks() {
   });
 }
 
+// The station detail pass in index.html is only safe because of three rules:
+// its meshes are never clickable, never carry a moduleKey (so selection and
+// highlighting ignore them), and the call that builds it fails closed. This
+// check reads the source and fails if a later edit breaks one of them.
+async function checkStationDetail() {
+  const simulation = await fs.readFile(path.join(repoRoot, 'index.html'), 'utf8');
+  const start = simulation.indexOf('function addStationDetail(gw)');
+  if (start === -1) return; // the pass is optional; nothing to guard without it
+  const end = simulation.indexOf('function buildGateway()', start);
+  const body = simulation.slice(start, end === -1 ? undefined : end);
+  if (/clickables\.push|\breg\(/.test(body)) {
+    fail('station-detail', 'addStationDetail makes a detail mesh clickable; detail meshes must stay out of `clickables`');
+  }
+  if (/\.moduleKey\s*=[^=]/.test(body)) {
+    fail('station-detail', 'addStationDetail assigns a moduleKey; detail meshes must not carry one or selection highlighting will touch them');
+  }
+  if (!/try\s*\{\s*stationDetail\s*=\s*addStationDetail\(gw\);\s*\}\s*catch/.test(simulation)) {
+    fail('station-detail', 'the call to addStationDetail is no longer wrapped in try/catch, so a failure there would stop the simulation');
+  }
+  if (!simulation.includes("get('detail') !== 'off'")) {
+    fail('station-detail', 'the ?detail=off switch is missing from index.html');
+  }
+}
+
 const PROTECTED_PATTERN = /^(index\.html|Gateway_Thumbnail|LICENSE)/;
 
 function resolveBaseBranch() {
@@ -525,6 +549,7 @@ async function main() {
   await checkOverviewReconciliation();
   await checkConfidenceModel();
   await checkSimulationLayerHooks();
+  await checkStationDetail();
   checkProtectedFiles();
 
   if (failures.length) {

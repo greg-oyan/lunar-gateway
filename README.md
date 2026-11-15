@@ -43,7 +43,7 @@ The five explorers follow one pattern, so learning one teaches the rest:
 
 ## The simulation layer
 
-`index.html` (the 3D simulation) is not edited. `suite-assets/simulation-layer.js` and `simulation-layer.css` sit on top of it and only press buttons the simulation already has:
+`suite-assets/simulation-layer.js` and `simulation-layer.css` sit on top of `index.html` (the 3D simulation) without editing it, and only press buttons the simulation already has:
 
 - The launch screen has one primary action, Start Demo.
 - The HUD leads with live telemetry. Fixed station facts open from "Station facts".
@@ -52,6 +52,12 @@ The five explorers follow one pattern, so learning one teaches the rest:
 - The module panel gains an Overview link and says "Open in" once.
 
 Add `?layer=off` to the URL to see the simulation exactly as `index.html` draws it, or set `SIMULATION_LAYER_ENABLED` to `false` in `suite-assets/suite-context.js` to remove the layer. `scripts/verify-suite.mjs` fails if `index.html` drops an element the layer depends on.
+
+## Station detail
+
+The Gateway model in `index.html` has a detail pass (`addStationDetail`): docking ports, windows that glow on the night side, handrails, hull ribs, antenna dishes, thruster pods, grapple fixtures, an engine plate with nozzles, a crinkled foil texture, and reflections of the Moon and Earth that change along the orbit.
+
+It is additive. Every original mesh is left as it was, the added hardware is never clickable and never highlighted, and if any part of the pass fails the station is drawn as before. Press `D` in the running simulation to switch it off and on for a direct comparison, or add `?detail=off` to the URL. The look is tuned by the named constants in `STATION_LOOK`.
 
 ## How it was built
 
@@ -81,7 +87,7 @@ Every assumption is a named constant at the top of `confidence/model.js`, is lis
 node scripts/verify-suite.mjs
 ```
 
-Covers register parity, score invariants, crosswalk integrity, nav parity across every app, reconciliation of the Overview's cost figures against the source CSVs, sanity checks on the Confidence Lab model (reproducible, growth sources sum to the total, matches the closed-form mean with risks off), and that every element the simulation layer hooks into still exists in `index.html`.
+Covers register parity, score invariants, crosswalk integrity, nav parity across every app, reconciliation of the Overview's cost figures against the source CSVs, sanity checks on the Confidence Lab model (reproducible, growth sources sum to the total, matches the closed-form mean with risks off), that every element the simulation layer hooks into still exists in `index.html`, and that the station detail pass keeps its safety rules (never clickable, never highlighted, fails closed).
 
 ## Running locally
 

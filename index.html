@@ -577,6 +577,7 @@
             <li><strong>O / G / M / E / F</strong> Camera presets</li>
             <li><strong>0–4</strong> Time scale</li>
             <li><strong>Esc</strong> Close module info</li>
+            <li><strong>D</strong> Station detail on/off</li>
           </ul>
         </section>
 
@@ -691,7 +692,7 @@
   </div>
 
   <div class="corner" id="cr">Textures: NASA · Three.js · Wikimedia · Procedural<br>DSG-RQMT-001 Simulation</div>
-  <div class="corner" id="ht">Left drag · rotate &nbsp; Right drag · pan<br>Scroll · zoom &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Click module · specs<br>[O] Orbit &nbsp;[G] Gateway &nbsp;[M] Moon &nbsp;[E] Earth &nbsp;[Space] Pause</div>
+  <div class="corner" id="ht">Left drag · rotate &nbsp; Right drag · pan<br>Scroll · zoom &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Click module · specs<br>[O] Orbit &nbsp;[G] Gateway &nbsp;[M] Moon &nbsp;[E] Earth &nbsp;[D] Detail &nbsp;[Space] Pause</div>
   <div id="tooltip"></div>
   <div class="corner" id="oleg"><span class="oleg-sw"></span>NRHO Polar Orbit — Periapsis 1,000 km above south pole<br>Apoapsis 70,000 km · Eccentricity 0.93 · Period 6.56 days</div>
 
@@ -832,6 +833,18 @@
 
     // Gateway visual scale — intentionally enlarged for readability, but no longer oversized
     const GW_SCALE  = 2.2;
+
+    // Station detail pass (see addStationDetail). ?detail=off draws the
+    // station exactly as it was before the pass existed; D toggles it live.
+    const STATION_DETAIL = new URLSearchParams(window.location.search).get('detail') !== 'off';
+    const STATION_LOOK = Object.freeze({
+      reflection: 1.0,               // strength of moonshine/earthshine reflections on the hull
+      arrayReflection: 0.55,         // same, for the glossy solar arrays
+      foilRoughness: 0.44,           // module foil: lower = shinier
+      foilCrinkle: 0.15,             // depth of the foil crinkle texture
+      windowGlow: 0.50,              // brightness of lit windows
+      reflectionRefreshSeconds: 0.5, // shortest gap between reflection re-captures
+    });
 
     let simTime  = 0;
     let simScale = 600;
@@ -1428,6 +1441,7 @@
 
     const solarTex = makeSolarTex();
     const clickables = [];
+    let stationDetail = null;
 
     function modMat(color, r=0.55, m=0.22) { return new THREE.MeshStandardMaterial({color,roughness:r,metalness:m}); }
     function reg(mesh, key) {
@@ -1598,6 +1612,302 @@
       gw.add(dockRing);
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    //  STATION DETAIL PASS
+    //  Additive only. Every mesh built above is left exactly as it is.
+    //  This pass adds hardware on top of the modules, gives the station's
+    //  materials reflections of the Moon and Earth, and a crinkled
+    //  foil texture.
+    //
+    //  Safety rules it follows:
+    //  - Detail meshes are never pushed to `clickables` and never carry a
+    //    moduleKey, so hover, click, selection and highlighting behave
+    //    exactly as before.
+    //  - Everything is built detached and attached in one step at the
+    //    end, so an error part-way leaves the station as it was.
+    //  - Reflections come from a tiny private scene (two spheres), not
+    //    from the real one, so the Moon, Earth, stars and lights are not
+    //    touched.
+    //
+    //  Off: ?detail=off in the URL, or STATION_DETAIL = false. D toggles
+    //  it while the simulation runs.
+    // ═══════════════════════════════════════════════════════════════
+    function makeFoilNormalMap() {
+      const N=128, TAU=Math.PI*2;
+      const c=document.createElement('canvas'); c.width=c.height=N;
+      const ctx=c.getContext('2d');
+      // Seamless height field from a fixed set of waves running in different
+      // directions (no Math.random, so the texture is identical on every
+      // load). abs() folds the waves into creases, like crinkled foil.
+      let seed=20260406;
+      const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
+      const waves=[];
+      for(let i=0;i<22;i++){
+        const kx=Math.round((rnd()*2-1)*9), ky=Math.round((rnd()*2-1)*9);
+        if(!kx&&!ky) continue;
+        waves.push({kx,ky,ph:rnd()*TAU,a:(0.4+rnd()*0.6)/Math.sqrt(1+Math.hypot(kx,ky))});
+      }
+      const h=new Float32Array(N*N);
+      for(let y=0;y<N;y++) for(let x=0;x<N;x++){
+        let v=0;
+        for(const w of waves) v+=w.a*Math.abs(Math.sin((w.kx*x+w.ky*y)/N*TAU+w.ph));
+        h[y*N+x]=v;
+      }
+      const img=ctx.createImageData(N,N), S=1.6;
+      for(let y=0;y<N;y++) for(let x=0;x<N;x++){
+        const dx=(h[y*N+(x+1)%N]-h[y*N+(x+N-1)%N])*S, dy=(h[((y+1)%N)*N+x]-h[((y+N-1)%N)*N+x])*S;
+        const l=Math.hypot(dx,dy,1), o=(y*N+x)*4;
+        img.data[o]=(-dx/l*0.5+0.5)*255; img.data[o+1]=(-dy/l*0.5+0.5)*255; img.data[o+2]=(1/l*0.5+0.5)*255; img.data[o+3]=255;
+      }
+      ctx.putImageData(img,0,0);
+      const t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(3,2); return t;
+    }
+
+    function addStationDetail(gw) {
+      const rad=THREE.MathUtils.degToRad;
+
+      // Read the module layout from the meshes that already exist, so this
+      // pass follows the station if its dimensions are ever changed.
+      const mods={};
+      const thrusters=[];
+      gw.traverse(c=>{
+        if(!c.isMesh||!c.userData.moduleKey||!c.geometry) return;
+        const key=c.userData.moduleKey, p=c.geometry.parameters||{};
+        if(c.geometry.type==='CylinderGeometry'&&p.radiusTop===p.radiusBottom&&p.height>=0.1&&!mods[key]){
+          mods[key]={cx:c.parent.position.x+c.position.x,len:p.height,r:p.radiusTop,body:c};
+        }
+        if(c.geometry.type==='ConeGeometry'&&key==='PPE'){
+          thrusters.push(new THREE.Vector3(c.parent.position.x+c.position.x,c.position.y,c.position.z));
+        }
+      });
+      for(const key of ['PPE','MHC','IHAB','USHAB','AIRLOCK']){
+        if(!mods[key]) throw new Error('module body not found: '+key);
+      }
+      const HABS=[mods.MHC,mods.IHAB,mods.USHAB];
+
+      // ── Part list: every part is a geometry plus a placement. Parts that
+      //    share a material are merged into one mesh, so the whole pass
+      //    costs a handful of draw calls.
+      const parts={metal:[],rail:[],dark:[],white:[],glass:[],whiteShell:[],darkShell:[]};
+      const T=(x,y,z)=>new THREE.Matrix4().makeTranslation(x,y,z);
+      const RX=a=>new THREE.Matrix4().makeRotationX(a);
+      const RY=a=>new THREE.Matrix4().makeRotationY(a);
+      const RZ=a=>new THREE.Matrix4().makeRotationZ(a);
+      const put=(bucket,geo,m)=>parts[bucket].push({geo,m});
+      // Frame for something mounted on a module's hull: dx along the
+      // station axis from the module centre, deg around the axis (0 = +Y,
+      // the sunward side), h above the surface. Local +Y points outward.
+      const hull=(mod,dx,deg,h=0)=>T(mod.cx+dx,0,0).multiply(RX(rad(deg))).multiply(T(0,mod.r+h,0));
+      const onHull=(bucket,geo,mod,dx,deg,h,local)=>{
+        const m=hull(mod,dx,deg,h); if(local) m.multiply(local); put(bucket,geo,m);
+      };
+
+      // Shared geometries (merged copies are made later).
+      const cyl=(rt,rb,h,seg=16,open=false)=>new THREE.CylinderGeometry(rt,rb,h,seg,1,open);
+      const box=(x,y,z)=>new THREE.BoxGeometry(x,y,z);
+      const torus=(r,t,rs=6,ts=36)=>new THREE.TorusGeometry(r,t,rs,ts);
+
+      // ── Hull ribs and handrails on every pressurised module ──────────
+      const railPost=box(0.0016,0.0045,0.0016);
+      for(const mod of [...HABS,mods.AIRLOCK]){
+        const rib=torus(mod.r+0.0008,0.0011,6,40);
+        // Habitats carry ports and windows mid-body, so their ribs sit near the ends.
+        for(const f of (mod===mods.AIRLOCK?[-0.33,0,0.33]:[-0.42,0.42])) put('metal',rib,T(mod.cx+f*mod.len,0,0).multiply(RY(Math.PI/2)));
+        const L=mod.len*0.70, rail=box(L,0.0014,0.0020);
+        for(const deg of [35,145,215,325]){
+          onHull('rail',rail,mod,0,deg,0.0045);
+          for(const f of [-0.45,0,0.45]) onHull('rail',railPost,mod,f*L,deg,0.00225);
+        }
+      }
+
+      // ── Windows: dark glass that glows from inside on the night side ──
+      const winFrame=cyl(0.0074,0.0074,0.0020,18), winGlass=cyl(0.0052,0.0052,0.0022,18);
+      const window_=(mod,dx,deg)=>{ onHull('dark',winFrame,mod,dx,deg,0.0000); onHull('glass',winGlass,mod,dx,deg,0.0002); };
+      for(const mod of HABS){
+        const dx=mod.len*0.27;
+        for(const deg of [130,230]){ window_(mod,-dx,deg); window_(mod,dx,deg); }   // anti-Sun side: pairs
+        window_(mod,dx,50); window_(mod,-dx,310);                                    // sunward side: one each
+      }
+
+      // ── Radial docking ports ─────────────────────────────────────────
+      const portFlange=cyl(0.0245,0.0245,0.0100,22), portStub=cyl(0.0210,0.0210,0.0240,22,true);
+      const portRing=torus(0.0205,0.0026,8,28), portHatch=cyl(0.0175,0.0175,0.0012,22), portPetal=box(0.0070,0.0030,0.0016);
+      const portView=cyl(0.0050,0.0050,0.0014,14);
+      const port=(mod,deg)=>{
+        // Both start below the surface: a flat flange on a curved hull would otherwise overhang it.
+        onHull('metal',portFlange,mod,0,deg,-0.0030);
+        onHull('metal',portStub,mod,0,deg,0.0040);
+        onHull('metal',portRing,mod,0,deg,0.0160,RX(Math.PI/2));
+        onHull('metal',portHatch,mod,0,deg,0.0146);
+        onHull('dark',portView,mod,0,deg,0.0148);
+        for(let i=0;i<3;i++){
+          const a=i/3*Math.PI*2;
+          onHull('dark',portPetal,mod,0,deg,0.0186,RY(a).multiply(T(0.0205,0,0)));
+        }
+      };
+      port(mods.MHC,90);  port(mods.MHC,270);
+      port(mods.IHAB,90); port(mods.IHAB,180);
+      port(mods.USHAB,270); port(mods.USHAB,180);
+
+      // ── High-gain dishes on the first habitat (anti-Sun side) ────────
+      const dishPts=[]; for(let i=0;i<=8;i++){ const r=0.020*i/8; dishPts.push(new THREE.Vector2(r,0.0075*(r/0.020)**2)); }
+      const dishGeo=new THREE.LatheGeometry(dishPts,24);
+      const boom=cyl(0.0016,0.0016,0.030,8), gimbal=new THREE.SphereGeometry(0.0042,10,8);
+      const feed=cyl(0.0010,0.0010,0.0130,6), horn=cyl(0.0024,0.0012,0.0030,10);
+      const dish=(mod,dx,deg,tilt)=>{
+        onHull('metal',boom,mod,dx,deg,0.0150);
+        onHull('metal',gimbal,mod,dx,deg,0.0310);
+        const aim=T(0,0.0330,0).multiply(RZ(tilt));
+        onHull('whiteShell',dishGeo,mod,dx,deg,0,aim);
+        onHull('metal',feed,mod,dx,deg,0,aim.clone().multiply(T(0,0.0065,0)));
+        onHull('dark',horn,mod,dx,deg,0,aim.clone().multiply(T(0,0.0140,0)));
+      };
+      dish(mods.MHC,0.040,180,-0.45); dish(mods.MHC,-0.040,180,0.45);
+
+      // ── Grapple fixtures for the robotic arm (sunward side) ──────────
+      const pdgfBase=cyl(0.0065,0.0065,0.0040,14), pdgfPin=cyl(0.0012,0.0012,0.0060,8);
+      for(const mod of [mods.IHAB,mods.USHAB]) for(const dx of [-0.036,0.036]){
+        onHull('metal',pdgfBase,mod,dx,0,0.0005); onHull('dark',pdgfPin,mod,dx,0,0.0050);
+      }
+
+      // ── Attitude-control thruster pods ───────────────────────────────
+      const podBox=box(0.0110,0.0060,0.0090), podNozzle=cyl(0.0032,0.0012,0.0050,10,true);
+      const pod=(mod,dx,deg)=>{
+        onHull('dark',podBox,mod,dx,deg,0.0030);
+        onHull('darkShell',podNozzle,mod,dx,deg,0.0085);
+        onHull('darkShell',podNozzle,mod,dx,deg,0.0030,T(0,0,0.0070).multiply(RX(Math.PI/2)));
+        onHull('darkShell',podNozzle,mod,dx,deg,0.0030,T(0,0,-0.0070).multiply(RX(-Math.PI/2)));
+      };
+      for(const deg of [45,135,225,315]){ pod(mods.PPE,0.060,deg); pod(mods.AIRLOCK,0.030,deg); }
+
+      // ── Power and Propulsion Element: tank bands, engine plate, nozzles ─
+      const ppe=mods.PPE, ppeBand=torus(ppe.r+0.0008,0.0016,6,44);
+      for(const f of [-0.30,0,0.30]) put('metal',ppeBand,T(ppe.cx+f*ppe.len,0,0).multiply(RY(Math.PI/2)));
+      const ppeEnd=ppe.cx+ppe.len/2;
+      put('dark',cyl(0.052,0.052,0.0030,28),T(ppeEnd+0.0015,0,0).multiply(RZ(-Math.PI/2)));
+      const bell=cyl(0.0115,0.0065,0.0160,14,true);
+      for(const t of thrusters) put('darkShell',bell,T(t.x+0.0060,t.y,t.z).multiply(RZ(-Math.PI/2)));
+
+      // ── Airlock: handrail ring around the hatch, and two whip antennas ─
+      const air=mods.AIRLOCK;
+      put('rail',torus(0.0470,0.0012,6,36),T(air.cx-air.len/2-0.0015,0,0).multiply(RY(Math.PI/2)));
+      const whip=cyl(0.0011,0.0011,0.0300,6);
+      onHull('metal',whip,air,-0.020,20,0.0150); onHull('metal',whip,ppe,-0.040,340,0.0150);
+
+      // ── Merge each bucket into one mesh ──────────────────────────────
+      function merge(list){
+        const geos=list.map(({geo,m})=>{ const g=geo.index?geo.toNonIndexed():geo.clone(); g.applyMatrix4(m); return g; });
+        const count=geos.reduce((n,g)=>n+g.attributes.position.count,0);
+        const pos=new Float32Array(count*3), nor=new Float32Array(count*3), uv=new Float32Array(count*2);
+        let o=0;
+        for(const g of geos){
+          pos.set(g.attributes.position.array,o*3); nor.set(g.attributes.normal.array,o*3);
+          if(g.attributes.uv) uv.set(g.attributes.uv.array,o*2);
+          o+=g.attributes.position.count; g.dispose();
+        }
+        const out=new THREE.BufferGeometry();
+        out.setAttribute('position',new THREE.BufferAttribute(pos,3));
+        out.setAttribute('normal',new THREE.BufferAttribute(nor,3));
+        out.setAttribute('uv',new THREE.BufferAttribute(uv,2));
+        out.computeBoundingSphere();
+        return out;
+      }
+      const std=o=>new THREE.MeshStandardMaterial(o);
+      const mats={
+        metal:std({color:0xb4bac4,roughness:0.52,metalness:0.70}),
+        rail:std({color:0xc9a44c,roughness:0.38,metalness:0.85}),
+        dark:std({color:0x2a2e36,roughness:0.50,metalness:0.65}),
+        white:std({color:0xe8ebf0,roughness:0.40,metalness:0.05}),
+        glass:std({color:0x0a0e14,roughness:0.12,metalness:0.0,emissive:0xffe6c4,emissiveIntensity:STATION_LOOK.windowGlow}),
+        whiteShell:std({color:0xa9afb8,roughness:0.70,metalness:0.05,side:THREE.DoubleSide}),
+        darkShell:std({color:0x2a2e36,roughness:0.50,metalness:0.65,side:THREE.DoubleSide}),
+      };
+      const group=new THREE.Group(); group.name='station-detail'; group.userData.stationDetail=true;
+      for(const [bucket,list] of Object.entries(parts)){
+        if(!list.length) continue;
+        const mesh=new THREE.Mesh(merge(list),mats[bucket]);
+        mesh.name='station-detail:'+bucket; mesh.userData.stationDetail=true;
+        mesh.castShadow=false; mesh.receiveShadow=true;
+        group.add(mesh);
+      }
+
+      // ── Reflections: a private two-sphere scene (Moon and Earth, lit from
+      //    the Sun's direction) is rendered to a small cube map from the
+      //    station's position. Only the station's materials use it, so the
+      //    hull picks up moonshine and earthshine that change along the
+      //    orbit. The Sun itself is deliberately left out: the real Sun
+      //    light already gives the hull its highlights, and a reflected
+      //    Sun would glint on the night side, where the hull should block it.
+      const envScene=new THREE.Scene();
+      envScene.background=new THREE.Color(0x010203);
+      const envSunLight=new THREE.DirectionalLight(0xfff4de,3.6); envSunLight.position.copy(SUN_POS); envScene.add(envSunLight);
+      const envMoon=new THREE.Mesh(new THREE.SphereGeometry(MOON_R,32,16),new THREE.MeshLambertMaterial({color:0x6b6a67})); envScene.add(envMoon);
+      const envEarth=new THREE.Mesh(new THREE.SphereGeometry(EARTH_R,24,12),new THREE.MeshLambertMaterial({color:0x4f86c6}));
+      envEarth.position.copy(EARTH_POS); envScene.add(envEarth);
+      const envTarget=new THREE.WebGLCubeRenderTarget(64);
+      const envCam=new THREE.CubeCamera(0.05,6000,envTarget);
+
+      // ── Material changes on the existing station, recorded so they can
+      //    be undone exactly.
+      const foilNormal=makeFoilNormalMap();
+      const bodyMats=new Set(Object.values(mods).map(m=>m.body.material));
+      const touched=[];
+      const seen=new Set();
+      gw.traverse(c=>{
+        const m=c.isMesh&&c.material;
+        if(!m||seen.has(m)||!(m.isMeshStandardMaterial)) return;
+        seen.add(m);
+        const rec={mat:m,was:{envMap:m.envMap,envMapIntensity:m.envMapIntensity,normalMap:m.normalMap,roughness:m.roughness},
+                   now:{envMap:envTarget.texture,envMapIntensity:m.isMeshPhysicalMaterial?STATION_LOOK.arrayReflection:STATION_LOOK.reflection,normalMap:m.normalMap,roughness:m.roughness}};
+        if(bodyMats.has(m)){ rec.now.normalMap=foilNormal; rec.now.roughness=Math.min(m.roughness,STATION_LOOK.foilRoughness); rec.foil=true; }
+        touched.push(rec);
+      });
+      for(const m of Object.values(mats)){ m.envMap=envTarget.texture; m.envMapIntensity=STATION_LOOK.reflection; }
+      function applyMaterials(on){
+        for(const rec of touched){
+          const v=on?rec.now:rec.was;
+          rec.mat.envMap=v.envMap; rec.mat.envMapIntensity=v.envMapIntensity; rec.mat.normalMap=v.normalMap; rec.mat.roughness=v.roughness;
+          if(rec.foil&&on) rec.mat.normalScale.set(STATION_LOOK.foilCrinkle,STATION_LOOK.foilCrinkle);
+          rec.mat.needsUpdate=true;
+        }
+      }
+
+      // Everything above succeeded: attach in one step.
+      gw.add(group);
+      applyMaterials(true);
+
+      let enabled=true, envOK=true, since=Infinity, captured=false;
+      const lastPos=new THREE.Vector3();
+      return {
+        group,
+        get enabled(){ return enabled; },
+        setEnabled(on){ enabled=!!on; group.visible=enabled; applyMaterials(enabled&&envOK); since=Infinity; captured=false; },
+        toggle(){ this.setEnabled(!enabled); },
+        // Called once per frame. Re-captures the reflections at most a
+        // couple of times a second, and only when the station's view of
+        // the Moon has actually changed (it has moved about a degree
+        // around it, or 2% nearer or farther), so a paused or slow
+        // simulation does no extra work. If a capture ever fails,
+        // reflections switch off and the simulation carries on.
+        update(gwPos,dt){
+          if(!enabled||!envOK) return;
+          since+=dt;
+          if(since<STATION_LOOK.reflectionRefreshSeconds) return;
+          const r=gwPos.length();
+          if(captured&&r>0&&gwPos.angleTo(lastPos)<0.0175&&Math.abs(r-lastPos.length())<0.02*r) return;
+          since=0;
+          try{
+            envCam.position.copy(gwPos);
+            envCam.update(renderer,envScene);
+            lastPos.copy(gwPos); captured=true;
+          }catch(envErr){
+            envOK=false; applyMaterials(false);
+            console.warn('[station detail] reflections switched off:',envErr);
+          }
+        },
+      };
+    }
+
     function buildGateway() {
       const gw=new THREE.Group(); gw.name='gateway';
       buildPPE(gw);
@@ -1606,6 +1916,10 @@
       buildHab(gw,'USHAB', -0.168,0.120,0.064,MODS.USHAB.color);
       buildAirlock(gw); buildEVR(gw);
       addGatewayVisuals(gw);
+      if(STATION_DETAIL){
+        try { stationDetail=addStationDetail(gw); }
+        catch(detailErr){ stationDetail=null; console.warn('[station detail] skipped:',detailErr); }
+      }
       gw.scale.setScalar(GW_SCALE);
       return gw;
     }
@@ -2062,6 +2376,7 @@
         case 'KeyM': document.getElementById('cam-moon').click(); break;
         case 'KeyE': document.getElementById('cam-earth').click(); break;
         case 'KeyF': document.getElementById('focus-gw').click(); break;
+        case 'KeyD': if(stationDetail) stationDetail.toggle(); break;
         case 'Escape': if(selKey) selectModule(selKey); break;
         case 'Digit0': document.getElementById('sp-0').click(); break;
         case 'Digit1': document.getElementById('sp-1').click(); break;
@@ -2203,6 +2518,8 @@
       _thrustGlow.position.copy(gwPos);
       const _tAlt=(gwPos.length()/ORBIT_VIS/MOON_R)*MOON_R_KM-MOON_R_KM;
       _thrustGlow.intensity=_tAlt<12000?1.1*Math.pow(Math.max(0,1-_tAlt/12000),2):0;
+
+      if(stationDetail) stationDetail.update(gwPos,dt);
 
       updateHUD(gwPos);
       // Keep starfield effectively at infinity: no translation parallax.
